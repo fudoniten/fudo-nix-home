@@ -18,6 +18,10 @@ let
       };
     };
   };
+
+  getConfigUser = { username, config-user, ... }:
+    if isNull config-user then username else config-user;
+
 in {
   options.fudo.home-manager = with types; {
     enable = mkEnableOption "Enable Home Manager for known users.";
@@ -44,7 +48,8 @@ in {
   };
 
   config = mkIf cfg.enable (let
-    homeFileExists = userOpts: pathExists "./user/${userOpts.config-user}.nix";
+    homeFileExists = userOpts:
+      pathExists "./user/${getConfigUser userOpts}.nix";
 
     existingUsers = filter homeFileExists cfg.users;
   in mkMerge [
@@ -54,11 +59,10 @@ in {
         (username: { home = { inherit (cfg.system) stateVersion; }; });
     }
     {
-      home-manager.users = listToAttrs (map
-        ({ username, config-user, ... }@opts:
-          let target = if isNull config-user then username else config-user;
-          in nameValuePair username (import "./users/${target}.nix" inputs opts
-            config.fudo.home-manager.system)) existingUsers);
+      home-manager.users = listToAttrs (map ({ username, ... }@opts:
+        nameValuePair username
+        (import "./users/${getConfigUser opts}.nix" inputs opts
+          config.fudo.home-manager.system)) existingUsers);
     }
   ]);
 }
