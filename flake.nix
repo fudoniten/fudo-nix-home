@@ -1,11 +1,10 @@
 {
   description = "Fudo Home Manager Configuration";
 
-  inputs = let version = "24.05";
-  in {
-    nixpkgs.url = "nixpkgs/nixos-${version}";
+  inputs = {
+    nixpkgs.url = "nixpkgs/nixos-24.05";
     home-manager = {
-      url = "github:nix-community/home-manager/release-${version}";
+      url = "github:nix-community/home-manager/release-24.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     doom-emacs = {
@@ -17,13 +16,14 @@
       flake = false;
     };
     fudo-pkgs = {
-      url = "github:fudoniten/fudo-nix-pkgs/${version}";
+      url = "github:fudoniten/fudo-nix-pkgs/24.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
   outputs = { home-manager, ... }@inputs: {
-    nixosModules = {
+    nixosModules = rec {
+      default = home-configuration;
       home-configuration = {
         imports = [
           home-manager.nixosModules.home-manager
