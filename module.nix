@@ -23,7 +23,7 @@ let
     if isNull config-user then username else config-user;
 
   versionSetModule = { ... }: {
-    home-manager.users =
+    config.home-manager.users =
       genAttrs (map ({ username, ... }: username) existingUsers) (username: {
         home = { # inherit (cfg.system) stateVersion;
           stateVersion =
