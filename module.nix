@@ -22,6 +22,17 @@ let
   getConfigUser = { username, config-user, ... }:
     if isNull config-user then username else config-user;
 
+  versionSetModule = { ... }: {
+    home-manager.users =
+      genAttrs (map ({ username, ... }: username) existingUsers) (username: {
+        home = { # inherit (cfg.system) stateVersion;
+          stateVersion =
+            trace "value for ${username}: ${cfg.system.stateVersion}"
+            cfg.system.stateVersion;
+        };
+      });
+  };
+
 in {
   options.fudo.home-manager = with types; {
     enable = mkEnableOption "Enable Home Manager for known users.";
@@ -52,17 +63,14 @@ in {
       pathExists "./user/${getConfigUser userOpts}.nix";
 
     existingUsers = filter homeFileExists cfg.users;
-  in mkMerge [
-    {
-      home-manager.users =
-        genAttrs (map ({ username, ... }: username) existingUsers)
-        (username: { home = { inherit (cfg.system) stateVersion; }; });
-    }
-    {
+  in {
+    imports = [ versionSetModule ];
+
+    config = {
       home-manager.users = listToAttrs (map ({ username, ... }@opts:
         nameValuePair username
         (import "./users/${getConfigUser opts}.nix" inputs opts
           config.fudo.home-manager.system)) existingUsers);
-    }
-  ]);
+    };
+  });
 }
