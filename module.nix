@@ -49,23 +49,19 @@ in {
     existingUsers = filter homeFileExists cfg.users;
   in mkMerge [
     {
-      home-manager.users = listToAttrs (map ({ username, ... }:
-        nameValuePair username {
-          home = { inherit (cfg.system) stateVersion; };
-        }) existingUsers);
+      home-manager.users = genAttrs (map (opts: opts.username) existingUsers)
+        (username: { home = { inherit (cfg.system) stateVersion; }; });
     }
     {
-      home-manager = {
-        users = listToAttrs (map (userOpts:
-          let
-            username = if isNull userOpts.config-user then
-              userOpts.username
-            else
-              userOpts.config-user;
-          in nameValuePair userOpts.username
-          (import "./users/${username}.nix" inputs userOpts
-            config.fudo.home-manager.system)) existingUsers);
-      };
+      home-manager.users = listToAttrs (map (userOpts:
+        let
+          username = if isNull userOpts.config-user then
+            userOpts.username
+          else
+            userOpts.config-user;
+        in nameValuePair userOpts.username
+        (import "./users/${username}.nix" inputs userOpts
+          config.fudo.home-manager.system)) existingUsers);
     }
   ]);
 }
