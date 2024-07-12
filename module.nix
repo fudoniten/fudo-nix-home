@@ -29,20 +29,43 @@ in {
       default = [ ];
     };
 
-    system.desktop.type = mkOption {
-      type = enum [ "x" "wayland" "darwin" "none" ];
-      default = "none";
+    system = {
+      desktop.type = mkOption {
+        type = enum [ "x" "wayland" "darwin" "none" ];
+        default = "none";
+      };
+
+      stateVersion = mkOption {
+        type = str;
+        description =
+          "State version of the parent host, which should match the user home.";
+      };
     };
   };
 
-  config = mkIf cfg.enable {
-    home-manager = let
-      homeFileExists = userOpts:
-        pathExists "./user/${userOpts.config-user}.nix";
-    in {
-      users = genAttrs (filter homeFileExists cfg.users) (userOpts:
-        import "./users/${userOpts.config-user}.nix" inputs userOpts
-        config.fudo.home-manager.system config);
-    };
-  };
+  config = mkIf cfg.enable (let
+    homeFileExists = userOpts: pathExists "./user/${userOpts.config-user}.nix";
+
+    existingUsers = filter homeFileExists cfg.users;
+  in mkMerge [
+    {
+      home-manager.users = listToAttrs (map ({ username, ... }:
+        nameValuePair username {
+          home = { inherit (cfg.system) stateVersion; };
+        }) existingUsers);
+    }
+    {
+      home-manager = {
+        users = listToAttrs (map (userOpts:
+          let
+            username = if isNull userOpts.config-user then
+              userOpts.username
+            else
+              userOpts.config-user;
+          in nameValuePair userOpts.username
+          (import "./users/${username}.nix" inputs userOpts
+            config.fudo.home-manager.system)) existingUsers);
+      };
+    }
+  ]);
 }
