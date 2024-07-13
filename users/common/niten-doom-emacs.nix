@@ -13,7 +13,7 @@ let
   addEmacsDependencies = emacs:
     emacs.overrideAttrs (oldAttrs:
       with pkgs; {
-        runtimeInputs = oldAttrs.runtimeInputs ++ [
+        propagatedBuildInputs = oldAttrs.propagatedBuildInputs ++ [
           git
           (ripgrep.override { withPCRE2 = true; })
           gnutls
