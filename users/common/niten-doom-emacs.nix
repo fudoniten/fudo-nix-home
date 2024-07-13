@@ -51,11 +51,11 @@ in {
         zsh.envExtra = doomEmacsEnv;
       };
 
-      systemd.user.tmpfiles.rules =
-        [ "d ${config.xdg.configHome}/emacs 0750 - - - -" ];
-
       home.activation.installDoomEmacs =
         lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          if [ ! -d ${config.xdg.configHome}/emacs ]; then
+            mkdir -p ${config.xdg.configHome}/emacs
+          fi
           ${pkgs.rsync}/bin/rsync -avz --chmod=D2755,F744 ${doom-emacs}/ ${config.xdg.configHome}/emacs/
         '';
     }
