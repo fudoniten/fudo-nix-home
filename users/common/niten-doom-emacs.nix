@@ -80,8 +80,8 @@ in {
       };
 
       systemd.user.services.emacs = {
-        Service.ExecStartPre =
-          pkgs.writeShellScript "initializes-doom" "doom sync";
+        Service.ExecStartPre = pkgs.writeShellScript "initialize-doom"
+          "${config.xdg.configHome}/emacs/bin/doom sync";
       };
 
       services.emacs = {
