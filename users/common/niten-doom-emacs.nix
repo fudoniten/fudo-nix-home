@@ -71,11 +71,26 @@ in {
             pkgs.emacs-gtk);
       in myEmacsPackagesFor pkg;
     in {
-      home.packages = [ emacsPackage ];
+      home = {
+        packages = [ emacsPackage ];
+        shellAliases = {
+          e = "emacsclient --create-frame --tty";
+          ew = "emacsclient --create-frame";
+        };
+      };
+
+      systemd.user.services.emacs = {
+        serviceConfig.ExecStartPre =
+          pkgs.writeShellScript "initializes-doom" "doom sync";
+      };
+
       services.emacs = {
         enable = true;
         package = emacsPackage;
-        client.enable = true;
+        client = {
+          enable = true;
+          arguments = [ "--create-frame" ];
+        };
         defaultEditor = true;
         startWithUserSession = true;
       };
