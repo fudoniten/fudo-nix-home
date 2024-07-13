@@ -7,7 +7,9 @@ systemCfg:
 { config, lib, pkgs, ... }:
 
 with lib;
-mkIf (systemCfg.desktop.type != "none") {
+if (systemCfg.desktop.type == "none") then
+  { }
+else {
   config = {
     home = {
       inherit username;

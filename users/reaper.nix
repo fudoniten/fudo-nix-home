@@ -50,7 +50,7 @@ with lib; {
       git = {
         enable = true;
         userName = username;
-        userEmail = user-email;
+        userEmail = email;
       };
 
       fzf = {

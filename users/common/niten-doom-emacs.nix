@@ -1,3 +1,5 @@
+systemCfg:
+
 { doom-emacs, niten-doom-config, ... }:
 
 { config, lib, pkgs, ... }:
@@ -26,8 +28,15 @@ let
       });
 
   myEmacsPackagesFor = emacs:
-    (pkgs.emacsPackagesFor emacs).emacsWithPackages
-    (epkgs: [ chatgpt-shell elpher flycheck-clj-kondo pylint spotify thrift ]);
+    (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
+      with epkgs; [
+        chatgpt-shell
+        elpher
+        flycheck-clj-kondo
+        pylint
+        spotify
+        thrift
+      ]);
 
 in {
   config = mkMerge [
@@ -49,11 +58,15 @@ in {
     }
 
     (mkIf pkgs.stdenv.isLinux (let
-      emacsPackage = myEmacsPackagesFor
-        (if config.modules.desktop.type == "wayland" then
-          emacs-pgtk
+      emacsPackage = let
+        pkg = if systemCfg.desktop.type == "none" then
+          pkgs.emacs-nox
         else
-          emacs-git);
+          (if systemCfg.desktop.type == "wayland" then
+            pkgs.emacs-pgtk
+          else
+            pkgs.emacs-gtk);
+      in myEmacsPackagesFor pkg;
     in {
       home.packages = [ emacsPackage ];
       services.emacs = {

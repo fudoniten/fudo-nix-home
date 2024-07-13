@@ -1,4 +1,4 @@
-{ doom-emacs, niten-doom-config, ... }:
+inputs:
 
 { username, email, home-directory, ... }:
 
@@ -28,7 +28,7 @@ let
     bundix # gemfile -> nix
     cdrtools
     cargo # rust
-    clj-kondo # Clojure linter
+    # clj-kondo # Clojure linter
     clojure
     cmake
     curl
@@ -53,7 +53,7 @@ let
     mtr # network diagnosis tool
     mqttui # CLI MQTT client
     nil # nix lsp server
-    nixfmt # format nix files
+    nixfmt-classic # format nix files
     nix-index # search by executable
     nix-prefetch-git
     nix-prefetch-github
@@ -62,7 +62,7 @@ let
     pciutils
     pv # dd with info
     pwgen
-    python
+    python3
     ruby
     rustc
     statix # nix linter
@@ -74,7 +74,7 @@ let
     wget
     # yubikey-manager
     # yubikey-personalization
-    youtube-dl
+    yt-dlp
     yq # yaml processor
   ];
 
@@ -140,7 +140,7 @@ let
   ]);
 
 in {
-  imports = [ (import ./common/niten-doom-emacs.nix inputs) ];
+  imports = [ (import ./common/niten-doom-emacs.nix systemCfg inputs) ];
 
   config = {
     programs = {

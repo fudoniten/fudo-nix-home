@@ -31,7 +31,9 @@ let
   ];
 
 in {
-  imports = [ (import ./common/niten-doom-emacs.nix inputs) ];
+  imports = [
+    (import ./common/niten-doom-emacs.nix { desktop.type = "none"; } inputs)
+  ];
 
   config = {
     programs = {
@@ -43,17 +45,9 @@ in {
       git = {
         enable = true;
         userName = username;
-        userEmail = user-email;
+        userEmail = email;
         ignores = [ "*~" ];
         extraConfig.pull.rebase = false;
-      };
-    };
-
-    services = {
-      emacs = {
-        enable = true;
-        package = doom-emacs-package;
-        client.enable = true;
       };
     };
 
@@ -70,6 +64,6 @@ in {
     };
 
     systemd.user.tmpfiles.rules =
-      [ "d ${home-dir}/.emacs.d/.local/etc/eshell 700 root - - -" ];
+      [ "d ${home-directory}/.emacs.d/.local/etc/eshell 700 root - - -" ];
   };
 }
