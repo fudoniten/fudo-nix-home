@@ -81,7 +81,7 @@ in {
 
       systemd.user.services.emacs = {
         Service = {
-          Environment.PATH = "$PATH:${emacsPackage}/bin";
+          Environment = "PATH=$PATH:${emacsPackage}/bin";
           ExecStartPre =
             "${pkgs.bash}/bin/bash ${config.xdg.configHome}/emacs/bin/doom sync";
         };
