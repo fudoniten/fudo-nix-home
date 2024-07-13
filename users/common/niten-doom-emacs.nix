@@ -11,8 +11,8 @@ let
   '';
 
   addEmacsDependencies = emacs:
-    emacs.override {
-      extraPackages = with pkgs; [
+    emacs.overrideAttrs (oldAttrs: {
+      propagatedBuildInputs = with pkgs; [
         git
         (ripgrep.override { withPCRE2 = true; })
         gnutls
@@ -24,7 +24,7 @@ let
         editorconfig-core-c
         sqlite
       ];
-    };
+    });
 
   myEmacsPackagesFor = emacs:
     (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
