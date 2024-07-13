@@ -112,7 +112,6 @@ let
     signal-desktop
     spotify-player
     spotify-qt
-    spotify-tui
     via # keyboard firmware tool
     vial # another keyboard firmware tool
     xclip
