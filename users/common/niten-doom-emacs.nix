@@ -11,21 +11,20 @@ let
   '';
 
   addEmacsDependencies = emacs:
-    emacs.overrideAttrs (oldAttrs:
-      with pkgs; {
-        propagatedBuildInputs = oldAttrs.propagatedBuildInputs ++ [
-          git
-          (ripgrep.override { withPCRE2 = true; })
-          gnutls
-          gopls
-          fd
-          imagemagick
-          zstd
-          (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
-          editorconfig-core-c
-          sqlite
-        ];
-      });
+    emacs.override {
+      extraPackages = with pkgs; [
+        git
+        (ripgrep.override { withPCRE2 = true; })
+        gnutls
+        gopls
+        fd
+        imagemagick
+        zstd
+        (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
+        editorconfig-core-c
+        sqlite
+      ];
+    };
 
   myEmacsPackagesFor = emacs:
     (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
