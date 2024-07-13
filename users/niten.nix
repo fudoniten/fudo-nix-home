@@ -62,7 +62,6 @@ let
     pciutils
     pv # dd with info
     pwgen
-    python3
     ruby
     rustc
     statix # nix linter
