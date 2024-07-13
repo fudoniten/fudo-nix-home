@@ -13,7 +13,7 @@ let
   addEmacsDependencies = emacs:
     emacs.overrideAttrs (oldAttrs: {
       propagatedUserEnvPkgs = let
-        oldInputs = if hasAttr propagatedUserEnvPkgs oldAttrs then
+        oldInputs = if hasAttr "propagatedUserEnvPkgs" oldAttrs then
           oldAttrs.propagatedUserEnvPkgs
         else
           [ ];
