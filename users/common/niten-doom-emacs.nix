@@ -51,7 +51,7 @@ in {
         zsh.envExtra = doomEmacsEnv;
       };
 
-      systemd.tmpfiles.rules =
+      systemd.user.tmpfiles.rules =
         [ "d ${config.xdg.configHome}/emacs 0750 - - - -" ];
 
       home.activation.installDoomEmacs =
