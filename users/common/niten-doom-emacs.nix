@@ -82,6 +82,7 @@ in {
             in "PATH=$PATH:${binPath}";
           ExecStartPre =
             "${pkgs.bash}/bin/bash ${config.xdg.configHome}/emacs/bin/doom sync";
+          TimeoutStartSec = "30min";
         };
       };
 
