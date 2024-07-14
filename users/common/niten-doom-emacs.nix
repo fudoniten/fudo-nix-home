@@ -81,7 +81,7 @@ in {
             Environment =
               let binPath = makeBinPath ([ emacsPackage ] ++ emacsDeps);
               in "PATH=$PATH:${binPath}";
-            ExecStartPre = pkgs.wirteShellScript "run-doom-sync" ''
+            ExecStartPre = pkgs.writeShellScript "run-doom-sync" ''
               until [ -d ${config.xdg.configHome}/emacs ]; do sleep 1; done
 
               ${pkgs.bash}/bin/bash ${config.xdg.configHome}/emacs/bin/doom sync
