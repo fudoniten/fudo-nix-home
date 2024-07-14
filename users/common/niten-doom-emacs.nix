@@ -89,7 +89,6 @@ in {
 
               if [ -d $HOME/.emacs.d ]; then
                 echo "removing old emacs config in ~/.emacs.d"
-                rm -rf $HOME/.emacs.d
               fi
             '';
             TimeoutStartSec = "30min";
