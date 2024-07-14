@@ -66,7 +66,7 @@ in {
             pkgs.emacs-pgtk
           else
             pkgs.emacs-gtk);
-      in myEmacsPackagesFor (addEmacsDependencies pkg);
+      in myEmacsPackagesFor pkg;
     in {
       home = {
         packages = [ emacsPackage ];
