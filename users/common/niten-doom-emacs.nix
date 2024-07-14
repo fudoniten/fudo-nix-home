@@ -85,6 +85,11 @@ in {
               until [ -d ${config.xdg.configHome}/emacs ]; do sleep 1; done
 
               ${pkgs.bash}/bin/bash ${config.xdg.configHome}/emacs/bin/doom sync
+
+              if [ -d $HOME/.emacs.d ]; then
+                echo "removing old emacs config in ~/.emacs.d"
+                rm -rf $HOME/.emacs.d
+              fi
             '';
             TimeoutStartSec = "30min";
           };
