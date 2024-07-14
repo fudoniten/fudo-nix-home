@@ -96,9 +96,6 @@ in {
             };
           };
         };
-
-        tmpfiles.rules =
-          [ "d ${config.xdg.configHome}/doom/snippets 0750 - - - -" ];
       };
 
       services.emacs = {
