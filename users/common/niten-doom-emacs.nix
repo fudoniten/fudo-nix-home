@@ -10,19 +10,18 @@ let
     export PATH="${config.xdg.configHome}/emacs/bin:$PATH"
   '';
 
-  emacsDeps = with pkgs;
-    oldInputs ++ [
-      git
-      (ripgrep.override { withPCRE2 = true; })
-      gnutls
-      gopls
-      fd
-      imagemagick
-      zstd
-      (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
-      editorconfig-core-c
-      sqlite
-    ];
+  emacsDeps = with pkgs; [
+    git
+    (ripgrep.override { withPCRE2 = true; })
+    gnutls
+    gopls
+    fd
+    imagemagick
+    zstd
+    (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
+    editorconfig-core-c
+    sqlite
+  ];
 
   myEmacsPackagesFor = emacs:
     (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
