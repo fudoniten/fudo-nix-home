@@ -76,24 +76,29 @@ in {
         };
       };
 
-      systemd.user.services = {
-        emacs = {
-          Service = {
-            Environment =
-              let binPath = makeBinPath ([ emacsPackage ] ++ emacsDeps);
-              in "PATH=$PATH:${binPath}";
-            ExecStartPre = pkgs.writeShellScript "run-doom-sync" ''
-              until [ -d ${config.xdg.configHome}/emacs ]; do sleep 1; done
+      systemd.user = {
+        services = {
+          emacs = {
+            Service = {
+              Environment =
+                let binPath = makeBinPath ([ emacsPackage ] ++ emacsDeps);
+                in "PATH=$PATH:${binPath}";
+              ExecStartPre = pkgs.writeShellScript "run-doom-sync" ''
+                until [ -d ${config.xdg.configHome}/emacs ]; do sleep 1; done
 
-              ${pkgs.bash}/bin/bash ${config.xdg.configHome}/emacs/bin/doom sync
+                ${pkgs.bash}/bin/bash ${config.xdg.configHome}/emacs/bin/doom sync
 
-              if [ -d $HOME/.emacs.d ]; then
-                echo "removing old emacs config in ~/.emacs.d"
-              fi
-            '';
-            TimeoutStartSec = "30min";
+                if [ -d $HOME/.emacs.d ]; then
+                  echo "removing old emacs config in ~/.emacs.d"
+                fi
+              '';
+              TimeoutStartSec = "30min";
+            };
           };
         };
+
+        tmpfiles.rules =
+          [ "d ${config.xdg.configHome}/doom/snippets 0750 - - - -" ];
       };
 
       services.emacs = {
