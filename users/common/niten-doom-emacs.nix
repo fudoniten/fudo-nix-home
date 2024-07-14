@@ -102,11 +102,9 @@ in {
         package = emacsPackage;
         client = {
           enable = true;
-          arguments = [
-            "--create-frame"
-            "--init-directory=${config.xdg.configHome}/emacs"
-          ];
+          arguments = [ "--create-frame" ];
         };
+        extraOptions = [ "--init-directory=${config.xdg.configHome}/emacs" ];
         defaultEditor = true;
         startWithUserSession = true;
       };
