@@ -10,27 +10,19 @@ let
     export PATH="${config.xdg.configHome}/emacs/bin:$PATH"
   '';
 
-  addEmacsDependencies = emacs:
-    emacs.overrideAttrs (oldAttrs: {
-      propagatedUserEnvPkgs = let
-        oldInputs = if hasAttr "propagatedUserEnvPkgs" oldAttrs then
-          oldAttrs.propagatedUserEnvPkgs
-        else
-          [ ];
-      in with pkgs;
-      oldInputs ++ [
-        git
-        (ripgrep.override { withPCRE2 = true; })
-        gnutls
-        gopls
-        fd
-        imagemagick
-        zstd
-        (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
-        editorconfig-core-c
-        sqlite
-      ];
-    });
+  emacsDeps = with pkgs;
+    oldInputs ++ [
+      git
+      (ripgrep.override { withPCRE2 = true; })
+      gnutls
+      gopls
+      fd
+      imagemagick
+      zstd
+      (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
+      editorconfig-core-c
+      sqlite
+    ];
 
   myEmacsPackagesFor = emacs:
     (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
@@ -86,7 +78,9 @@ in {
 
       systemd.user.services.emacs = {
         Service = {
-          Environment = "PATH=$PATH:${emacsPackage}/bin";
+          Environment =
+            let binPath = makeBinPath ([ emacsPackage ] ++ emacsDeps);
+            in "PATH=$PATH:${binPath}";
           ExecStartPre =
             "${pkgs.bash}/bin/bash ${config.xdg.configHome}/emacs/bin/doom sync";
         };
