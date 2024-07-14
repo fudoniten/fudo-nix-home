@@ -270,11 +270,6 @@ in {
       sessionVariables = envVariables;
     };
 
-    systemd.user = mkIf isLinux {
-      tmpfiles.rules = [
-        "d ${home-directory}/.emacs.d/.local/etc/eshell 700 ${username} - - -"
-      ];
-      sessionVariables = envVariables;
-    };
+    systemd.user = mkIf isLinux { sessionVariables = envVariables; };
   };
 }
