@@ -23,7 +23,7 @@ let
     sqlite
     xclip
     openssh
-    diff
+    diffutils
   ];
 
   myEmacsPackagesFor = emacs:
