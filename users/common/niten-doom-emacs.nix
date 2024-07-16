@@ -24,6 +24,7 @@ let
     xclip
     openssh
     diffutils
+    coreutils
   ];
 
   myEmacsPackagesFor = emacs:
