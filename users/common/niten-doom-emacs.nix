@@ -22,6 +22,8 @@ let
     editorconfig-core-c
     sqlite
     xclip
+    openssh
+    diff
   ];
 
   myEmacsPackagesFor = emacs:
