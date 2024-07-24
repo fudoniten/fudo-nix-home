@@ -26,6 +26,8 @@ let
     diffutils
     coreutils
     tar
+    bash
+    clojure-lsp
   ];
 
   myEmacsPackagesFor = emacs:
