@@ -25,7 +25,7 @@ let
     openssh
     diffutils
     coreutils
-    tar
+    gnutar
     bash
     clojure-lsp
   ];
