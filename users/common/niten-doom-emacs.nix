@@ -25,6 +25,7 @@ let
     openssh
     diffutils
     coreutils
+    tar
   ];
 
   myEmacsPackagesFor = emacs:
