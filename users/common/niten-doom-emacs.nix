@@ -28,6 +28,7 @@ let
     gnutar
     bash
     clojure-lsp
+    clojure
   ];
 
   myEmacsPackagesFor = emacs:
