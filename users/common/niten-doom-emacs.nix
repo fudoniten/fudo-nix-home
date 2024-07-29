@@ -29,6 +29,7 @@ let
     bash
     clojure-lsp
     clojure
+    sbcl
   ];
 
   myEmacsPackagesFor = emacs:
