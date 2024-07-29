@@ -30,6 +30,7 @@ let
     clojure-lsp
     clojure
     sbcl
+    curl
   ];
 
   myEmacsPackagesFor = emacs:
