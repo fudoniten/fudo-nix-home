@@ -31,6 +31,7 @@ let
     clojure
     sbcl
     curl
+    grep
   ];
 
   myEmacsPackagesFor = emacs:
