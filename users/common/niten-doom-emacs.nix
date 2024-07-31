@@ -32,7 +32,7 @@ let
     sbcl
     curl
     gnugrep
-  ] ++ config.home.packages;
+  ];
 
   myEmacsPackagesFor = emacs:
     (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
@@ -90,9 +90,10 @@ in {
         services = {
           emacs = {
             Service = {
-              Environment =
-                let binPath = makeBinPath ([ emacsPackage ] ++ emacsDeps);
-                in "PATH=$PATH:${binPath}";
+              Environment = let
+                binPath =
+                  makeBinPath ([ emacsPackage ] ++ config.home.packages);
+              in "PATH=$PATH:${binPath}";
               ExecStartPre = pkgs.writeShellScript "run-doom-sync" ''
                 until [ -d ${config.xdg.configHome}/emacs ]; do sleep 1; done
 
