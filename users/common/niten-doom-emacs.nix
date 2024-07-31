@@ -32,7 +32,7 @@ let
     sbcl
     curl
     gnugrep
-  ];
+  ] ++ config.home.packages;
 
   myEmacsPackagesFor = emacs:
     (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
