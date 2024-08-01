@@ -43,6 +43,7 @@ let
     go
     graphviz
     guile
+    home-assistant-cli
     inetutils
     ipfs
     jdk
