@@ -40,6 +40,7 @@ let
         chatgpt-shell
         elpher
         flycheck-clj-kondo
+        hass
         pylint
         spotify
         thrift
