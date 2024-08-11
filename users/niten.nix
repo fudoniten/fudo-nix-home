@@ -49,6 +49,7 @@ let
     jdk
     jq # command-line JSON parser
     lsof
+    kubectl
     manix # nixos doc searcher
     mosh
     mtr # network diagnosis tool
