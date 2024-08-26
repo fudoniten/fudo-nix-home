@@ -35,6 +35,8 @@ let
     duf # fancy df
     enca # encoding detector
     file
+    fluxcd
+    fluxctl
     fortune
     fzf
     gcc
