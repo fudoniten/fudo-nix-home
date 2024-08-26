@@ -42,6 +42,7 @@ let
         elpher
         flycheck-clj-kondo
         hass
+        kubernetes
         pylint
         spotify
         thrift
