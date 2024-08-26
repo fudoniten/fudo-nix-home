@@ -32,6 +32,7 @@ let
     sbcl
     curl
     gnugrep
+    nodePackages.prettier
   ];
 
   myEmacsPackagesFor = emacs:
