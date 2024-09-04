@@ -150,6 +150,10 @@ in {
       bash = {
         enable = true;
         enableVteIntegration = true;
+        enableCompletion = true;
+        bashrcExtra = ''
+          [[ -f $HOME/.bashrc_local ]] && . $HOME/.bashrc_local
+        '';
       };
 
       git = {
