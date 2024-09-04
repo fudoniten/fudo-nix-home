@@ -72,11 +72,11 @@
     "doom-emacs": {
       "flake": false,
       "locked": {
-        "lastModified": 1724960669,
-        "narHash": "sha256-1UldBoeXBf1JrgIUhHa2gAqgLtZWjDeuHkp8wsz1Trc=",
+        "lastModified": 1725476672,
+        "narHash": "sha256-voaZX2q7QskeizY8/BPoS0gtEe0ObCL8ysUyCs8Em6M=",
         "owner": "doomemacs",
         "repo": "doomemacs",
-        "rev": "7f175ab6d9a0648eac5c8b404f3005eeda829a4d",
+        "rev": "a940ac5614c0bb34358682e42e9d7791f56d135a",
         "type": "github"
       },
       "original": {
@@ -166,11 +166,11 @@
         "utils": "utils_4"
       },
       "locked": {
-        "lastModified": 1723942984,
-        "narHash": "sha256-0FWR7YwSRYNKjXgTBIKV5o02+7tCtcYaL3fbkfmd4NQ=",
+        "lastModified": 1724998929,
+        "narHash": "sha256-TZROJnZFdZQEYmjTF/UAujVO+neeCQTY9Es2fPcHf5g=",
         "owner": "fudoniten",
         "repo": "fudo-nix-pkgs",
-        "rev": "e4610c0bc649b01f325c4ccc45e825c00a113cbd",
+        "rev": "017b93bf14739d1ed5bafb6c0d080f16d594cbe8",
         "type": "github"
       },
       "original": {
@@ -399,11 +399,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1724727824,
-        "narHash": "sha256-0XH9MJk54imJm+RHOLTUJ7e+ponLW00tw5ke4MTVa1Y=",
+        "lastModified": 1725001927,
+        "narHash": "sha256-eV+63gK0Mp7ygCR0Oy4yIYSNcum2VQwnZamHxYTNi+M=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "36bae45077667aff5720e5b3f1a5458f51cf0776",
+        "rev": "6e99f2a27d600612004fbd2c3282d614bfee6421",
         "type": "github"
       },
       "original": {

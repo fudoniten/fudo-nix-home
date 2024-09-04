@@ -151,8 +151,8 @@ in {
         enable = true;
         enableVteIntegration = true;
         enableCompletion = true;
-        bashrcExtra = ''
-          [[ -f $HOME/.bashrc_local ]] && . $HOME/.bashrc_local
+        profileExtra = ''
+          [[ -f $HOME/.profile_local ]] && . $HOME/.profile_local
         '';
       };
 
@@ -224,6 +224,10 @@ in {
       };
 
       obs-studio.enable = isLinux && isGui;
+
+      zsh.profileExtra = ''
+        [[ -f $HOME/.profile_local ]] && . $HOME/.profile_local
+      '';
     };
 
     xresources.properties = mkIf isX {
