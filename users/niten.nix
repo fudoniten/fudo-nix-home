@@ -154,6 +154,7 @@ in {
         profileExtra = ''
           [[ -f $HOME/.profile_local ]] && . $HOME/.profile_local
         '';
+        package = bashInteractive;
       };
 
       git = {

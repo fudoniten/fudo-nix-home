@@ -26,7 +26,7 @@ let
     diffutils
     coreutils
     gnutar
-    bash
+    bashInteractive
     clojure-lsp
     clojure
     curl
