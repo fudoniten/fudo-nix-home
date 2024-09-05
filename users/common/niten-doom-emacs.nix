@@ -7,7 +7,7 @@ systemCfg:
 with lib;
 let
   doomEmacsEnv = ''
-    export PATH="${config.xdg.configHome}/emacs/bin:$PATH"
+    export PATH="${config.xdg.configHome}/emacs/bin:${config.xdg.configHome}/doom/bin:$PATH"
   '';
 
   emacsDeps = with pkgs; [
@@ -83,7 +83,12 @@ in {
     in {
       home = {
         packages = [ emacsPackage ] ++ emacsDeps;
+        sessionVariables = {
+          DOOM_EMACS_SITE_PATH = "${config.xdg.configHome}/doom/site.d";
+          DOOM_EMACS_LOCAL_PATH = "${config.xdg.configHome}/emacs-local";
+        };
         shellAliases = {
+          emacs = "emacs --init-directory=${config.xdg.configHome}/emacs";
           e = "emacsclient --create-frame --tty";
           ew = "emacsclient --create-frame";
         };
