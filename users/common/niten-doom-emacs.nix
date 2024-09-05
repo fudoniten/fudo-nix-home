@@ -75,7 +75,6 @@ in {
           DOOM_EMACS_SITE_PATH = "${config.xdg.configHome}/doom/site.d";
           DOOM_EMACS_LOCAL_PATH = "${config.xdg.configHome}/emacs-local";
         };
-        packages = [ emacsPackage ] ++ emacsDeps;
         shellAliases = {
           emacs = "emacs --init-directory=${config.xdg.configHome}/emacs";
           e = "emacsclient --create-frame --tty";
@@ -95,6 +94,8 @@ in {
             pkgs.emacs-gtk);
       in myEmacsPackagesFor pkg;
     in {
+      home.packages = [ emacsPackage ] ++ emacsDeps;
+      
       systemd.user = {
         services = {
           emacs = {
@@ -132,9 +133,9 @@ in {
     }))
 
     (mkIf pkgs.stdenv.isDarwin
-      (let emacsPackage = myEmacsPackagesFor pkgs.emacs29;
+      (let emacsPackage = myEmacsPackagesFor pkgs.emacs-macport;
       in {
-        home.packages = [ emacsPackage ];
+        home.packages = [ emacsPackage ] ++ emacsDeps;
         launchd = {
           enable = true;
           agents.emacs = {
