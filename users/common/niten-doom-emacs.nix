@@ -29,10 +29,13 @@ let
     bash
     clojure-lsp
     clojure
-    sbcl
     curl
     gnugrep
     nodePackages.prettier
+  ];
+
+  emacsLinuxDeps = with pkgs; [
+    sbcl
   ];
 
   myEmacsPackagesFor = emacs:
@@ -94,7 +97,7 @@ in {
             pkgs.emacs-gtk);
       in myEmacsPackagesFor pkg;
     in {
-      home.packages = [ emacsPackage ] ++ emacsDeps;
+      home.packages = [ emacsPackage ] ++ emacsDeps ++ emacsLinuxDeps;
       
       systemd.user = {
         services = {
