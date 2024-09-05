@@ -136,7 +136,7 @@ in {
     }))
 
     (mkIf pkgs.stdenv.isDarwin
-      (let emacsPackage = myEmacsPackagesFor pkgs.emacs-macport;
+      (let emacsPackage = myEmacsPackagesFor pkgs.emacs29;
       in {
         home.packages = [ emacsPackage ] ++ emacsDeps;
         launchd = {
