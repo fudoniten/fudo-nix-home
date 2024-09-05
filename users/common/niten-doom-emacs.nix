@@ -39,6 +39,7 @@ let
     (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
       with epkgs; [
         chatgpt-shell
+        dirvish
         elpher
         flycheck-clj-kondo
         hass
@@ -61,13 +62,26 @@ in {
         zsh.envExtra = doomEmacsEnv;
       };
 
-      home.activation.installDoomEmacs =
-        lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          if [ ! -d ${config.xdg.configHome}/emacs ]; then
-            mkdir -p ${config.xdg.configHome}/emacs
-          fi
-          ${pkgs.rsync}/bin/rsync -avz --chmod=D2755,F744 ${doom-emacs}/ ${config.xdg.configHome}/emacs/
-        '';
+      home = {
+        activation.installDoomEmacs =
+          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            if [ ! -d ${config.xdg.configHome}/emacs ]; then
+              mkdir -p ${config.xdg.configHome}/emacs
+            fi
+            ${pkgs.rsync}/bin/rsync -avz --chmod=D2755,F744 ${doom-emacs}/ ${config.xdg.configHome}/emacs/
+          '';
+        
+        sessionVariables = {
+          DOOM_EMACS_SITE_PATH = "${config.xdg.configHome}/doom/site.d";
+          DOOM_EMACS_LOCAL_PATH = "${config.xdg.configHome}/emacs-local";
+        };
+        packages = [ emacsPackage ] ++ emacsDeps;
+        shellAliases = {
+          emacs = "emacs --init-directory=${config.xdg.configHome}/emacs";
+          e = "emacsclient --create-frame --tty";
+          ew = "emacsclient --create-frame";
+        };
+      };
     }
 
     (mkIf pkgs.stdenv.isLinux (let
@@ -81,19 +95,6 @@ in {
             pkgs.emacs-gtk);
       in myEmacsPackagesFor pkg;
     in {
-      home = {
-        packages = [ emacsPackage ] ++ emacsDeps;
-        sessionVariables = {
-          DOOM_EMACS_SITE_PATH = "${config.xdg.configHome}/doom/site.d";
-          DOOM_EMACS_LOCAL_PATH = "${config.xdg.configHome}/emacs-local";
-        };
-        shellAliases = {
-          emacs = "emacs --init-directory=${config.xdg.configHome}/emacs";
-          e = "emacsclient --create-frame --tty";
-          ew = "emacsclient --create-frame";
-        };
-      };
-
       systemd.user = {
         services = {
           emacs = {
