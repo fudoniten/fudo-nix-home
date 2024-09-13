@@ -146,6 +146,12 @@ in {
   imports = [ (import ./common/niten-doom-emacs.nix systemCfg inputs) ];
 
   config = {
+
+    gtk.iconTheme = {
+      package = pkgs.numix-icon-theme;
+      name = "Numix";
+    };
+
     programs = {
       bash = {
         enable = true;
@@ -171,11 +177,6 @@ in {
           editor = "emacsclient";
           git_protocol = "ssh";
         };
-      };
-
-      gtk.iconTheme = {
-        package = pkgs.numix-icon-theme;
-        name = "Numix";
       };
 
       fzf = {
