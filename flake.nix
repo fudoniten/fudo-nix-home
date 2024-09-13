@@ -32,8 +32,8 @@
       };
     };
 
-    mkModule.niten =
-      { username, email, home-directory, stateVersion, desktopType, ... }: {
+    mkModule.niten = { username, email, home-directory, stateVersion
+      , desktopType ? "none", ... }: {
         imports = [
           ./modules
           (import ./users/niten.nix inputs {

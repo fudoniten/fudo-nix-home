@@ -190,15 +190,6 @@ in {
           # theme = "Obsidian";
           # font_features = "ShureTechMono Nerd Font -liga";
         };
-        font = {
-          package = pkgs.nerdfonts;
-          name = "Terminess (TTF) Nerd Font Complete Mono";
-          # name = "Shure Tech Mono Nerd Font Complete Mono";
-          size = 14;
-          #package = pkgs.inconsolata;
-          #name = "Incosolata";
-          #size = 10;
-        };
         keybindings = let lead = "ctrl+super";
         in {
           "ctrl+shift+plus" = "no_op";
