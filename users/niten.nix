@@ -173,6 +173,11 @@ in {
         };
       };
 
+      gtk.iconTheme = {
+        package = pkgs.numix-icon-theme;
+        name = "Numix";
+      };
+
       fzf = {
         enable = true;
         enableBashIntegration = true;
