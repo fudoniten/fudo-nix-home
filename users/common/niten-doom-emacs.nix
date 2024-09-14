@@ -34,9 +34,7 @@ let
     nodePackages.prettier
   ];
 
-  emacsLinuxDeps = with pkgs; [
-    sbcl
-  ];
+  emacsLinuxDeps = with pkgs; [ sbcl ];
 
   myEmacsPackagesFor = emacs:
     (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
@@ -73,7 +71,7 @@ in {
             fi
             ${pkgs.rsync}/bin/rsync -avz --chmod=D2755,F744 ${doom-emacs}/ ${config.xdg.configHome}/emacs/
           '';
-        
+
         sessionVariables = {
           DOOM_EMACS_SITE_PATH = "${config.xdg.configHome}/doom/site.d";
           DOOM_EMACS_LOCAL_PATH = "${config.xdg.configHome}/emacs-local";
@@ -92,13 +90,13 @@ in {
           pkgs.emacs-nox
         else
           (if systemCfg.desktop.type == "wayland" then
-            pkgs.emacs-pgtk
+            pkgs.emacs29-pgtk
           else
             pkgs.emacs-gtk);
       in myEmacsPackagesFor pkg;
     in {
       home.packages = [ emacsPackage ] ++ emacsDeps ++ emacsLinuxDeps;
-      
+
       systemd.user = {
         services = {
           emacs = {
