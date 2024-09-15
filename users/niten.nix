@@ -64,6 +64,7 @@ let
     openssl # Not sure which I need?
     openssl.out
     pciutils
+    psensors
     pv # dd with info
     pwgen
     ruby
