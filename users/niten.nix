@@ -64,7 +64,6 @@ let
     openssl # Not sure which I need?
     openssl.out
     pciutils
-    psensor
     pv # dd with info
     pwgen
     ruby
@@ -83,6 +82,8 @@ let
   ];
 
   commonGuiPackages = with pkgs; [ spotify ];
+
+  linuxPackages = with pkgs; [ psensor ];
 
   linuxGuiPackages = with pkgs; [
     gnomeExtensions.espresso
@@ -260,7 +261,8 @@ in {
       homeDirectory = home-directory;
 
       packages = commonPackages ++ (optionals isGui commonGuiPackages)
-        ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages));
+        ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages))
+        ++ (optionals isLinux linuxPackages);
 
       file = {
         ".xprofile" = mkIf isX {
