@@ -46,6 +46,7 @@ let
         hass
         kubernetes
         pylint
+        restclient-mode
         spotify
         thrift
       ]);
