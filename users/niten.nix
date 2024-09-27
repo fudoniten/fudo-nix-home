@@ -41,6 +41,7 @@ let
     fzf
     gcc
     git
+    gnumake
     gnupg
     go
     graphviz
