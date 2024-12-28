@@ -72,6 +72,7 @@ let
     statix # nix linter
     stdenv
     texlive.combined.scheme-basic
+    texlivePackages.etoolbox
     tio # Serial IO
     tmux
     unzip
