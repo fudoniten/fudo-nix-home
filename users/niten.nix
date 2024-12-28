@@ -71,8 +71,7 @@ let
     rustc
     statix # nix linter
     stdenv
-    texlive.combined.scheme-basic
-    texlivePackages.etoolbox
+    texlive.combined.scheme-full
     tio # Serial IO
     tmux
     unzip
