@@ -84,7 +84,7 @@ let
 
   commonGuiPackages = with pkgs; [ spotify ];
 
-  linuxPackages = with pkgs; [ psensor ];
+  linuxPackages = with pkgs; [ ];
 
   linuxGuiPackages = with pkgs; [
     gnomeExtensions.espresso
