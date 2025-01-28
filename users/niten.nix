@@ -225,6 +225,15 @@ in {
 
       obs-studio.enable = isLinux && isGui;
 
+      ssh = {
+        enable = true;
+        package = pkgs.openssh_hpnWithKerberos;
+        addKeysToAgent = true;
+        compression = true;
+        controlMaster = true;
+        forwardAgent = true;
+      };
+
       zsh.profileExtra = ''
         [[ -f $HOME/.profile_local ]] && . $HOME/.profile_local
       '';
