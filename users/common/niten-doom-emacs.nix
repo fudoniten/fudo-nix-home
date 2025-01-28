@@ -31,7 +31,7 @@ let
     curl
     gnugrep
     nodePackages.prettier
-    ssh-hpnWithKerberos
+    openssh-hpnWithKerberos
   ];
 
   emacsLinuxDeps = with pkgs; [ sbcl ];
