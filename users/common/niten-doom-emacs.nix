@@ -10,29 +10,29 @@ let
     export PATH="${config.xdg.configHome}/emacs/bin:${config.xdg.configHome}/doom/bin:$PATH"
   '';
 
-  emacsDeps = with pkgs; [
-    git
-    (ripgrep.override { withPCRE2 = true; })
-    gnutls
-    gopls
-    fd
-    imagemagick
-    zstd
-    (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
-    editorconfig-core-c
-    sqlite
-    xclip
-    openssh
-    diffutils
-    coreutils
-    gnutar
-    bashInteractive
-    clojure-lsp
-    clojure
-    curl
-    gnugrep
-    nodePackages.prettier
-  ];
+  emacsDeps = with pkgs;
+    [
+      git
+      (ripgrep.override { withPCRE2 = true; })
+      gnutls
+      gopls
+      fd
+      imagemagick
+      zstd
+      (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
+      editorconfig-core-c
+      sqlite
+      xclip
+      diffutils
+      coreutils
+      gnutar
+      bashInteractive
+      clojure-lsp
+      clojure
+      curl
+      gnugrep
+      nodePackages.prettier
+    ] ++ config.home.packages;
 
   emacsLinuxDeps = with pkgs; [ sbcl ];
 
