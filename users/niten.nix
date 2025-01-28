@@ -228,9 +228,9 @@ in {
       ssh = {
         enable = true;
         package = pkgs.openssh_hpnWithKerberos;
-        addKeysToAgent = true;
+        addKeysToAgent = "yes";
         compression = true;
-        controlMaster = true;
+        controlMaster = "yes";
         forwardAgent = true;
       };
 
