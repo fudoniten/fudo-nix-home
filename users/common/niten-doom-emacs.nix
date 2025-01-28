@@ -2,7 +2,7 @@ systemCfg:
 
 { doom-emacs, niten-doom-config, ... }:
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }@toplevel:
 
 with lib;
 let
@@ -32,7 +32,7 @@ let
       curl
       gnugrep
       nodePackages.prettier
-    ] ++ config.home.packages;
+    ] ++ toplevel.config.home.packages;
 
   emacsLinuxDeps = with pkgs; [ sbcl ];
 
