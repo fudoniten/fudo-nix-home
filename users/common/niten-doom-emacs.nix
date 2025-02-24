@@ -2,6 +2,8 @@ systemCfg:
 
 { doom-emacs, niten-doom-config, ... }:
 
+userPackages:
+
 { config, lib, pkgs, ... }:
 
 with lib;
@@ -10,29 +12,30 @@ let
     export PATH="${config.xdg.configHome}/emacs/bin:${config.xdg.configHome}/doom/bin:$PATH"
   '';
 
-  emacsDeps = with pkgs; [
-    git
-    (ripgrep.override { withPCRE2 = true; })
-    gnutls
-    gopls
-    fd
-    imagemagick
-    zstd
-    (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
-    editorconfig-core-c
-    sqlite
-    xclip
-    diffutils
-    coreutils
-    gnutar
-    bashInteractive
-    clojure-lsp
-    clojure
-    curl
-    gnugrep
-    nodePackages.prettier
-    openssh_hpnWithKerberos
-  ];
+  emacsDeps = with pkgs;
+    [
+      git
+      (ripgrep.override { withPCRE2 = true; })
+      gnutls
+      gopls
+      fd
+      imagemagick
+      zstd
+      (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
+      editorconfig-core-c
+      sqlite
+      xclip
+      diffutils
+      coreutils
+      gnutar
+      bashInteractive
+      clojure-lsp
+      clojure
+      curl
+      gnugrep
+      nodePackages.prettier
+      openssh_hpnWithKerberos
+    ] ++ userPackages;
 
   emacsLinuxDeps = with pkgs; [ sbcl ];
 
@@ -41,6 +44,7 @@ let
       with epkgs; [
         chatgpt-shell
         dirvish
+        ellama
         elpher
         flycheck-clj-kondo
         hass

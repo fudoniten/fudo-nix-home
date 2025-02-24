@@ -146,7 +146,8 @@ let
   ]);
 
 in {
-  imports = [ (import ./common/niten-doom-emacs.nix systemCfg inputs) ];
+  imports =
+    [ (import ./common/niten-doom-emacs.nix systemCfg inputs home.packages) ];
 
   config = {
 
