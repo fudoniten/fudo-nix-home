@@ -32,7 +32,8 @@ let
 
 in {
   imports = [
-    (import ./common/niten-doom-emacs.nix { desktop.type = "none"; } inputs)
+    (import ./common/niten-doom-emacs.nix { desktop.type = "none"; } inputs
+      commonPackages)
   ];
 
   config = {
