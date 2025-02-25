@@ -145,11 +145,13 @@ let
     unifont
   ]);
 
+  finalPackages = commonPackages ++ (optionals isGui commonGuiPackages)
+    ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages))
+    ++ (optionals isLinux linuxPackages);
+
 in {
-  imports = [
-    (import ./common/niten-doom-emacs.nix systemCfg inputs
-      toplevel.config.home.packages)
-  ];
+  imports =
+    [ (import ./common/niten-doom-emacs.nix systemCfg inputs finalPackages) ];
 
   config = {
 
@@ -273,9 +275,7 @@ in {
       inherit username;
       homeDirectory = home-directory;
 
-      packages = commonPackages ++ (optionals isGui commonGuiPackages)
-        ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages))
-        ++ (optionals isLinux linuxPackages);
+      packages = finalPackages;
 
       file = {
         ".xprofile" = mkIf isX {
