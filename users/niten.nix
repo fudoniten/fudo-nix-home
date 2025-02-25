@@ -4,7 +4,7 @@ inputs:
 
 systemCfg:
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }@toplevel:
 
 with lib;
 let
@@ -146,8 +146,10 @@ let
   ]);
 
 in {
-  imports =
-    [ (import ./common/niten-doom-emacs.nix systemCfg inputs home.packages) ];
+  imports = [
+    (import ./common/niten-doom-emacs.nix systemCfg inputs
+      toplevel.config.home.packages)
+  ];
 
   config = {
 
