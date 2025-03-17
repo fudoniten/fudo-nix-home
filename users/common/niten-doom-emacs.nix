@@ -95,7 +95,7 @@ in {
           pkgs.emacs-nox
         else
           (if systemCfg.desktop.type == "wayland" then
-            pkgs.emacs29-pgtk
+            pkgs.emacs30-pgtk
           else
             pkgs.emacs-gtk);
       in myEmacsPackagesFor pkg;
