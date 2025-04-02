@@ -72,11 +72,11 @@
     "doom-emacs": {
       "flake": false,
       "locked": {
-        "lastModified": 1742013576,
-        "narHash": "sha256-wgzv3IFBxJkAYfLG0vCp1jbajHKrrpFzKZ2BssWVSlo=",
+        "lastModified": 1743582203,
+        "narHash": "sha256-5vUl7QdPa8WFBALVBAGMQdjdogiVnmUjFFoxgNZf2U8=",
         "owner": "doomemacs",
         "repo": "doomemacs",
-        "rev": "466490c252d06f42a9c165f361de74a6e6abad8d",
+        "rev": "16dd6f8674e6abf07a95a18b865c26d7c9573969",
         "type": "github"
       },
       "original": {
@@ -270,11 +270,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1742234739,
-        "narHash": "sha256-zFL6zsf/5OztR1NSNQF33dvS1fL/BzVUjabZq4qrtY4=",
+        "lastModified": 1743387206,
+        "narHash": "sha256-24N3NAuZZbYqZ39NgToZgHUw6M7xHrtrAm18kv0+2Wo=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "f6af7280a3390e65c2ad8fd059cdc303426cbd59",
+        "rev": "15c5f9d04fabd176f30286c8f52bbdb2c853a146",
         "type": "github"
       },
       "original": {
@@ -399,11 +399,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1742512142,
-        "narHash": "sha256-8XfURTDxOm6+33swQJu/hx6xw1Tznl8vJJN5HwVqckg=",
+        "lastModified": 1743501102,
+        "narHash": "sha256-7PCBQ4aGVF8OrzMkzqtYSKyoQuU2jtpPi4lmABpe5X4=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "7105ae3957700a9646cc4b766f5815b23ed0c682",
+        "rev": "02f2af8c8a8c3b2c05028936a1e84daefa1171d4",
         "type": "github"
       },
       "original": {
