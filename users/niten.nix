@@ -74,6 +74,8 @@ let
     texlive.combined.scheme-full
     tio # Serial IO
     tmux
+    trezor-agent
+    trezor-suite
     unzip
     wget
     # yubikey-manager
