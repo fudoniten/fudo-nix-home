@@ -65,6 +65,8 @@ let
     openssl # Not sure which I need?
     openssl.out
     pciutils
+    pipewire
+    pipewire.jack
     pv # dd with info
     pwgen
     ruby
