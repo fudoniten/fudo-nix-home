@@ -39,7 +39,7 @@ in {
 
         Service = {
           ExecStart = concatStringsSep " " [
-            "${pkgs.supercollider}/bin/scsynth"
+            "${pkgs.supercollider-with-sc3-plugins}/bin/scsynth"
             "-u ${toString cfg.port}"
             "-B ${cfg.listen-address}"
             "-m ${toString cfg.memory}"
