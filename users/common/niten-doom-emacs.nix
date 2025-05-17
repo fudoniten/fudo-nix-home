@@ -35,6 +35,7 @@ let
       gnugrep
       nodePackages.prettier
       openssh_hpnWithKerberos
+      supercollider
     ] ++ userPackages;
 
   emacsLinuxDeps = with pkgs; [ sbcl ];
