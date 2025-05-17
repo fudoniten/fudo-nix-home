@@ -36,6 +36,7 @@ let
       nodePackages.prettier
       openssh_hpnWithKerberos
       supercollider
+      jack2
     ] ++ userPackages;
 
   emacsLinuxDeps = with pkgs; [ sbcl ];
