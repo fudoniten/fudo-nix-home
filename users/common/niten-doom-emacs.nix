@@ -14,28 +14,31 @@ let
 
   emacsDeps = with pkgs;
     [
+      (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
+      aider-chat-full
+      bashInteractive
+      clojure
+      clojure-lsp
+      coreutils
+      curl
+      diffutils
+      editorconfig-core-c
+      fd
       git
-      (ripgrep.override { withPCRE2 = true; })
+      gnugrep
+      gnutar
       gnutls
       gopls
-      fd
       imagemagick
-      zstd
-      (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
-      editorconfig-core-c
-      sqlite
-      xclip
-      diffutils
-      coreutils
-      gnutar
-      bashInteractive
-      clojure-lsp
-      clojure
-      curl
-      gnugrep
+      nix
       nodePackages.prettier
       openssh_hpnWithKerberos
+      python3Full
+      (ripgrep.override { withPCRE2 = true; })
+      sqlite
       supercollider
+      xclip
+      zstd
     ] ++ userPackages;
 
   emacsLinuxDeps = with pkgs; [ sbcl ];
