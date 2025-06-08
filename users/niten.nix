@@ -36,7 +36,7 @@ let
     enca # encoding detector
     file
     fluxcd
-    flux2
+    flux
     fortune
     fzf
     gcc
