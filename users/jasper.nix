@@ -16,7 +16,7 @@ else {
 
       packages = with pkgs; [
         anki # flashcards
-        gnome.gnome-tweaks
+        gnome-tweaks
         google-chrome
         mumble
         python3
