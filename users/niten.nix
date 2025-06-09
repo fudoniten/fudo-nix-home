@@ -100,8 +100,8 @@ let
     anki # flashcards
     cool-retro-term
     faudio # direct-x audio?
-    gnome.dconf-editor # for gnome dconf config
-    gnome.gnome-tweaks
+    dconf-editor # for gnome dconf config
+    gnome-tweaks
     google-chrome
     gparted
     helvum # pipeaudio switch panel
