@@ -16,7 +16,7 @@ else {
 
       packages = with pkgs; [
         abiword
-        gnome.gnome-tweaks
+        gnome-tweaks
         google-chrome
         imagemagick
         redshift
