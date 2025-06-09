@@ -1,4 +1,4 @@
-inputs:
+{ stylix }@inputs:
 
 { config, lib, pkgs, ... }:
 
@@ -31,8 +31,23 @@ let
   hmModulesModule = usernames:
     { ... }: {
       config = mkIf cfg.enable {
-        home-manager.users =
-          genAttrs usernames (username: { imports = [ ./modules ]; });
+        home-manager.users = listToAttrs (map ({ username, ... }@userOpts:
+          nameValuePair username {
+            imports = [
+              (import ./modules/modules.nix {
+                inherit inputs userOpts;
+                systemOpts = config.fudo.home-manager.system;
+              } config.fudo.home-manager.system)
+            ];
+          }) existingUsers);
+      };
+    };
+
+  commonModule = usernames:
+    { ... }: {
+      config = mkIf cfg.enable {
+        home-manager.users = genAttrs usernames
+          (username: { imports = [ stylix.homeModules.default ]; });
       };
     };
 
@@ -69,6 +84,7 @@ in {
   in [
     (versionSetModule usernames cfg.system.stateVersion)
     (hmModulesModule usernames)
+    (commonModule usernames)
   ];
 
   config = mkIf cfg.enable {

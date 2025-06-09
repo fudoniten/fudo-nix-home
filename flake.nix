@@ -19,6 +19,10 @@
       url = "github:fudoniten/fudo-nix-pkgs/25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    stylix = {
+      url = "github:danth/stylix/release-25.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { home-manager, ... }@inputs: {
