@@ -11,7 +11,7 @@ in mkIf isGui {
       imageScalingMode = "fit";
 
       cursor = mkDefault {
-        package = pkgs.graphiteCursors;
+        package = pkgs.graphite-cursors;
         name = "graphite-dark";
       };
 
