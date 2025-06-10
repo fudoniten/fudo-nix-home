@@ -15,7 +15,7 @@ let
   emacsDeps = with pkgs;
     [
       (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
-      aider-chat
+      pkgs.unstable.aider-chat
       bashInteractive
       clojure
       clojure-lsp
@@ -59,7 +59,7 @@ let
         restclient
         spotify
         thrift
-        transient
+        pkgs.unstable.transient
       ]);
 
 in {
