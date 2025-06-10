@@ -147,8 +147,7 @@ let
     ultimate-oldschool-pc-font-pack
     unifont
   ]) ++ (with pkgs.nerd-fonts; [
-    0
-    xproto
+    pkgs.nerd-fonts."0xproto"
     pkgs.nerd-fonts."3270"
     adwaita-mono
     agave
