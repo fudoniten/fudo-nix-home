@@ -46,6 +46,8 @@ let
   myEmacsPackagesFor = emacs:
     (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
       with epkgs; [
+        aider
+        aidermacs
         chatgpt-shell
         dirvish
         ellama
@@ -57,6 +59,7 @@ let
         restclient
         spotify
         thrift
+        transient
       ]);
 
 in {
