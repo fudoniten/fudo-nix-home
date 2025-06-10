@@ -6,8 +6,6 @@ with lib;
 let
   cfg = config.fudo.home-manager;
 
-  pkgsUnstable = nixpkgsUnstable.legacyPackages."${pkgs.system}";
-
   userOpts.options = with types; {
     username = mkOption { type = str; };
     email = mkOption { type = str; };
@@ -96,6 +94,10 @@ in {
         (import ./users/${getConfigUser opts}.nix inputs opts
           config.fudo.home-manager.system)) existingUsers);
     };
-    nixpkgs.overlays = [ (final: prev: { unstable = pkgsUnstable; }) ];
+    nixpkgs.overlays = [
+      (final: prev: {
+        unstable = pkgsUnstable.legacyPackages."${prev.system}";
+      })
+    ];
   };
 }
