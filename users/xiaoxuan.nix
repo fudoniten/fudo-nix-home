@@ -17,7 +17,7 @@ else {
       packages = with pkgs; [
         abiword
         anki # flashcards
-        gnome.gnome-tweaks
+        gnome-tweaks
         google-chrome
         mumble
         pv
