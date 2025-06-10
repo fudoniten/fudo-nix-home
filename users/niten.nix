@@ -1,4 +1,4 @@
-{ nixpkgsUnstable, ... }:
+{ nixpkgsUnstable, ... }@inputs:
 
 { username, email, home-directory, ... }:
 
