@@ -9,7 +9,7 @@ in mkIf isGui {
   stylix = {
     imageScalingMode = "fit";
 
-    cursor = mkDefault {
+    cursor = mkForce {
       package = pkgs.graphite-cursors;
       name = "graphite-dark";
       size = 48;
