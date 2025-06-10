@@ -1,4 +1,4 @@
-{ stylix }@inputs:
+{ stylix, ... }@inputs:
 
 { config, lib, pkgs, ... }:
 
