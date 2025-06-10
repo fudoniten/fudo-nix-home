@@ -1,6 +1,6 @@
 systemCfg:
 
-{ doom-emacs, niten-doom-config, ... }:
+{ doom-emacs, niten-doom-config, nixpkgsUnstable, ... }:
 
 userPackages:
 
@@ -8,6 +8,8 @@ userPackages:
 
 with lib;
 let
+  pkgsUnstable = nixpkgsUnstable.legacyPackages."${pkgs.system}";
+
   doomEmacsEnv = ''
     export PATH="${config.xdg.configHome}/emacs/bin:${config.xdg.configHome}/doom/bin:$PATH"
   '';
@@ -59,7 +61,7 @@ let
         restclient
         spotify
         thrift
-        pkgs.unstable.emacsPackages.transient
+        pkgsUnstable.emacsPackages.transient
       ]);
 
 in {

@@ -94,10 +94,5 @@ in {
         (import ./users/${getConfigUser opts}.nix inputs opts
           config.fudo.home-manager.system)) existingUsers);
     };
-    nixpkgs.overlays = [
-      (final: prev: {
-        unstable = pkgsUnstable.legacyPackages."${prev.system}";
-      })
-    ];
   };
 }

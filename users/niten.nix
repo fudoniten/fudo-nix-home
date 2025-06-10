@@ -1,4 +1,4 @@
-inputs:
+{ nixpkgsUnstable, ... }:
 
 { username, email, home-directory, ... }:
 
@@ -9,6 +9,8 @@ systemCfg:
 with lib;
 let
   inherit (pkgs.stdenv) isLinux isDarwin;
+
+  unstable = pkgsUnstable.legacyPackages."${pkgs.system}";
 
   envVariables = {
     ALTERNATE_EDITOR = "";
