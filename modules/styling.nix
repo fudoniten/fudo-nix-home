@@ -3,7 +3,7 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let isGui = systemCfg.desktop.type != "none";
+let isGui = systemOpts.desktop.type != "none";
 
 in mkIf isGui {
   config = {
