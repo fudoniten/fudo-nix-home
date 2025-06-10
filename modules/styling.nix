@@ -6,13 +6,13 @@ with lib;
 let isGui = systemOpts.desktop.type != "none";
 
 in mkIf isGui {
-
   stylix = {
     imageScalingMode = "fit";
 
     cursor = mkDefault {
       package = pkgs.graphite-cursors;
       name = "graphite-dark";
+      size = 48;
     };
 
     opacity = {
@@ -47,5 +47,4 @@ in mkIf isGui {
       };
     };
   };
-
 }
