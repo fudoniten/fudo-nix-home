@@ -47,7 +47,7 @@ let
     { ... }: {
       config = mkIf cfg.enable {
         home-manager.users = genAttrs usernames
-          (username: { imports = [ stylix.homeModules.default ]; });
+          (username: { imports = [ stylix.homeModules.stylix ]; });
       };
     };
 
