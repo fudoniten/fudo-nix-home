@@ -59,7 +59,7 @@ let
         restclient
         spotify
         thrift
-        pkgs.unstable.transient
+        pkgs.unstable.emacsPackages.transient
       ]);
 
 in {
