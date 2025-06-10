@@ -37,7 +37,7 @@ let
               (import ./modules/modules.nix {
                 inherit inputs userOpts;
                 systemOpts = config.fudo.home-manager.system;
-              } config.fudo.home-manager.system)
+              })
             ];
           }) existingUsers);
       };
