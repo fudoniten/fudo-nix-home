@@ -135,19 +135,90 @@ let
     shotcut
   ];
 
-  fontPackages = optionals isLinux (with pkgs; [
+  fontPackages = optionals isLinux ((with pkgs; [
     cantarell-fonts
     dejavu_fonts
     fira-code
     fira-code-symbols
     liberation_ttf
-    nerdfonts
     proggyfonts
     terminus_font
     ubuntu_font_family
     ultimate-oldschool-pc-font-pack
     unifont
-  ]);
+  ]) ++ (with pkgs.nerd-fonts; [
+    0
+    xproto
+    pkgs.nerd-fonts."3270"
+    adwaita-mono
+    agave
+    anonymice
+    arimo
+    atkynson-mono
+    aurulent-sans-mono
+    bigblue-terminal
+    bitstream-vera-sans-mono
+    blex-mono
+    caskaydia-cove
+    caskaydia-mono
+    code-new-roman
+    comic-shanns-mono
+    commit-mono
+    cousine
+    d2coding
+    daddy-time-mono
+    dejavu-sans-mono
+    departure-mono
+    droid-sans-mono
+    envy-code-r
+    fantasque-sans-mono
+    fira-code
+    fira-mono
+    geist-mono
+    go-mono
+    gohufont
+    hack
+    hasklug
+    heavy-data
+    hurmit
+    im-writing
+    inconsolata
+    inconsolata-go
+    inconsolata-lgc
+    intone-mono
+    iosevka
+    iosevka-term
+    iosevka-term-slab
+    jetbrains-mono
+    lekton
+    liberation
+    lilex
+    martian-mono
+    meslo-lg
+    monaspace
+    monofur
+    monoid
+    mononoki
+    pkgs.nerd-fonts."m+"
+    noto
+    open-dyslexic
+    overpass
+    profont
+    proggy-clean-tt
+    recursive-mono
+    roboto-mono
+    shure-tech-mono
+    sauce-code-pro
+    space-mono
+    symbols-only
+    terminess-ttf
+    tinos
+    ubuntu
+    ubuntu-mono
+    ubuntu-sans
+    victor-mono
+    zed-mono
+  ]));
 
   finalPackages = commonPackages ++ (optionals isGui commonGuiPackages)
     ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages))
