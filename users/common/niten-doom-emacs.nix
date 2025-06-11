@@ -17,7 +17,7 @@ let
   emacsDeps = with pkgs;
     [
       (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
-      pkgs.unstable.aider-chat
+      pkgsUnstable.aider-chat
       bashInteractive
       clojure
       clojure-lsp
