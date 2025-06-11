@@ -46,7 +46,7 @@ let
   emacsLinuxDeps = with pkgs; [ sbcl ];
 
   myEmacsPackagesFor = emacs:
-    (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs:
+    (pkgsUnstable.emacsPackagesFor emacs).emacsWithPackages (epkgs:
       with epkgs; [
         aider
         aidermacs
@@ -61,7 +61,7 @@ let
         restclient
         spotify
         thrift
-        pkgsUnstable.emacsPackages.transient
+        transient
       ]);
 
 in {
@@ -101,12 +101,12 @@ in {
     (mkIf pkgs.stdenv.isLinux (let
       emacsPackage = let
         pkg = if systemCfg.desktop.type == "none" then
-          pkgs.emacs-nox
+          unstablePkgs.emacs-nox
         else
           (if systemCfg.desktop.type == "wayland" then
-            pkgs.emacs30-pgtk
+            unstablePkgs.emacs30-pgtk
           else
-            pkgs.emacs-gtk);
+            unstablePkgs.emacs-gtk);
       in myEmacsPackagesFor pkg;
     in {
       home.packages = [ emacsPackage ] ++ emacsDeps ++ emacsLinuxDeps;
