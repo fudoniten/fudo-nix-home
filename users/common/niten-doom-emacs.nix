@@ -101,12 +101,12 @@ in {
     (mkIf pkgs.stdenv.isLinux (let
       emacsPackage = let
         pkg = if systemCfg.desktop.type == "none" then
-          unstablePkgs.emacs-nox
+          pkgsUnstable.emacs-nox
         else
           (if systemCfg.desktop.type == "wayland" then
-            unstablePkgs.emacs30-pgtk
+            pkgsUnstable.emacs30-pgtk
           else
-            unstablePkgs.emacs-gtk);
+            pkgsUnstable.emacs-gtk);
       in myEmacsPackagesFor pkg;
     in {
       home.packages = [ emacsPackage ] ++ emacsDeps ++ emacsLinuxDeps;
