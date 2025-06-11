@@ -89,6 +89,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager = {
+      useGlobalPkgs = true;
       users = listToAttrs (map ({ username, ... }@opts:
         nameValuePair username
         (import ./users/${getConfigUser opts}.nix inputs opts
