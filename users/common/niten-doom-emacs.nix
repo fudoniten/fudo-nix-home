@@ -45,8 +45,24 @@ let
 
   emacsLinuxDeps = with pkgs; [ sbcl ];
 
-  myEmacsPackagesFor = emacs:
-    (pkgsUnstable.emacsPackagesFor emacs).emacsWithPackages (epkgs:
+  myEmacsWithPackages = emacs:
+    let
+      transientVersion = "0.9.2";
+      transientSha256 = "f3f498aa155f88c7e2ab6d1d01d1361813059db8";
+
+      basePkgs = (pkgs.emacsPackagesFor emacs) // {
+        transient = prev.emacsPackages.trivialBuild {
+          pname = "transient";
+          inherit version;
+          src = prev.fetchFromGithub {
+            ower = "magit";
+            repo = "transient";
+            rev = "v${version}";
+            sha256 = transientSha256;
+          };
+        };
+      };
+    in pkgs.emacsWithPackages (epkgs:
       with epkgs; [
         aider
         aidermacs
@@ -107,7 +123,7 @@ in {
             pkgs.emacs-unstable-pgtk
           else
             pkgs.emacs-unstable-gtk);
-      in myEmacsPackagesFor pkg;
+      in myEmacsWithPackages pkg;
     in {
       home.packages = [ emacsPackage ] ++ emacsDeps ++ emacsLinuxDeps;
 
