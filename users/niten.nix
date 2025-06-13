@@ -361,7 +361,7 @@ in {
       homeDirectory = home-directory;
 
       packages = finalPackages
-        ++ (with pgks; [ graphite-gtk-theme papirus-icon-theme ]);
+        ++ (with pkgs; [ graphite-gtk-theme papirus-icon-theme ]);
 
       file = {
         ".xprofile" = mkIf isX {
