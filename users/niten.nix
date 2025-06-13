@@ -231,9 +231,18 @@ in {
 
   config = {
 
-    gtk.iconTheme = {
-      package = pkgs.numix-icon-theme;
-      name = "Numix";
+    gtk = {
+      iconTheme = {
+        # package = pkgs.numix-icon-theme;
+        # name = "Numix";
+        name = "Papirus-Dark";
+        package = pkgs.papirus-icon-theme;
+      };
+
+      theme = {
+        package = pkgs.graphite-gtk-theme;
+        name = "Graphite-Dark-Rimless";
+      };
     };
 
     programs = {
@@ -369,7 +378,9 @@ in {
         };
       };
 
-      sessionVariables = envVariables;
+      sessionVariables = envVariables // {
+        GTK_THEME = "Graphite-Dark-Rimless";
+      };
     };
 
     systemd.user = mkIf isLinux { sessionVariables = envVariables; };
