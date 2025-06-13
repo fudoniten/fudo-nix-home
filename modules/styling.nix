@@ -11,7 +11,7 @@ in mkIf isGui {
 
     cursor = mkForce {
       package = pkgs.graphite-cursors;
-      name = "dist-dark";
+      name = "Graphite dark Cursors";
       size = 48;
     };
 
