@@ -360,7 +360,8 @@ in {
       inherit username;
       homeDirectory = home-directory;
 
-      packages = finalPackages;
+      packages = finalPackages
+        ++ (with pgks; [ graphite-gtk-theme papirus-icon-theme ]);
 
       file = {
         ".xprofile" = mkIf isX {
