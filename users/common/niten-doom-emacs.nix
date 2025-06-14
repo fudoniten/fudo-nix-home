@@ -55,7 +55,7 @@ let
         transient = prev.trivialBuild {
           pname = "transient";
           inherit version;
-          src = prev.fetchFromGithub {
+          src = pkgs.fetchFromGithub {
             ower = "magit";
             repo = "transient";
             rev = "v${version}";
