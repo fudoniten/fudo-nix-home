@@ -49,25 +49,25 @@ let
     let
       transientVersion = "0.9.2";
       transientSha256 = "f3f498aa155f88c7e2ab6d1d01d1361813059db8";
-      transient = prev.emacsPackages.trivialBuild {
-        pname = "transient";
-        inherit version;
-        src = prev.fetchFromGithub {
-          ower = "magit";
-          repo = "transient";
-          rev = "v${version}";
-          sha256 = transientSha256;
-        };
-        meta = {
-          homepage = "https://github.com/magit/transient";
-          description = "A transient command interface for Emacs";
-          license = pkgs.lib.licenses.gpl3Plus;
-        };
-      };
 
       baseEmacsPkgs = (pkgs.emacsPackagesFor emacs);
-      updatedEmacsPkgs =
-        baseEmacsPkgs.overrideScope (self: super: { inherit transient; });
+      updatedEmacsPkgs = baseEmacsPkgs.overrideScope (prev: final: {
+        transient = prev.emacsPackages.trivialBuild {
+          pname = "transient";
+          inherit version;
+          src = prev.fetchFromGithub {
+            ower = "magit";
+            repo = "transient";
+            rev = "v${version}";
+            sha256 = transientSha256;
+          };
+          meta = {
+            homepage = "https://github.com/magit/transient";
+            description = "A transient command interface for Emacs";
+            license = pkgs.lib.licenses.gpl3Plus;
+          };
+        };
+      });
 
     in updatedEmacsPkgs.withPackages (epkgs:
       with epkgs; [
