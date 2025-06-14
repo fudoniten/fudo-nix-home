@@ -52,7 +52,7 @@ let
 
       baseEmacsPkgs = (pkgs.emacsPackagesFor emacs);
       updatedEmacsPkgs = baseEmacsPkgs.overrideScope (prev: final: {
-        transient = prev.emacsPackages.trivialBuild {
+        transient = prev.trivialBuild {
           pname = "transient";
           inherit version;
           src = prev.fetchFromGithub {
