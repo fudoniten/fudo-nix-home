@@ -61,6 +61,12 @@ let
             rev = "v${version}";
             sha256 = transientSha256;
           };
+
+          installPhase = ''
+            mkdir -p $out/share/emacs/site-lisp
+            cp *.el *.elc -t $out/share/emacs/site-lisp/
+          '';
+
           meta = {
             homepage = "https://github.com/magit/transient";
             description = "A transient command interface for Emacs";
