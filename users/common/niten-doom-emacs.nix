@@ -61,11 +61,6 @@ let
             rev = "v${version}";
             sha256 = transientSha256;
           };
-          meta = {
-            homepage = "https://github.com/magit/transient";
-            description = "A transient command interface for Emacs";
-            license = pkgs.lib.licenses.gpl3Plus;
-          };
         };
       });
 
