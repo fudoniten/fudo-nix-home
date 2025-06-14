@@ -62,7 +62,7 @@ let
           };
         };
       };
-    in emacs.pkgs.withPackages (epkgs:
+    in basePkgs.withPackages (epkgs:
       with epkgs; [
         aider
         aidermacs
