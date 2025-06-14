@@ -64,7 +64,8 @@ let
 
           installPhase = ''
             mkdir -p $out/share/emacs/site-lisp
-            cp *.el *.elc -t $out/share/emacs/site-lisp/
+            cp *.el $out/share/emacs/site-lisp/
+            cp *.elc $out/share/emacs/site-lisp/
           '';
 
           meta = {
