@@ -12,6 +12,7 @@ in mkIf isGui {
     cursor = mkForce {
       package = pkgs.graphite-cursors;
       name = "graphite-dark";
+      size = 16;
     };
 
     opacity = {
@@ -32,12 +33,14 @@ in mkIf isGui {
         name = "Liberation Serif";
       };
       sansSerif = mkDefault {
-        package = nerdfonts;
-        name = "SourceSans3VF";
+        # package = nerdfonts;
+        # name = "SourceSans3VF";
+        package = oxanium;
+        name = "Oxanium";
       };
       monospace = mkDefault {
         package = nerdfonts;
-        name = "M+1Code Nerd Font";
+        name = "Iosevka Nerd Font";
         # name = "Hurmit Nerd Font Mono";
       };
       emoji = mkDefault {
