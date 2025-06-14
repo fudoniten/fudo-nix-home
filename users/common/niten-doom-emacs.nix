@@ -48,7 +48,7 @@ let
   myEmacsWithPackages = emacs:
     let
       transientVersion = "0.9.2";
-      transientSha256 = "f3f498aa155f88c7e2ab6d1d01d1361813059db8";
+      transientSha256 = "sha256-TEryawJiPZU6bWnrO+/TDwJtjE6VP5MwWYUdCluTZAM=";
 
       baseEmacsPkgs = (pkgs.emacsPackagesFor emacs);
       updatedEmacsPkgs = baseEmacsPkgs.overrideScope (prev: final: {
