@@ -67,7 +67,7 @@ let
 
       baseEmacsPkgs = (pkgs.emacsPackagesFor emacs);
       updatedEmacsPkgs =
-        baseEmacsPkgs.overrideScope' (self: super: { inherit transient; });
+        baseEmacsPkgs.overrideScope (self: super: { inherit transient; });
 
     in updatedEmacsPkgs.withPackages (epkgs:
       with epkgs; [
