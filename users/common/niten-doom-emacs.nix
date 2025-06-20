@@ -51,29 +51,32 @@ let
       transientSha256 = "sha256-TEryawJiPZU6bWnrO+/TDwJtjE6VP5MwWYUdCluTZAM=";
 
       baseEmacsPkgs = (pkgs.emacsPackagesFor emacs);
-      updatedEmacsPkgs = baseEmacsPkgs.overrideScope (prev: final: {
-        transient = prev.trivialBuild {
-          pname = "transient";
-          inherit version;
-          src = pkgs.fetchFromGitHub {
-            owner = "magit";
-            repo = "transient";
-            rev = "v${version}";
-            sha256 = transientSha256;
-          };
+      updatedEmacsPkgs = baseEmacsPkgs.overrideScope (prev: final:
+        {
+          ## Can't be found for some fucking reason
+          #
+          # transient = prev.trivialBuild {
+          #   pname = "transient";
+          #   inherit version;
+          #   src = pkgs.fetchFromGitHub {
+          #     owner = "magit";
+          #     repo = "transient";
+          #     rev = "v${version}";
+          #     sha256 = transientSha256;
+          #   };
 
-          installPhase = ''
-            mkdir -p $out/share/emacs/site-lisp
-            cp ./lisp/*.el $out/share/emacs/site-lisp/
-          '';
+          #   installPhase = ''
+          #     mkdir -p $out/share/emacs/site-lisp
+          #     cp ./lisp/*.el $out/share/emacs/site-lisp/
+          #   '';
 
-          meta = {
-            homepage = "https://github.com/magit/transient";
-            description = "A transient command interface for Emacs";
-            license = pkgs.lib.licenses.gpl3Plus;
-          };
-        };
-      });
+          #   meta = {
+          #     homepage = "https://github.com/magit/transient";
+          #     description = "A transient command interface for Emacs";
+          #     license = pkgs.lib.licenses.gpl3Plus;
+          #   };
+          # };
+        });
 
     in updatedEmacsPkgs.withPackages (epkgs:
       with epkgs; [
