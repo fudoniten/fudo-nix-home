@@ -47,7 +47,7 @@ let
 
   myEmacsWithPackages = emacs:
     let
-      transientVersion = "v0.9.2";
+      transientVersion = "0.9.1";
       transientSha256 = "sha256-TEryawJiPZU6bWnrO+/TDwJtjE6VP5MwWYUdCluTZAM=";
 
       baseEmacsPkgs = (pkgs.emacsPackagesFor emacs);
