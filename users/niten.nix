@@ -10,7 +10,7 @@ with lib;
 let
   inherit (pkgs.stdenv) isLinux isDarwin;
 
-  unstable = pkgsUnstable.legacyPackages."${pkgs.system}";
+  unstable = nixpkgsUnstable.legacyPackages."${pkgs.system}";
 
   envVariables = {
     ALTERNATE_EDITOR = "";
