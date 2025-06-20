@@ -64,7 +64,6 @@ let
     nix-index # search by executable
     nix-prefetch-git
     nix-prefetch-github
-    unstable.nyxt
     openssl # Not sure which I need?
     openssl.out
     pciutils
@@ -89,7 +88,7 @@ let
     yq # yaml processor
   ];
 
-  commonGuiPackages = with pkgs; [ spotify ];
+  commonGuiPackages = with pkgs; [ spotify unstable.nyxt ];
 
   linuxPackages = with pkgs; [ ];
 
