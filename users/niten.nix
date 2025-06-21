@@ -88,7 +88,7 @@ let
     yq # yaml processor
   ];
 
-  commonGuiPackages = with pkgs; [ spotify unstable.nyxt ];
+  commonGuiPackages = with pkgs; [ spotify ];
 
   linuxPackages = with pkgs; [ ];
 
