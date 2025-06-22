@@ -58,7 +58,7 @@ let
           src = pkgs.fetchFromGitHub {
             owner = "eliraz-refael";
             repo = "doom-two-tone-themes";
-            nev = "cbc3d52fb6db72a82734445076980d8e74c20293";
+            rev = "cbc3d52fb6db72a82734445076980d8e74c20293";
             sha256 = "sha256-Cgt2v6uQMl2Ub1uUWucOrRfHw9cY7GkW5u5Ua+Prnz8=";
           };
 
