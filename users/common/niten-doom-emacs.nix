@@ -47,8 +47,8 @@ let
 
   myEmacsWithPackages = emacs:
     let
-      transientVersion = "0.9.1";
-      transientSha256 = "sha256-TEryawJiPZU6bWnrO+/TDwJtjE6VP5MwWYUdCluTZAM=";
+      # transientVersion = "0.9.1";
+      # transientSha256 = "sha256-TEryawJiPZU6bWnrO+/TDwJtjE6VP5MwWYUdCluTZAM=";
 
       baseEmacsPkgs = (pkgs.emacsPackagesFor emacs);
       updatedEmacsPkgs = baseEmacsPkgs.overrideScope (prev: final: {
@@ -63,8 +63,9 @@ let
           };
 
           installPhase = ''
-            mkdir -p $out/share/emacs/site-lisp
-            cp ./lisp/*.el $out/share/emacs/site-lisp/
+            mkdir -p $out/share/emacs/site-lisp/themes
+            cp ./doom-two-tone-themes.el $out/share/emacs/site-lisp/doom-two-tone-themes.el
+            cp ./themes/*.el $out/share/emacs/site-lisp/themes/
           '';
 
           meta = {
