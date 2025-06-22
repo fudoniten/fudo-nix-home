@@ -105,6 +105,7 @@ let
         aidermacs
         chatgpt-shell
         dirvish
+        doom-two-tone-themes
         ellama
         elpher
         flycheck-clj-kondo
