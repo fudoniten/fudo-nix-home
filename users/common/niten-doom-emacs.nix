@@ -65,12 +65,14 @@ let
           installPhase = ''
             mkdir -p $out/share/emacs/site-lisp/themes
             cp ./doom-two-tone-themes.el $out/share/emacs/site-lisp/doom-two-tone-themes.el
+            ls -l .
+            ls -l ./themes/
             cp ./themes/*.el $out/share/emacs/site-lisp/themes/
           '';
 
           meta = {
             homepage = "https://github.com/eliraz-refael/doom-two-tone-themes";
-            description = "Two-toned themes for Doom Emacs..";
+            description = "Two-toned themes for Doom Emacs.";
             license = pkgs.lib.licenses.gpl3Plus;
           };
         };
