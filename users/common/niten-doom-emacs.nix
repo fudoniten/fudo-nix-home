@@ -65,9 +65,7 @@ let
           installPhase = ''
             mkdir -p $out/share/emacs/site-lisp/themes
             cp ./doom-two-tone-themes.el $out/share/emacs/site-lisp/doom-two-tone-themes.el
-            ls -l .
-            ls -l ./themes/
-            cp ./themes/*.el $out/share/emacs/site-lisp/themes/
+            cp -R ./themes $out/share/emacs/site-lisp/
           '';
 
           meta = {
