@@ -104,14 +104,23 @@ let
       with epkgs; [
         aider
         aidermacs
+        bash-completion
         chatgpt-shell
         dirvish
         doom-two-tone-themes
+        edit-server
         ellama
         elpher
+        embark
         flycheck-clj-kondo
+        gptel
+        graphviz-dot-mode
         hass
         kubernetes
+        ivy-prescient
+        nix-mode
+        noflet
+        org-roam
         pylint
         restclient
         spotify
