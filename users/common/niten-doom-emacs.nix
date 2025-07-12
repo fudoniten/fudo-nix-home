@@ -114,7 +114,7 @@ let
         embark
         flycheck-clj-kondo
         gptel
-        graphviz-dot-mode
+        # graphviz-dot-mode
         hass
         kubernetes
         ivy-prescient
