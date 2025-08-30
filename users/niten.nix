@@ -103,6 +103,7 @@ let
     cool-retro-term
     faudio # direct-x audio?
     dconf-editor # for gnome dconf config
+    gogdl
     gnome-tweaks
     google-chrome
     gparted
@@ -111,6 +112,7 @@ let
     imagemagick
     kitty # terminal
     libreoffice
+    lutris # game launcher
     # xorg.libXxf86vm # ???
     # xorg.libXxf86vm.dev
     # mattermost-desktop # Element failing to build
