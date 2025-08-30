@@ -107,6 +107,7 @@ let
     google-chrome
     gparted
     helvum # pipeaudio switch panel
+    heroic # game launcher
     imagemagick
     kitty # terminal
     libreoffice
