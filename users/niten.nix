@@ -74,6 +74,7 @@ let
     texlive.combined.scheme-full
     tio # Serial IO
     tmux
+    tor-browser
     unzip
     wget
     # yubikey-manager
