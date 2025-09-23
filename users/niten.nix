@@ -78,6 +78,7 @@ let
     texlive.combined.scheme-full
     tio # Serial IO
     tmux
+    tor-browser
     trezor-agent
     trezor-suite
     unzip
