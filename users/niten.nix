@@ -260,6 +260,12 @@ in {
         '';
       };
 
+      direnv = {
+        enable = true;
+        enableBashMigration = true;
+        nix-direnv.enable = true;
+      };
+
       git = {
         enable = true;
         userName = username;
