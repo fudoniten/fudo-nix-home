@@ -262,7 +262,7 @@ in {
 
       direnv = {
         enable = true;
-        enableBashMigration = true;
+        enableBashIntegration = true;
         nix-direnv.enable = true;
       };
 
