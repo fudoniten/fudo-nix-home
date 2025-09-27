@@ -34,6 +34,7 @@ let
     clojure
     cmake
     curl
+    direnv
     duf # fancy df
     enca # encoding detector
     file
