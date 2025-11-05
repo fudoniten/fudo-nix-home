@@ -18,6 +18,7 @@ let
     [
       (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
       pkgsUnstable.aider-chat
+      babashka
       bashInteractive
       clojure
       clojure-lsp
@@ -32,7 +33,6 @@ let
       gnutls
       gopls
       imagemagick
-      inf-clojure
       nix
       nodePackages.prettier
       openssh_hpnWithKerberos
@@ -118,6 +118,7 @@ let
         # graphviz-dot-mode
         hass
         kubernetes
+        inf-clojure
         ivy-prescient
         nix-mode
         noflet
