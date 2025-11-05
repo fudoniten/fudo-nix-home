@@ -32,6 +32,7 @@ let
       gnutls
       gopls
       imagemagick
+      inf-clojure
       nix
       nodePackages.prettier
       openssh_hpnWithKerberos
