@@ -25,6 +25,7 @@ let
       coreutils
       curl
       diffutils
+      doas
       editorconfig-core-c
       fd
       git
