@@ -57,7 +57,7 @@ let
     lsof
     kubectl
     manix # nixos doc searcher
-    mosh
+    (mosh.override { openssh = openssh_gssapi; })
     mtr # network diagnosis tool
     mqttui # CLI MQTT client
     nil # nix lsp server
