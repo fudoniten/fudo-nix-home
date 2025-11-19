@@ -75,6 +75,8 @@ let
             description = "Two-toned themes for Doom Emacs.";
             license = pkgs.lib.licenses.gpl3Plus;
           };
+
+          gptel = pkgsUnstable.emacsPackages.gptel;
         };
 
         ## Can't be found for some fucking reason
