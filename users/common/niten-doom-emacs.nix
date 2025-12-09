@@ -110,6 +110,7 @@ let
       with epkgs; [
         aider
         aidermacs
+        babashka
         bash-completion
         chatgpt-shell
         dirvish
