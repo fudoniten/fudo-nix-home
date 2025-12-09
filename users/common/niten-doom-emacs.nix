@@ -20,6 +20,7 @@ let
       pkgsUnstable.aider-chat
       babashka
       bashInteractive
+      basedpyright # python lsp
       clojure
       clojure-lsp
       coreutils
@@ -39,6 +40,7 @@ let
       openssh_hpnWithKerberos
       python3Full
       (ripgrep.override { withPCRE2 = true; })
+      ruff # Python linting LSP
       sqlite
       supercollider
       xclip
