@@ -129,6 +129,7 @@ let
         nix-mode
         noflet
         org-roam
+        paredit
         pylint
         restclient
         spotify
