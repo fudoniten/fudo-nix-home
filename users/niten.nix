@@ -134,7 +134,7 @@ let
     vial # another keyboard firmware tool
     xclip
     # Matrix clients
-    element-desktop # matrix client
+    # element-desktop # matrix client # using EOL deps
 
     # Video editors
     libsForQt5.kdenlive
