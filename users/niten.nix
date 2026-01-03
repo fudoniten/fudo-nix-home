@@ -391,6 +391,7 @@ in {
 
       gnome-keyring.enable = isGui;
 
+      ## Depends on an insecure version of qtwebengine
       # supercollider = {
       #   enable = isGui;
       #   port = 30300;
