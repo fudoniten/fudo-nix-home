@@ -38,7 +38,7 @@ let
       nix
       nodePackages.prettier
       openssh_hpnWithKerberos
-      python3Full
+      python3
       (ripgrep.override { withPCRE2 = true; })
       ruff # Python linting LSP
       sqlite
