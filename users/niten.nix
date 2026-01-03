@@ -136,7 +136,7 @@ let
     # element-desktop # matrix client # using EOL deps
 
     # Video editors
-    libsForQt5.kdenlive
+    kdePackages.kdenlive
     openshot-qt
     shotcut
   ];
