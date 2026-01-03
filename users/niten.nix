@@ -95,7 +95,6 @@ let
   linuxPackages = with pkgs; [ ];
 
   linuxGuiPackages = with pkgs; [
-    gnomeExtensions.espresso
     gnomeExtensions.forge
     gnomeExtensions.vitals
 
