@@ -32,7 +32,7 @@ else
           xclip
 
           # Video editors
-          libsForQt5.kdenlive
+          kdePackages.kdenlive
           openshot-qt
           shotcut
         ];
