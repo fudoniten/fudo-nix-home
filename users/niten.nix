@@ -149,7 +149,7 @@ let
     liberation_ttf
     proggyfonts
     terminus_font
-    ubuntu_font_family
+    ubuntu-classic
     ultimate-oldschool-pc-font-pack
     unifont
   ]) ++ (with pkgs.nerd-fonts; [
