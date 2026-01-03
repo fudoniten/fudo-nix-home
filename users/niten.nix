@@ -51,11 +51,11 @@ let
     guile
     home-assistant-cli
     inetutils
-    ipfs
     jdk
     jq # command-line JSON parser
-    lsof
+    kubo
     kubectl
+    lsof
     manix # nixos doc searcher
     (mosh.override { openssh = openssh_gssapi; })
     mtr # network diagnosis tool
