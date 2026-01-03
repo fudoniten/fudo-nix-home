@@ -391,11 +391,11 @@ in {
 
       gnome-keyring.enable = isGui;
 
-      supercollider = {
-        enable = isGui;
-        port = 30300;
-        memory = 4096;
-      };
+      # supercollider = {
+      #   enable = isGui;
+      #   port = 30300;
+      #   memory = 4096;
+      # };
 
       syncthing = {
         enable = true;
