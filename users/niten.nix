@@ -80,8 +80,8 @@ let
     tio # Serial IO
     tmux
     tor-browser
-    trezor-agent
-    trezor-suite
+    # trezor-agent
+    # trezor-suite
     unzip
     wget
     # yubikey-manager
