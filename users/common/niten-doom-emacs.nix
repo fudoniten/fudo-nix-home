@@ -123,9 +123,9 @@ let
         gptel
         # graphviz-dot-mode
         hass
-        kubernetes
         inf-clojure
         ivy-prescient
+        kubernetes
         nix-mode
         noflet
         org-roam
@@ -133,6 +133,7 @@ let
         pylint
         restclient
         spotify
+        stimmung-themes
         thrift
         transient
       ]);
