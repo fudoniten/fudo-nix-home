@@ -32,6 +32,7 @@ let
     cargo # rust
     # clj-kondo # Clojure linter
     clojure
+    claude-code
     cmake
     curl
     direnv
