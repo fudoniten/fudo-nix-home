@@ -66,6 +66,7 @@ let
     nix-index # search by executable
     nix-prefetch-git
     nix-prefetch-github
+    opencode
     openssl # Not sure which I need?
     openssl.out
     pciutils
