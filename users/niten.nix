@@ -261,6 +261,13 @@ in {
         '';
       };
 
+      starship = {
+        enable = true;
+        enableBashIntegration = true;
+        enableFishIntegration = true;
+        enableInteractive = true;
+      };
+
       direnv = {
         enable = true;
         enableBashIntegration = true;
