@@ -50,6 +50,13 @@ in {
         ignores = [ "*~" ];
         extraConfig.pull.rebase = false;
       };
+
+      starship = {
+        enable = true;
+        enableBashIntegration = true;
+        enableFishIntegration = true;
+        enableInteractive = true;
+      };
     };
 
     home = {
