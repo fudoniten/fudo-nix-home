@@ -121,6 +121,7 @@ let
         aidermacs
         babashka
         bash-completion
+        canon
         chatgpt-shell
         dirvish
         doom-two-tone-themes
@@ -139,12 +140,14 @@ let
         noflet
         org-roam
         paredit
+        polymuse
         pylint
         restclient
         spotify
         stimmung-themes
         thrift
         transient
+        typewrite
       ]);
 
 in {
