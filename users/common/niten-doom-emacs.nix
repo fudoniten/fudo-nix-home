@@ -1,6 +1,6 @@
 systemCfg:
 
-{ doom-emacs, niten-doom-config, nixpkgsUnstable, ... }:
+{ doom-emacs, niten-doom-config, polymuse, nixpkgsUnstable, ... }:
 
 userPackages:
 
@@ -55,56 +55,65 @@ let
       # transientSha256 = "sha256-TEryawJiPZU6bWnrO+/TDwJtjE6VP5MwWYUdCluTZAM=";
 
       baseEmacsPkgs = (pkgs.emacsPackagesFor emacs);
-      updatedEmacsPkgs = baseEmacsPkgs.overrideScope (prev: final: {
-        doom-two-tone-themes = prev.trivialBuild {
-          pname = "doom-two-tone-themes";
-          version = "0.1";
-          src = pkgs.fetchFromGitHub {
-            owner = "eliraz-refael";
-            repo = "doom-two-tone-themes";
-            rev = "cbc3d52fb6db72a82734445076980d8e74c20293";
-            sha256 = "sha256-Cgt2v6uQMl2Ub1uUWucOrRfHw9cY7GkW5u5Ua+Prnz8=";
+      updatedEmacsPkgs = baseEmacsPkgs.overrideScope (prev: final:
+        let
+          doom-two-tone-themes = prev.trivialBuild {
+            pname = "doom-two-tone-themes";
+            version = "0.1";
+            src = pkgs.fetchFromGitHub {
+              owner = "eliraz-refael";
+              repo = "doom-two-tone-themes";
+              rev = "cbc3d52fb6db72a82734445076980d8e74c20293";
+              sha256 = "sha256-Cgt2v6uQMl2Ub1uUWucOrRfHw9cY7GkW5u5Ua+Prnz8=";
+            };
+
+            installPhase = ''
+              mkdir -p $out/share/emacs/site-lisp/themes
+              cp ./doom-two-tone-themes.el $out/share/emacs/site-lisp/doom-two-tone-themes.el
+              cp -R ./themes $out/share/emacs/site-lisp/
+            '';
+
+            meta = {
+              homepage =
+                "https://github.com/eliraz-refael/doom-two-tone-themes";
+              description = "Two-toned themes for Doom Emacs.";
+              license = pkgs.lib.licenses.gpl3Plus;
+            };
           };
 
-          installPhase = ''
-            mkdir -p $out/share/emacs/site-lisp/themes
-            cp ./doom-two-tone-themes.el $out/share/emacs/site-lisp/doom-two-tone-themes.el
-            cp -R ./themes $out/share/emacs/site-lisp/
-          '';
+          polymusePkgs = polymuse.packages."${pkgs.system}";
 
-          meta = {
-            homepage = "https://github.com/eliraz-refael/doom-two-tone-themes";
-            description = "Two-toned themes for Doom Emacs.";
-            license = pkgs.lib.licenses.gpl3Plus;
-          };
+        in {
+          inherit doom-two-tone-themes;
 
           gptel = pkgsUnstable.emacsPackages.gptel;
-        };
 
-        ## Can't be found for some fucking reason
-        #
-        # transient = prev.trivialBuild {
-        #   pname = "transient";
-        #   inherit version;
-        #   src = pkgs.fetchFromGitHub {
-        #     owner = "magit";
-        #     repo = "transient";
-        #     rev = "v${version}";
-        #     sha256 = transientSha256;
-        #   };
+          inherit (polymusePkgs) polymuse canon typewrite;
 
-        #   installPhase = ''
-        #     mkdir -p $out/share/emacs/site-lisp
-        #     cp ./lisp/*.el $out/share/emacs/site-lisp/
-        #   '';
+          ## Can't be found for some fucking reason
+          #
+          # transient = prev.trivialBuild {
+          #   pname = "transient";
+          #   inherit version;
+          #   src = pkgs.fetchFromGitHub {
+          #     owner = "magit";
+          #     repo = "transient";
+          #     rev = "v${version}";
+          #     sha256 = transientSha256;
+          #   };
 
-        #   meta = {
-        #     homepage = "https://github.com/magit/transient";
-        #     description = "A transient command interface for Emacs";
-        #     license = pkgs.lib.licenses.gpl3Plus;
-        #   };
-        # };
-      });
+          #   installPhase = ''
+          #     mkdir -p $out/share/emacs/site-lisp
+          #     cp ./lisp/*.el $out/share/emacs/site-lisp/
+          #   '';
+
+          #   meta = {
+          #     homepage = "https://github.com/magit/transient";
+          #     description = "A transient command interface for Emacs";
+          #     license = pkgs.lib.licenses.gpl3Plus;
+          #   };
+          # };
+        });
 
     in updatedEmacsPkgs.withPackages (epkgs:
       with epkgs; [

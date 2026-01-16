@@ -24,6 +24,10 @@
       url = "github:danth/stylix/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    polymuse = {
+      url = "github:fudoniten/polymuse/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { home-manager, ... }@inputs: {
