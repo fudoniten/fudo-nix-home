@@ -241,6 +241,24 @@
         "type": "github"
       }
     },
+    "flake-utils_2": {
+      "inputs": {
+        "systems": "systems_5"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "fromYaml": {
       "flake": false,
       "locked": {
@@ -572,6 +590,28 @@
         "type": "github"
       }
     },
+    "polymuse": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1768572662,
+        "narHash": "sha256-jYL/wc5/fwXMzFRHnKRGKaTEfUm+sPq53cnmFn+/EsU=",
+        "owner": "fudoniten",
+        "repo": "polymuse",
+        "rev": "77f70b3ec93da8056a0e4f955d2fc53a373c4953",
+        "type": "github"
+      },
+      "original": {
+        "owner": "fudoniten",
+        "ref": "master",
+        "repo": "polymuse",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "doom-emacs": "doom-emacs",
@@ -580,6 +620,7 @@
         "niten-doom-config": "niten-doom-config",
         "nixpkgs": "nixpkgs_5",
         "nixpkgsUnstable": "nixpkgsUnstable",
+        "polymuse": "polymuse",
         "stylix": "stylix"
       }
     },
@@ -596,7 +637,7 @@
           "nixpkgs"
         ],
         "nur": "nur",
-        "systems": "systems_5",
+        "systems": "systems_6",
         "tinted-foot": "tinted-foot",
         "tinted-kitty": "tinted-kitty",
         "tinted-schemes": "tinted-schemes",
@@ -679,6 +720,21 @@
       }
     },
     "systems_5": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_6": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
