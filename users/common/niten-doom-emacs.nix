@@ -57,7 +57,7 @@ let
       baseEmacsPkgs = (pkgs.emacsPackagesFor emacs);
       updatedEmacsPkgs = baseEmacsPkgs.overrideScope (eself: esuper:
         let
-          doom-two-tone-themes = prev.trivialBuild {
+          doom-two-tone-themes = eself.trivialBuild {
             pname = "doom-two-tone-themes";
             version = "0.1";
             src = pkgs.fetchFromGitHub {
@@ -91,30 +91,6 @@ let
           polymuse = polymuseLibs.mkPolymuse eself;
           canon = polymuseLibs.mkCanon eself;
           typewrite = polymuseLibs.mkTypewrite eself;
-
-          ## Can't be found for some fucking reason
-          #
-          # transient = prev.trivialBuild {
-          #   pname = "transient";
-          #   inherit version;
-          #   src = pkgs.fetchFromGitHub {
-          #     owner = "magit";
-          #     repo = "transient";
-          #     rev = "v${version}";
-          #     sha256 = transientSha256;
-          #   };
-
-          #   installPhase = ''
-          #     mkdir -p $out/share/emacs/site-lisp
-          #     cp ./lisp/*.el $out/share/emacs/site-lisp/
-          #   '';
-
-          #   meta = {
-          #     homepage = "https://github.com/magit/transient";
-          #     description = "A transient command interface for Emacs";
-          #     license = pkgs.lib.licenses.gpl3Plus;
-          #   };
-          # };
         });
 
     in updatedEmacsPkgs.withPackages (epkgs:
