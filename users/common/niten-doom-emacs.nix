@@ -81,7 +81,7 @@ let
             };
           };
 
-          polymusePkgs = polymuse.packages."${pkgs.system}";
+          polymusePkgs = polymuse.lib."${pkgs.system}";
 
         in {
           inherit doom-two-tone-themes;
