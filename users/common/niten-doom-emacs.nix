@@ -81,16 +81,16 @@ let
             };
           };
 
-          polymusePkgs = polymuse.lib."${pkgs.system}";
+          polymuseLibs = polymuse.lib."${pkgs.system}";
 
         in {
           inherit doom-two-tone-themes;
 
           gptel = pkgsUnstable.emacsPackages.gptel;
 
-          polymuse = polymusePkgs.polymuse eself;
-          canon = polymusePkgs.canon eself;
-          typewrite = polymusePkgs.typewrite.eself;
+          polymuse = polymuseLibs.mkPolymuse eself;
+          canon = polymuseLibs.mkCanon eself;
+          typewrite = polymuseLibs.mkTypewrite eself;
 
           ## Can't be found for some fucking reason
           #
