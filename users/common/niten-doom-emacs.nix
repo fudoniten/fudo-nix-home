@@ -55,7 +55,7 @@ let
       # transientSha256 = "sha256-TEryawJiPZU6bWnrO+/TDwJtjE6VP5MwWYUdCluTZAM=";
 
       baseEmacsPkgs = (pkgs.emacsPackagesFor emacs);
-      updatedEmacsPkgs = baseEmacsPkgs.overrideScope (prev: final:
+      updatedEmacsPkgs = baseEmacsPkgs.overrideScope (eself: esuper:
         let
           doom-two-tone-themes = prev.trivialBuild {
             pname = "doom-two-tone-themes";
@@ -88,7 +88,9 @@ let
 
           gptel = pkgsUnstable.emacsPackages.gptel;
 
-          inherit (polymusePkgs) polymuse canon typewrite;
+          polymuse = polymusePkgs.polymuse eself;
+          canon = polymusePkgs.canon eself;
+          typewrite = polymusePkgs.typewrite.eself;
 
           ## Can't be found for some fucking reason
           #
