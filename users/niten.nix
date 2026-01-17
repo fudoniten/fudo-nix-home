@@ -259,6 +259,22 @@ in {
         profileExtra = ''
           [[ -f $HOME/.profile_local ]] && . $HOME/.profile_local
         '';
+        initExtra = ''
+          __set_xterm_title() {
+            local dir="''${PWD/#$HOME/~}"
+            printf '\033]0;%s:%s\007' "$HOSTNAME" "$dir"
+          }
+
+          case "$TERM" in
+            xterm*|rxvt*|screen*|tmux*)
+              if [[ -n "''${PROMPT_COMMAND-}" ]]; then
+                PROMPT_COMMAND="__set_xterm_title; $PROMPT_COMMAND"
+              else
+                PROMPT_COMMAND="__set_xterm_title"
+              fi
+              ;;
+          esac
+        '';
       };
 
       starship = {
@@ -266,6 +282,13 @@ in {
         enableBashIntegration = true;
         enableFishIntegration = true;
         enableInteractive = true;
+        settings = {
+          directory = {
+            truncation_length = 0;
+            truncate_to_repo = true;
+            fish_style_pwd_dir_length = 3;
+          };
+        };
       };
 
       direnv = {
