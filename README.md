@@ -1,12 +1,12 @@
 # Fudo Nix Home Manager Configuration
 
-Internal repository for managing our team's [Home Manager](https://github.com/nix-community/home-manager) configurations across various systems.
+Internal repository for managing [Home Manager](https://github.com/nix-community/home-manager) configurations across various systems for the Fudo Project.
 
 **Current users:** jasper, ken, niten, reaper, root, xiaoxuan
 
 ## What This Repo Does
 
-- Manages user-specific NixOS/Home Manager configurations for our team members
+- Manages user-specific NixOS/Home Manager configurations for Fudo Project users
 - Provides custom modules (Doom Emacs, SuperCollider) that we commonly use
 - Supports multiple desktop environments (X11, Wayland, macOS, headless)
 - Can be deployed as a NixOS module or standalone Home Manager configuration
@@ -22,7 +22,7 @@ Internal repository for managing our team's [Home Manager](https://github.com/ni
 │   │   └── doom-emacs.nix # Doom Emacs configuration module
 │   └── services/
 │       └── supercollider.nix # SuperCollider audio server
-└── users/                 # Team member configurations
+└── users/                 # User configurations
     ├── jasper.nix
     ├── ken.nix
     ├── niten.nix
@@ -31,7 +31,7 @@ Internal repository for managing our team's [Home Manager](https://github.com/ni
     └── xiaoxuan.nix
 ```
 
-## Quick Start for Team Members
+## Quick Start
 
 ### Option 1: NixOS System Integration (Recommended)
 
@@ -213,9 +213,9 @@ This flake includes several specialized inputs:
 - **home-manager**: Home Manager for declarative dotfile management
 - **doom-emacs**: Doom Emacs framework source
 - **niten-doom-config**: Example Doom Emacs configuration
-- **polymuse**: Generative music composition engine for Emacs
-- **typewrite-el**: Emacs typing/writing utilities (dependency of polymuse)
-- **canon-el**: Music notation and composition tools for Emacs
+- **polymuse**: Over-the-shoulder LLM reviewer for code or prose in Emacs
+- **typewrite-el**: Prints to buffer at a typewriterly pace (used by polymuse)
+- **canon-el**: Repository for project data (architecture/style guides, characters/locations/events) with tools to expose to LLMs
 - **fudo-pkgs**: Additional package collection
 
 ## Adding Yourself as a New User
