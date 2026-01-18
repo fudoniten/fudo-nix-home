@@ -40,11 +40,15 @@ let
   ];
 
 in {
-  imports = [
-    (import ./common/niten-doom-emacs.nix inputs { desktop.type = "none"; })
-  ];
+  imports = [ ];
 
   config = {
+    programs.doom-emacs = {
+      enable = true;
+      desktopType = "none";
+      doomSource = inputs.doom-emacs;
+      doomConfigSource = inputs.niten-doom-config;
+    };
     programs = {
       bash = {
         enable = true;
