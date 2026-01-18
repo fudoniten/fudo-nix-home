@@ -3,5 +3,9 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports = [ ./services (import ./styling.nix settings) ];
+  imports = [
+    ./services
+    (import ./programs { inherit inputs; })
+    (import ./styling.nix settings)
+  ];
 }

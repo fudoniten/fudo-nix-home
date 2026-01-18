@@ -1,5 +1,7 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports = [ (import ./services) ];
+  imports = [
+    (import ./services)
+  ];
 }

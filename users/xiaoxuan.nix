@@ -1,113 +1,134 @@
 inputs:
 
-{ username, email, ... }:
+{ username, email, home-directory ? null, ... }:
 
 systemCfg:
 
 { config, lib, pkgs, ... }:
 
 with lib;
-if (systemCfg.desktop.type == "none") then
-  { }
-else
-  let
-    inherit (pkgs.stdenv) isLinux;
+let
+  # Validate required arguments
+  _ = assert assertMsg (username != null && username != "")
+    "username is required";
+    assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
+    "systemCfg.desktop.type is required";
+    assert assertMsg (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
+    "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
+    null;
 
-    isGui = systemCfg.desktop.type != "none";
+  inherit (pkgs.stdenv) isLinux;
 
-  in {
-    config = {
-      home = {
-        inherit username;
+  isGui = systemCfg.desktop.type != "none";
+  isX = systemCfg.desktop.type == "x";
 
-        packages = with pkgs; [
-          abiword
-          anki # flashcards
-          gnome-tweaks
-          google-chrome
-          mumble
-          pv
-          redshift
-          spotify
-          xclip
+in {
+  config = mkIf isGui {
+    home = {
+      inherit username;
 
-          # Make sure to add themes here
-          graphite-cursors
-        ];
+      packages = with pkgs; [
+        # Productivity and office
+        abiword                # Lightweight word processor
 
-        keyboard = {
-          layout = "us";
-          options = "";
-        };
+        # Learning
+        anki                   # Flashcard application
 
-        file = {
-          ".xprofile" = mkIf (systemCfg.desktop.type == "x") {
-            executable = true;
-            source = pkgs.writeShellScript "${username}-xsession" ''
-              gdmauth=$XAUTHORITY
-              unset  XAUTHORITY
-              export XAUTHORITY
-              xauth merge "$gdmauth"
+        # System tools
+        gnome-tweaks           # GNOME customization tool
 
-              if [ -f $HOME/.xinitrc ]; then
-                bash --login -i $HOME/.xinitrc
-              fi
+        # Web browsers
+        google-chrome          # Google Chrome browser
 
-              export XMODIFIERS="@im=fcitx5"
-              export XMODIFIER="@im=fcitx5"
-              export GTK_IM_MODULE="fcitx5"
-              export QT_IM_MODULE="fcitx5"
-            '';
-          };
-        };
+        # Communication
+        mumble                 # Low-latency voice chat
+
+        # Media
+        spotify                # Music streaming
+        redshift               # Screen color temperature
+
+        # Utilities
+        pv                     # Pipe viewer
+        xclip                  # X11 clipboard utility
+
+        # Theme packages
+        graphite-cursors       # Cursor theme
+      ];
+
+      keyboard = {
+        layout = "us";
+        options = "";
       };
 
-      i18n.inputMethod = {
-        enable = true;
-        type = "fcitx5";
-        fcitx5.addons = with pkgs; [
-          qt6Packages.fcitx5-chinese-addons
-          fcitx5-gtk
-          fcitx5-rime
-        ];
-      };
+      file = {
+        ".xprofile" = mkIf isX {
+          executable = true;
+          source = pkgs.writeShellScript "${username}-xsession" ''
+            gdmauth=$XAUTHORITY
+            unset  XAUTHORITY
+            export XAUTHORITY
+            xauth merge "$gdmauth"
 
-      programs.firefox.enable = true;
+            if [ -f $HOME/.xinitrc ]; then
+              bash --login -i $HOME/.xinitrc
+            fi
 
-      services.gnome-keyring.enable = true;
-
-      stylix = mkIf (isLinux && isGui) {
-        cursor = mkForce {
-          package = pkgs.graphite-cursors;
-          name = "graphite-dark";
-          size = 16;
-        };
-
-        opacity = {
-          applications = 1.0;
-          desktop = 1.0;
-          popups = 1.0;
-          terminal = 0.9;
-        };
-
-        fonts = with pkgs; {
-          serif = mkDefault {
-            package = liberation_ttf;
-            name = "Liberation Serif";
-          };
-          sansSerif = mkDefault {
-            package = nerdfonts;
-            name = "Adwaita Sans";
-          };
-          monospace = mkDefault {
-            package = nerdfonts;
-            name = "Iosevka Nerd Font";
-          };
-          emoji = mkDefault {
-            package = noto-fonts-emoji;
-            name = "Noto Color Emoji";
-          };
+            export XMODIFIERS="@im=fcitx5"
+            export XMODIFIER="@im=fcitx5"
+            export GTK_IM_MODULE="fcitx5"
+            export QT_IM_MODULE="fcitx5"
+          '';
         };
       };
     };
-  }
+
+    # Chinese input method configuration
+    i18n.inputMethod = {
+      enable = true;
+      type = "fcitx5";
+      fcitx5.addons = with pkgs; [
+        qt6Packages.fcitx5-chinese-addons
+        fcitx5-gtk
+        fcitx5-rime
+      ];
+    };
+
+    programs.firefox.enable = true;
+
+    services.gnome-keyring.enable = true;
+
+    stylix = mkIf (isLinux && isGui) {
+      cursor = mkForce {
+        package = pkgs.graphite-cursors;
+        name = "graphite-dark";
+        size = 16;
+      };
+
+      opacity = {
+        applications = 1.0;
+        desktop = 1.0;
+        popups = 1.0;
+        terminal = 0.9;
+      };
+
+      fonts = with pkgs; {
+        serif = mkDefault {
+          package = liberation_ttf;
+          name = "Liberation Serif";
+        };
+        sansSerif = mkDefault {
+          package = nerdfonts;
+          name = "Adwaita Sans";
+        };
+        monospace = mkDefault {
+          package = nerdfonts;
+          name = "Iosevka Nerd Font";
+        };
+        emoji = mkDefault {
+          package = noto-fonts-emoji;
+          name = "Noto Color Emoji";
+        };
+      };
+    };
+  };
+}
