@@ -1,18 +1,25 @@
-{ nixpkgsUnstable, ... }@inputs:
+inputs:
 
 { username, email, home-directory, ... }:
 
 systemCfg:
 
-{ config, lib, pkgs, ... }@toplevel:
+{ config, lib, pkgs, ... }:
 
 with lib;
 let
+  # Validate required arguments
+  _ = assert assertMsg (username != null && username != "")
+    "username is required";
+    assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
+    "systemCfg.desktop.type is required";
+    assert assertMsg (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
+    "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
+    null;
+
   inherit (pkgs.stdenv) isLinux isDarwin;
 
-  unstable = nixpkgsUnstable.legacyPackages."${pkgs.system}";
-
-  envVariables = {
+  sessionEnvVariables = {
     ALTERNATE_EDITOR = "";
 
     HISTCONTROL = "ignoredups:ignorespace";
@@ -25,135 +32,177 @@ let
   isGui = systemCfg.desktop.type != "none";
   isX = systemCfg.desktop.type == "x";
 
+  # Common packages available on all systems (both GUI and headless)
   commonPackages = with pkgs; [
-    dnsutils # for dig
-    bundix # gemfile -> nix
-    cdrtools
-    cargo # rust
-    # clj-kondo # Clojure linter
-    clojure
-    claude-code
-    cmake
-    curl
-    direnv
-    duf # fancy df
-    enca # encoding detector
-    file
-    fluxcd
-    flux
-    fortune
-    fzf
-    gcc
-    git
-    gnumake
-    gnupg
-    go
-    graphviz
-    guile
-    home-assistant-cli
-    inetutils
-    jdk
-    jq # command-line JSON parser
-    kubo
-    kubectl
-    lsof
-    manix # nixos doc searcher
-    (mosh.override { openssh = openssh_gssapi; })
-    mtr # network diagnosis tool
-    mqttui # CLI MQTT client
-    nil # nix lsp server
-    nixfmt-classic # format nix files
-    nix-index # search by executable
-    nix-prefetch-git
-    nix-prefetch-github
-    opencode
-    openssl # Not sure which I need?
-    openssl.out
-    pciutils
-    pipewire
-    pipewire.jack
-    pv # dd with info
-    pwgen
-    ruby
-    rustc
-    statix # nix linter
-    stdenv
-    texlive.combined.scheme-full
-    tio # Serial IO
-    tmux
-    tor-browser
-    # trezor-agent
-    # trezor-suite
-    unzip
-    wget
-    # yubikey-manager
-    # yubikey-personalization
-    yt-dlp
-    yq # yaml processor
+    # Network utilities
+    dnsutils               # DNS lookup tools (dig, nslookup)
+    curl                   # HTTP client
+    wget                   # File downloader
+    (mosh.override { openssh = openssh_gssapi; })  # Mobile shell
+    mtr                    # Network diagnostic tool (traceroute + ping)
+    inetutils              # Network utilities (telnet, ftp, etc.)
+
+    # Development tools - Build systems and compilers
+    gcc                    # GNU Compiler Collection
+    gnumake                # GNU Make build system
+    cmake                  # Cross-platform build system
+    stdenv                 # Standard build environment
+
+    # Development tools - Languages and runtimes
+    cargo                  # Rust package manager
+    rustc                  # Rust compiler
+    clojure                # Clojure programming language
+    go                     # Go programming language
+    guile                  # GNU Guile Scheme
+    jdk                    # Java Development Kit
+    ruby                   # Ruby programming language
+
+    # Development tools - Nix ecosystem
+    nil                    # Nix language server for IDE integration
+    nixfmt-classic         # Nix code formatter
+    nix-index              # Search for packages by executable name
+    nix-prefetch-git       # Fetch git repositories for Nix
+    nix-prefetch-github    # Fetch GitHub repositories for Nix
+    bundix                 # Convert Ruby Gemfiles to Nix expressions
+    manix                  # Search NixOS documentation
+    statix                 # Nix linter for code quality
+
+    # File and text utilities
+    file                   # Determine file types
+    enca                   # Encoding detector and converter
+    unzip                  # ZIP archive extraction
+    cdrtools               # CD/DVD recording utilities
+    pv                     # Pipe viewer (monitor progress through pipes)
+    duf                    # Modern disk usage utility (better df)
+
+    # System utilities
+    git                    # Version control system
+    gnupg                  # GNU Privacy Guard (encryption)
+    lsof                   # List open files
+    pciutils               # PCI utilities (lspci)
+    tmux                   # Terminal multiplexer
+    fzf                    # Fuzzy finder
+    pwgen                  # Password generator
+    fortune                # Random fortune cookie messages
+    direnv                 # Environment switcher
+
+    # AI development tools
+    claude-code            # Claude Code CLI
+    opencode               # OpenCode CLI
+
+    # Document processing
+    texlive.combined.scheme-full  # Complete LaTeX distribution
+    graphviz               # Graph visualization (dot)
+
+    # Data processing
+    jq                     # JSON processor
+    yq                     # YAML/XML processor
+
+    # Container and cloud tools
+    kubectl                # Kubernetes command-line tool
+    fluxcd                 # GitOps Kubernetes operator
+    flux                   # Flux control tool
+
+    # Smart home and IoT
+    home-assistant-cli     # Command-line interface for Home Assistant
+    mqttui                 # Terminal UI for MQTT
+
+    # Media
+    yt-dlp                 # Video downloader (youtube-dl fork)
+    pipewire               # Audio/video routing
+    pipewire.jack          # JACK compatibility
+
+    # Security and privacy
+    openssl                # SSL/TLS toolkit
+    openssl.out            # OpenSSL outputs
+    tor-browser            # Anonymous web browser
+
+    # Specialized tools
+    kubo                   # IPFS implementation
+    tio                    # Serial I/O terminal
   ];
 
-  commonGuiPackages = with pkgs; [ spotify ];
+  # GUI packages for all desktop environments
+  commonGuiPackages = with pkgs; [
+    spotify                # Music streaming service
+  ];
 
+  # Linux-specific packages (no GUI required)
   linuxPackages = with pkgs; [ ];
 
+  # Linux GUI applications
   linuxGuiPackages = with pkgs; [
-    gnomeExtensions.forge
-    gnomeExtensions.vitals
+    # GNOME Extensions
+    gnomeExtensions.forge     # Tiling window manager
+    gnomeExtensions.vitals    # System monitoring
 
-    abiword
-    alacritty # terminal
-    anki # flashcards
-    cool-retro-term
-    faudio # direct-x audio?
-    dconf-editor # for gnome dconf config
-    gogdl
-    gnome-tweaks
-    google-chrome
-    gparted
-    helvum # pipeaudio switch panel
-    heroic # game launcher
-    imagemagick
-    kitty # terminal
-    libreoffice
-    lutris # game launcher
-    # xorg.libXxf86vm # ???
-    # xorg.libXxf86vm.dev
-    # mattermost-desktop # Element failing to build
-    mindustry
-    mplayer
-    mumble
-    # Possibly not building right?
-    # nyxt # browser
-    openal
-    openttd
-    playerctl
-    rhythmbox
-    signal-desktop
-    spotify-player
-    spotify-qt
-    via # keyboard firmware tool
-    vial # another keyboard firmware tool
-    xclip
-    # Matrix clients
-    # element-desktop # matrix client # using EOL deps
+    # Terminals
+    alacritty              # GPU-accelerated terminal emulator
+    kitty                  # Fast, GPU-based terminal emulator
+    cool-retro-term        # Retro-styled terminal emulator
+
+    # Productivity and office
+    abiword                # Lightweight word processor
+    libreoffice            # Full office suite
+    anki                   # Flashcard application for learning
+
+    # Graphics and media
+    imagemagick            # Image manipulation tools
+    mplayer                # Media player
+    rhythmbox              # Music player and organizer
 
     # Video editors
-    kdePackages.kdenlive
-    openshot-qt
-    shotcut
+    kdePackages.kdenlive   # Professional video editor
+    openshot-qt            # Simple video editor
+    shotcut                # Cross-platform video editor
+
+    # Communication
+    signal-desktop         # Secure messaging
+    mumble                 # Low-latency voice chat
+
+    # Music and audio
+    spotify-player         # Terminal UI for Spotify
+    spotify-qt             # Qt-based Spotify client
+    helvum                 # PipeWire patchbay (audio routing)
+
+    # System tools
+    dconf-editor           # GNOME configuration editor
+    gnome-tweaks           # GNOME customization tool
+    gparted                # Partition editor
+    xclip                  # X11 clipboard utility
+    playerctl              # Media player controller
+
+    # Web browsers
+    google-chrome          # Google Chrome browser
+
+    # Hardware tools
+    via                    # Keyboard firmware configuration
+    vial                   # Open-source keyboard firmware tool
+
+    # Games
+    mindustry              # Tower defense strategy game
+    openttd                # OpenTTD transport simulation
+    heroic                 # Game launcher
+    lutris                 # Game launcher
+    gogdl                  # GOG downloader
+
+    # Audio libraries
+    faudio                 # DirectX audio compatibility layer
+    openal                 # 3D audio API
   ];
 
+  # Font packages for Linux GUI systems
   fontPackages = optionals isLinux ((with pkgs; [
-    cantarell-fonts
-    dejavu_fonts
-    fira-code
-    fira-code-symbols
-    liberation_ttf
-    proggyfonts
-    terminus_font
-    ubuntu-classic
-    ultimate-oldschool-pc-font-pack
-    unifont
+    cantarell-fonts                    # GNOME default font
+    dejavu_fonts                       # High-quality general-purpose fonts
+    fira-code                          # Monospace font with programming ligatures
+    fira-code-symbols                  # Additional symbols for Fira Code
+    liberation_ttf                     # Metric-compatible with Arial/Times New Roman
+    proggyfonts                        # Small bitmap programming fonts
+    terminus_font                      # Monospace bitmap font
+    ubuntu-classic                     # Ubuntu's font family
+    ultimate-oldschool-pc-font-pack    # Retro computer fonts
+    unifont                            # Unicode bitmap font
   ]) ++ (with pkgs.nerd-fonts; [
     pkgs.nerd-fonts."_0xproto"
     pkgs.nerd-fonts."_3270"
@@ -227,20 +276,20 @@ let
     zed-mono
   ]));
 
-  finalPackages = commonPackages ++ (optionals isGui commonGuiPackages)
-    ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages))
-    ++ (optionals isLinux linuxPackages);
-
 in {
-  imports =
-    [ (import ./common/niten-doom-emacs.nix systemCfg inputs finalPackages) ];
+  imports = [ ];
 
   config = {
+    # Doom Emacs configuration
+    programs.doom-emacs = {
+      enable = true;
+      desktopType = systemCfg.desktop.type;
+      doomSource = inputs.doom-emacs;
+      doomConfigSource = inputs.niten-doom-config;
+    };
 
     gtk = {
       iconTheme = {
-        # package = pkgs.numix-icon-theme;
-        # name = "Numix";
         name = "Papirus-Dark";
         package = pkgs.papirus-icon-theme;
       };
@@ -328,8 +377,6 @@ in {
           editor = "emacsclient -t";
           enable_audio_bell = false;
           scrollback_lines = 10000;
-          # theme = "Obsidian";
-          # font_features = "ShureTechMono Nerd Font -liga";
         };
         keybindings = let lead = "ctrl+super";
         in {
@@ -374,7 +421,6 @@ in {
     xresources.properties = mkIf isX {
       "Xft.antialias" = 1;
       "Xft.autohint" = 0;
-      # "Xft.dpi" = 192;
       "Xft.hinting" = 1;
       "Xft.hintstyle" = "hintfull";
       "Xft.lcdfilter" = "lcddefault";
@@ -400,15 +446,12 @@ in {
           name = "Liberation Serif";
         };
         sansSerif = mkDefault {
-          # package = nerdfonts;
-          # name = "SourceSans3VF";
           package = oxanium;
           name = "Oxanium";
         };
         monospace = mkDefault {
           package = nerdfonts;
           name = "Iosevka Nerd Font";
-          # name = "Hurmit Nerd Font Mono";
         };
         emoji = mkDefault {
           package = noto-fonts-emoji;
@@ -417,21 +460,17 @@ in {
       };
     };
 
+    # Services configuration (Linux only)
     services = mkIf isLinux {
+      # GPG agent for encryption and signing
       gpg-agent.enable = true;
 
+      # GNOME keyring for credential storage (GUI only)
       gnome-keyring.enable = isGui;
 
-      ## Depends on an insecure version of qtwebengine
-      # supercollider = {
-      #   enable = isGui;
-      #   port = 30300;
-      #   memory = 4096;
-      # };
-
+      # Syncthing continuous file synchronization
       syncthing = {
         enable = true;
-        # Required?
         extraOptions = [ ];
       };
     };
@@ -440,11 +479,14 @@ in {
       inherit username;
       homeDirectory = home-directory;
 
-      packages = finalPackages ++ (with pkgs; [
-        graphite-cursors
-        graphite-gtk-theme
-        papirus-icon-theme
-      ]);
+      packages = commonPackages ++ (optionals isGui commonGuiPackages)
+        ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages))
+        ++ (optionals isLinux linuxPackages)
+        ++ (with pkgs; [
+          graphite-cursors
+          graphite-gtk-theme
+          papirus-icon-theme
+        ]);
 
       file = {
         ".xprofile" = mkIf isX {
@@ -462,11 +504,11 @@ in {
         };
       };
 
-      sessionVariables = envVariables // {
+      sessionVariables = sessionEnvVariables // {
         GTK_THEME = "Graphite-Dark-Rimless";
       };
     };
 
-    systemd.user = mkIf isLinux { sessionVariables = envVariables; };
+    systemd.user = mkIf isLinux { sessionVariables = sessionEnvVariables; };
   };
 }
