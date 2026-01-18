@@ -598,11 +598,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768625119,
-        "narHash": "sha256-LZnQ+QgoMsACddIvvODhUWs3ERsttEs6vW/2sqpFzXo=",
+        "lastModified": 1768707460,
+        "narHash": "sha256-TZDY956pAQOR+0egQ097NSU1BF71JMseWvUujZZ2bC4=",
         "owner": "fudoniten",
         "repo": "polymuse",
-        "rev": "cac765fa95ef0f5547764030eeaca186ff1d6978",
+        "rev": "c9916313ec8d29707d6fa0b66b58a8a763fd29ab",
         "type": "github"
       },
       "original": {
