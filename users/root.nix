@@ -8,6 +8,15 @@ systemCfg:
 
 with lib;
 let
+  # Validate required arguments
+  _ = assert assertMsg (username != null && username != "")
+    "username is required";
+    assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
+    "systemCfg.desktop.type is required";
+    assert assertMsg (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
+    "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
+    null;
+
   commonPackages = with pkgs; [
     atop
     btrfs-progs
@@ -32,7 +41,7 @@ let
 
 in {
   imports = [
-    (import ./common/niten-doom-emacs.nix { desktop.type = "none"; } inputs)
+    (import ./common/niten-doom-emacs.nix inputs { desktop.type = "none"; })
   ];
 
   config = {

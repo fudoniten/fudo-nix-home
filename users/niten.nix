@@ -8,9 +8,18 @@ systemCfg:
 
 with lib;
 let
+  # Validate required arguments
+  _ = assert assertMsg (username != null && username != "")
+    "username is required";
+    assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
+    "systemCfg.desktop.type is required";
+    assert assertMsg (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
+    "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
+    null;
+
   inherit (pkgs.stdenv) isLinux isDarwin;
 
-  envVariables = {
+  sessionEnvVariables = {
     ALTERNATE_EDITOR = "";
 
     HISTCONTROL = "ignoredups:ignorespace";
@@ -28,7 +37,6 @@ let
     bundix # gemfile -> nix
     cdrtools
     cargo # rust
-    # clj-kondo # Clojure linter
     clojure
     cmake
     curl
@@ -77,8 +85,6 @@ let
     tor-browser
     unzip
     wget
-    # yubikey-manager
-    # yubikey-personalization
     yt-dlp
     yq # yaml processor
   ];
@@ -105,14 +111,9 @@ let
     imagemagick
     kitty # terminal
     libreoffice
-    # xorg.libXxf86vm # ???
-    # xorg.libXxf86vm.dev
-    # mattermost-desktop # Element failing to build
     mindustry
     mplayer
     mumble
-    # Possibly not building right?
-    # nyxt # browser
     openal
     openttd
     playerctl
@@ -123,7 +124,6 @@ let
     via # keyboard firmware tool
     vial # another keyboard firmware tool
     xclip
-    # Matrix clients
     element-desktop # matrix client
 
     # Video editors
@@ -147,7 +147,7 @@ let
   ]);
 
 in {
-  imports = [ (import ./common/niten-doom-emacs.nix systemCfg inputs) ];
+  imports = [ (import ./common/niten-doom-emacs.nix inputs systemCfg) ];
 
   config = {
 
@@ -197,8 +197,6 @@ in {
           editor = "emacsclient -t";
           enable_audio_bell = false;
           scrollback_lines = 10000;
-          # theme = "Obsidian";
-          # font_features = "ShureTechMono Nerd Font -liga";
         };
         keybindings = let lead = "ctrl+super";
         in {
@@ -234,7 +232,6 @@ in {
     xresources.properties = mkIf isX {
       "Xft.antialias" = 1;
       "Xft.autohint" = 0;
-      # "Xft.dpi" = 192;
       "Xft.hinting" = 1;
       "Xft.hintstyle" = "hintfull";
       "Xft.lcdfilter" = "lcddefault";
@@ -253,7 +250,6 @@ in {
 
       syncthing = {
         enable = true;
-        # Required?
         extraOptions = [ ];
       };
     };
@@ -282,9 +278,9 @@ in {
         };
       };
 
-      sessionVariables = envVariables;
+      sessionVariables = sessionEnvVariables;
     };
 
-    systemd.user = mkIf isLinux { sessionVariables = envVariables; };
+    systemd.user = mkIf isLinux { sessionVariables = sessionEnvVariables; };
   };
 }

@@ -1,11 +1,19 @@
-systemCfg:
+inputs:
 
-{ doom-emacs, niten-doom-config, ... }:
+systemCfg:
 
 { config, lib, pkgs, ... }:
 
 with lib;
 let
+  inherit (inputs) doom-emacs niten-doom-config;
+
+  # Validate required arguments
+  _ = assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
+    "systemCfg.desktop.type is required";
+    assert assertMsg (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
+    "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
+    null;
   doomEmacsEnv = ''
     export PATH="${config.xdg.configHome}/emacs/bin:${config.xdg.configHome}/doom/bin:$PATH"
   '';
