@@ -147,9 +147,15 @@ let
   ]);
 
 in {
-  imports = [ (import ./common/niten-doom-emacs.nix inputs systemCfg) ];
+  imports = [ ];
 
   config = {
+    programs.doom-emacs = {
+      enable = true;
+      desktopType = systemCfg.desktop.type;
+      doomSource = inputs.doom-emacs;
+      doomConfigSource = inputs.niten-doom-config;
+    };
 
     gtk.iconTheme = {
       package = pkgs.numix-icon-theme;
