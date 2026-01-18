@@ -4,9 +4,16 @@ with lib;
 let
   cfg = config.programs.doom-emacs;
 
+  # Determine state directory for Doom Emacs local files
+  stateDir = if cfg.stateDirectory != null then
+    cfg.stateDirectory
+  else
+    "${config.xdg.dataHome}/doom";
+
   # Default Doom Emacs environment setup
   doomEmacsEnv = ''
     export PATH="${config.xdg.configHome}/emacs/bin:${config.xdg.configHome}/doom/bin:$PATH"
+    export DOOMLOCALDIR="${stateDir}"
   '';
 
   # Default Emacs dependencies
@@ -145,6 +152,21 @@ in {
       default = "30min";
       description = "Timeout for Doom sync operation on daemon startup.";
     };
+
+    stateDirectory = mkOption {
+      type = nullOr str;
+      default = null;
+      description = ''
+        Directory for Doom Emacs state files (compiled packages, cache, etc.).
+        This directory must be writable and executable.
+
+        Useful when home directory is mounted read-only or noexec.
+        If null, defaults to XDG data directory (~/.local/share/doom).
+
+        Example: "/var/lib/doom-state" or "/tmp/doom-state"
+      '';
+      example = "/var/lib/doom-state";
+    };
   };
 
   config = mkIf cfg.enable (mkMerge [
@@ -167,12 +189,18 @@ in {
               mkdir -p ${config.xdg.configHome}/emacs
             fi
             ${pkgs.rsync}/bin/rsync -avz --chmod=D2755,F744 ${cfg.doomSource}/ ${config.xdg.configHome}/emacs/
+
+            # Create state directory if it doesn't exist
+            if [ ! -d ${stateDir} ]; then
+              mkdir -p ${stateDir}
+            fi
           '';
 
         packages = [ emacsPackage ] ++ defaultEmacsDeps ++ cfg.extraDependencies ++ cfg.extraPackages
           ++ (optionals pkgs.stdenv.isLinux defaultLinuxDeps);
 
         sessionVariables = {
+          DOOMLOCALDIR = stateDir;
           DOOM_EMACS_SITE_PATH = "${config.xdg.configHome}/doom/site.d";
           DOOM_EMACS_LOCAL_PATH = "${config.xdg.configHome}/emacs-local";
         } // cfg.extraEnv;
@@ -191,10 +219,19 @@ in {
         Service = {
           Environment = let
             binPath = makeBinPath ([ emacsPackage ] ++ config.home.packages);
-          in "PATH=$PATH:${binPath}";
+          in [
+            "PATH=$PATH:${binPath}"
+            "DOOMLOCALDIR=${stateDir}"
+          ];
           ExecStartPre = pkgs.writeShellScript "run-doom-sync" ''
+            # Ensure state directory exists
+            if [ ! -d ${stateDir} ]; then
+              mkdir -p ${stateDir}
+            fi
+
             until [ -d ${config.xdg.configHome}/emacs ]; do sleep 1; done
 
+            export DOOMLOCALDIR="${stateDir}"
             ${pkgs.bash}/bin/bash ${config.xdg.configHome}/emacs/bin/doom sync
 
             if [ -d $HOME/.emacs.d ]; then
@@ -229,8 +266,11 @@ in {
               "${pkgs.bash}/bin/bash"
               "-l"
               "-c"
-              "${emacsPackage}/bin/emacs --fg-daemon"
+              "export DOOMLOCALDIR='${stateDir}' && ${emacsPackage}/bin/emacs --fg-daemon"
             ];
+            EnvironmentVariables = {
+              DOOMLOCALDIR = stateDir;
+            };
             StandardErrorPath =
               "${config.home.homeDirectory}/Library/Logs/emacs-daemon.stderr.log";
             StandardOutPath =
