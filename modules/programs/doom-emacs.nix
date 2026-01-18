@@ -1,3 +1,25 @@
+# Doom Emacs Home Manager Module
+#
+# This module provides declarative configuration for Doom Emacs, an Emacs
+# framework that provides sensible defaults and a focus on performance.
+#
+# Features:
+# - Automatic installation and configuration of Doom Emacs
+# - Platform-specific Emacs package selection (X11, Wayland, macOS, headless)
+# - Emacs daemon service management (systemd on Linux, launchd on macOS)
+# - Custom state directory support for read-only or noexec home directories
+# - Integration with shell environments (bash, zsh)
+# - Configurable extra packages and dependencies
+#
+# Usage:
+#   programs.doom-emacs = {
+#     enable = true;
+#     desktopType = "wayland";  # or "x", "darwin", "none"
+#     doomSource = inputs.doom-emacs;
+#     doomConfigSource = inputs.my-doom-config;
+#     emacsPackages = [ ... ];  # Additional Emacs packages
+#   };
+
 { config, lib, pkgs, ... }:
 
 with lib;
@@ -17,32 +39,35 @@ let
   '';
 
   # Default Emacs dependencies
+  # These packages are required for Doom Emacs to function properly
   defaultEmacsDeps = with pkgs; [
-    git
-    (ripgrep.override { withPCRE2 = true; })
-    gnutls
-    gopls
-    fd
-    imagemagick
-    zstd
-    (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))
-    editorconfig-core-c
-    sqlite
-    xclip
-    openssh
-    diffutils
-    coreutils
-    gnutar
-    bashInteractive
-    clojure-lsp
-    clojure
-    curl
-    gnugrep
-    nodePackages.prettier
+    git                    # Version control (required by Doom)
+    (ripgrep.override { withPCRE2 = true; })  # Fast search with PCRE2 support
+    gnutls                 # TLS support for package downloads
+    gopls                  # Go language server
+    fd                     # Fast file finder (used by Doom's fuzzy finder)
+    imagemagick            # Image processing (for inline image display)
+    zstd                   # Compression (for package caching)
+    (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))  # Spell checking
+    editorconfig-core-c    # EditorConfig support
+    sqlite                 # Database (used by org-roam and other packages)
+    xclip                  # X11 clipboard integration
+    openssh                # SSH support (for TRAMP remote editing)
+    diffutils              # Diff tools (for version control)
+    coreutils              # Core GNU utilities
+    gnutar                 # Archive extraction
+    bashInteractive        # Shell integration
+    clojure-lsp            # Clojure language server
+    clojure                # Clojure runtime
+    curl                   # HTTP client
+    gnugrep                # GNU grep (used by various Doom features)
+    nodePackages.prettier  # Code formatter for web languages
   ];
 
   # Linux-specific dependencies
-  defaultLinuxDeps = with pkgs; [ sbcl ];
+  defaultLinuxDeps = with pkgs; [
+    sbcl                   # Steel Bank Common Lisp (for some Emacs packages)
+  ];
 
   # Build emacs with packages
   myEmacsPackagesFor = emacs:
