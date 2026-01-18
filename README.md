@@ -1,13 +1,15 @@
 # Fudo Nix Home Manager Configuration
 
-A modular [Home Manager](https://github.com/nix-community/home-manager) configuration for managing user environments across NixOS and non-NixOS systems. This flake provides a collection of custom modules, services, and user configurations that can be easily integrated into your system.
+Internal repository for managing our team's [Home Manager](https://github.com/nix-community/home-manager) configurations across various systems.
 
-## Features
+**Current users:** jasper, ken, niten, reaper, root, xiaoxuan
 
-- **Custom Modules**: Doom Emacs integration, SuperCollider audio synthesis server
-- **Multiple Desktop Environments**: Support for X11, Wayland, macOS, and headless systems
-- **User Profiles**: Pre-configured user environments with sensible defaults
-- **Flexible Deployment**: Use as a NixOS module or standalone Home Manager configuration
+## What This Repo Does
+
+- Manages user-specific NixOS/Home Manager configurations for our team members
+- Provides custom modules (Doom Emacs, SuperCollider) that we commonly use
+- Supports multiple desktop environments (X11, Wayland, macOS, headless)
+- Can be deployed as a NixOS module or standalone Home Manager configuration
 
 ## Repository Structure
 
@@ -20,18 +22,22 @@ A modular [Home Manager](https://github.com/nix-community/home-manager) configur
 │   │   └── doom-emacs.nix # Doom Emacs configuration module
 │   └── services/
 │       └── supercollider.nix # SuperCollider audio server
-└── users/                 # User-specific configurations
-    ├── niten.nix          # Example user configuration
-    └── ...
+└── users/                 # Team member configurations
+    ├── jasper.nix
+    ├── ken.nix
+    ├── niten.nix
+    ├── reaper.nix
+    ├── root.nix
+    └── xiaoxuan.nix
 ```
 
-## Usage
+## Quick Start for Team Members
 
-### As a NixOS Module (Recommended for NixOS Systems)
+### Option 1: NixOS System Integration (Recommended)
 
-Add this flake to your NixOS system configuration:
+If you're on NixOS and want to integrate your user configuration into your system flake:
 
-#### 1. Add to your `flake.nix` inputs:
+**1. Add to your system's `flake.nix` inputs:**
 
 ```nix
 {
@@ -61,13 +67,13 @@ Add this flake to your NixOS system configuration:
             enable = true;
 
             users = [{
-              username = "alice";
-              email = "alice@example.com";
-              home-directory = "/home/alice";
+              username = "niten";  # Your username from users/
+              email = "niten@fudo.org";
+              home-directory = "/home/niten";
             }];
 
             system = {
-              desktop.type = "wayland";  # Options: "x", "wayland", "darwin", "none"
+              desktop.type = "wayland";  # "x", "wayland", "darwin", or "none"
               stateVersion = "24.05";
             };
           };
@@ -78,20 +84,19 @@ Add this flake to your NixOS system configuration:
 }
 ```
 
-#### 2. Rebuild your system:
+**2. Rebuild:**
 
 ```bash
 sudo nixos-rebuild switch --flake .#your-hostname
 ```
 
-### As a Standalone Home Manager Configuration (Non-NixOS Systems)
+### Option 2: Standalone Home Manager (Non-NixOS or Limited Access)
 
-For systems where you don't have root access or aren't using NixOS, you can use this as a standalone Home Manager configuration.
+Use this if you're on a non-NixOS system or don't have root access.
 
-#### 1. Install Nix and Home Manager
+**1. Install Nix (if needed):**
 
 ```bash
-# Install Nix (if not already installed)
 sh <(curl -L https://nixos.org/nix/install) --daemon
 
 # Enable flakes
@@ -99,7 +104,7 @@ mkdir -p ~/.config/nix
 echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 ```
 
-#### 2. Create your Home Manager `flake.nix`:
+**2. Create a `flake.nix` in a new directory:**
 
 ```nix
 {
@@ -120,19 +125,19 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 
   outputs = { nixpkgs, home-manager, fudo-nix-home, ... }:
   let
-    system = "x86_64-linux";  # or "aarch64-darwin" for Apple Silicon
+    system = "x86_64-linux";  # or "aarch64-darwin" for macOS
     pkgs = nixpkgs.legacyPackages.${system};
   in {
-    homeConfigurations."alice" = home-manager.lib.homeManagerConfiguration {
+    homeConfigurations."niten" = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
 
       modules = [
-        fudo-nix-home.mkModule.niten {
-          username = "alice";
-          email = "alice@example.com";
-          home-directory = "/home/alice";
+        fudo-nix-home.mkModule.niten {  # Use your username from users/
+          username = "niten";
+          email = "niten@fudo.org";
+          home-directory = "/home/niten";
           stateVersion = "24.05";
-          desktopType = "wayland";  # Options: "x", "wayland", "darwin", "none"
+          desktopType = "wayland";  # "x", "wayland", "darwin", or "none"
         }
       ];
     };
@@ -140,14 +145,14 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 }
 ```
 
-#### 3. Activate the configuration:
+**3. Activate:**
 
 ```bash
-# First time setup
-nix run home-manager/release-24.05 -- switch --flake .#alice
+# First time
+nix run home-manager/release-24.05 -- switch --flake .#niten
 
-# Subsequent updates
-home-manager switch --flake .#alice
+# After that
+home-manager switch --flake .#niten
 ```
 
 ## Available Modules
@@ -213,9 +218,13 @@ This flake includes several specialized inputs:
 - **canon-el**: Music notation and composition tools for Emacs
 - **fudo-pkgs**: Additional package collection
 
-## Creating Your Own User Configuration
+## Adding Yourself as a New User
 
-To create a new user configuration, create a file in `users/yourname.nix`:
+To add your own configuration to this repo:
+
+**1. Create `users/yourname.nix`**
+
+Start with a minimal configuration (you can look at `users/ken.nix` or `users/jasper.nix` for simple examples):
 
 ```nix
 inputs:
@@ -226,28 +235,21 @@ systemCfg:
 with lib;
 {
   config = {
-    # Enable Doom Emacs
-    programs.doom-emacs = {
-      enable = true;
-      desktopType = systemCfg.desktop.type;
-      doomSource = inputs.doom-emacs;
-      doomConfigSource = inputs.your-doom-config;
-    };
-
-    # Install packages
+    # Basic packages everyone needs
     home.packages = with pkgs; [
       git
       ripgrep
       fd
     ];
 
-    # Configure git
+    # Git configuration
     programs.git = {
       enable = true;
       userName = username;
       userEmail = email;
     };
 
+    # Required Home Manager settings
     home = {
       inherit username;
       homeDirectory = home-directory;
@@ -256,6 +258,40 @@ with lib;
   };
 }
 ```
+
+**2. (Optional) Enable Doom Emacs**
+
+If you want Doom Emacs with your own config:
+
+```nix
+programs.doom-emacs = {
+  enable = true;
+  desktopType = systemCfg.desktop.type;
+  doomSource = inputs.doom-emacs;
+  doomConfigSource = inputs.your-doom-config;  # Add your config as an input
+};
+```
+
+**3. Add your user to `flake.nix`**
+
+Add an `mkModule` export for your username in the flake outputs.
+
+**4. Test it**
+
+```bash
+# Check syntax
+nix-instantiate --parse users/yourname.nix
+
+# Try building
+nix flake check
+
+# Run tests
+./run-tests.sh
+```
+
+**5. Submit a PR**
+
+Once it builds successfully, submit a pull request.
 
 ## Desktop Type Options
 
@@ -321,21 +357,16 @@ nix-instantiate --parse users/niten.nix
 nix-instantiate --parse modules/programs/doom-emacs.nix
 ```
 
-## Contributing
+## Making Changes
 
-Contributions are welcome! Please ensure your changes:
-- Follow the existing code style
-- Include appropriate comments
-- Update documentation as needed
-- Pass all automated tests (run `./run-tests.sh`)
-- Test on both NixOS and non-NixOS systems when applicable
+When modifying configurations or modules:
+- Run `./run-tests.sh` before committing to catch issues early
+- Update this README if you add new modules or change how things work
+- Keep your user configuration reasonably simple - complex customizations might be better in your own Doom config or similar
+- If you add a new module, add documentation in the relevant section above
 
-## License
+## Useful References
 
-This configuration is provided as-is for personal and educational use.
-
-## See Also
-
-- [Home Manager Manual](https://nix-community.github.io/home-manager/)
-- [NixOS Wiki](https://nixos.wiki/)
-- [Nix Flakes](https://nixos.wiki/wiki/Flakes)
+- [Home Manager Manual](https://nix-community.github.io/home-manager/) - Official Home Manager documentation
+- [NixOS Wiki](https://nixos.wiki/) - Community wiki with lots of examples
+- [Nix Flakes](https://nixos.wiki/wiki/Flakes) - Flakes documentation
