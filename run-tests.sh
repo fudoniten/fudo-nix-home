@@ -46,20 +46,38 @@ else
 fi
 echo ""
 
-# Test 3: Evaluate all user configurations
+# Test 3: Dead code detection
+echo -e "${YELLOW}▶${NC} Running: Dead code detection (deadnix)"
+if nix run nixpkgs#deadnix -- --fail .; then
+    echo -e "${GREEN}✓${NC} No dead code found"
+else
+    echo -e "${YELLOW}⚠${NC} Dead code detected (not blocking)"
+fi
+echo ""
+
+# Test 4: Format checking
+echo -e "${YELLOW}▶${NC} Running: Format check (nixpkgs-fmt)"
+if nix run nixpkgs#nixpkgs-fmt -- --check .; then
+    echo -e "${GREEN}✓${NC} Code formatting is correct"
+else
+    echo -e "${YELLOW}⚠${NC} Formatting issues found (run 'nix run nixpkgs#nixpkgs-fmt .' to fix)"
+fi
+echo ""
+
+# Test 5: Evaluate all user configurations
 USERS=(niten ken jasper xiaoxuan root reaper)
 for user in "${USERS[@]}"; do
     run_test "Evaluate configuration: $user" \
         nix eval .#homeConfigurations.$user.config.home.username --show-trace || true
 done
 
-# Test 4: Build activation packages (dry-run)
+# Test 6: Build activation packages (dry-run)
 for user in "${USERS[@]}"; do
     run_test "Build activation package: $user (dry-run)" \
         nix build .#homeConfigurations.$user.activationPackage --dry-run --show-trace || true
 done
 
-# Test 5: Module validation
+# Test 7: Module validation
 run_test "NixOS module structure validation" \
     nix eval .#nixosModules.fudo-home --apply 'x: x ? config' --show-trace || true
 

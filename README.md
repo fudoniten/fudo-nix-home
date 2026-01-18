@@ -274,7 +274,9 @@ This repository includes automated testing to ensure configurations build correc
 
 GitHub Actions automatically runs tests on every push and pull request:
 - **Flake validation**: Ensures the flake structure is correct
-- **Static analysis**: Checks for Nix code quality issues with statix
+- **Static analysis**: Checks for Nix code quality issues with [statix](https://github.com/nerdypepper/statix)
+- **Dead code detection**: Finds unused code with [deadnix](https://github.com/astro/deadnix)
+- **Format checking**: Validates code formatting with [nixpkgs-fmt](https://github.com/nix-community/nixpkgs-fmt)
 - **Build tests**: Validates all user configurations can be built
 - **Module validation**: Verifies NixOS module exports are correct
 
@@ -296,8 +298,17 @@ You can also run individual checks:
 # Validate flake structure
 nix flake check
 
-# Check code quality
+# Check code quality with statix
 nix run nixpkgs#statix -- check .
+
+# Find dead/unused code
+nix run nixpkgs#deadnix -- --fail .
+
+# Check code formatting
+nix run nixpkgs#nixpkgs-fmt -- --check .
+
+# Auto-fix formatting issues
+nix run nixpkgs#nixpkgs-fmt .
 
 # Test a specific user configuration
 nix eval .#homeConfigurations.niten.config.home.username

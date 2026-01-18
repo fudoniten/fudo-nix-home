@@ -26,6 +26,15 @@ jobs:
         run: nix run nixpkgs#statix -- check .
         continue-on-error: true  # Don't fail build on statix warnings initially
 
+      - name: Check for dead code with deadnix
+        run: nix run nixpkgs#deadnix -- --fail .
+        continue-on-error: true  # Don't fail build on dead code initially
+
+      - name: Check formatting with nixpkgs-fmt
+        run: |
+          nix run nixpkgs#nixpkgs-fmt -- --check .
+        continue-on-error: true  # Don't fail build on formatting issues initially
+
   build-configurations:
     runs-on: ubuntu-latest
     strategy:
