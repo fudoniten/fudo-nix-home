@@ -1,0 +1,75 @@
+name: Nix Build and Test
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  nix-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Flake check
+        run: nix flake check --show-trace
+
+      - name: Static analysis with statix
+        run: nix run nixpkgs#statix -- check .
+        continue-on-error: true  # Don't fail build on statix warnings initially
+
+  build-configurations:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        user: [niten, ken, jasper, xiaoxuan, root, reaper]
+      fail-fast: false  # Continue testing other users even if one fails
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Evaluate configuration for ${{ matrix.user }}
+        run: |
+          echo "Testing user configuration: ${{ matrix.user }}"
+          nix eval .#homeConfigurations.${{ matrix.user }}.config.home.username --show-trace
+
+      - name: Build activation package for ${{ matrix.user }}
+        run: |
+          echo "Building activation package for: ${{ matrix.user }}"
+          nix build .#homeConfigurations.${{ matrix.user }}.activationPackage --dry-run --show-trace
+
+  module-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Validate NixOS module exports
+        run: |
+          echo "Checking NixOS module structure..."
+          nix eval .#nixosModules.fudo-home --apply 'x: x ? config' --show-trace
+
+      - name: Validate flake outputs
+        run: |
+          echo "Verifying all flake outputs are accessible..."
+          nix flake show --show-trace

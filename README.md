@@ -266,12 +266,53 @@ The `desktopType` parameter configures environment-specific settings:
 - **`darwin`**: macOS/Darwin systems
 - **`none`**: Headless/server systems (no GUI)
 
+## Testing
+
+This repository includes automated testing to ensure configurations build correctly and catch issues early.
+
+### Continuous Integration
+
+GitHub Actions automatically runs tests on every push and pull request:
+- **Flake validation**: Ensures the flake structure is correct
+- **Static analysis**: Checks for Nix code quality issues with statix
+- **Build tests**: Validates all user configurations can be built
+- **Module validation**: Verifies NixOS module exports are correct
+
+### Local Testing
+
+Before pushing changes, run the test suite locally:
+
+```bash
+./run-tests.sh
+```
+
+This script runs the same checks as CI and will catch most issues before they reach the repository.
+
+### Manual Testing
+
+You can also run individual checks:
+
+```bash
+# Validate flake structure
+nix flake check
+
+# Check code quality
+nix run nixpkgs#statix -- check .
+
+# Test a specific user configuration
+nix eval .#homeConfigurations.niten.config.home.username
+
+# Test building (dry-run, doesn't install)
+nix build .#homeConfigurations.niten.activationPackage --dry-run
+```
+
 ## Contributing
 
 Contributions are welcome! Please ensure your changes:
 - Follow the existing code style
 - Include appropriate comments
 - Update documentation as needed
+- Pass all automated tests (run `./run-tests.sh`)
 - Test on both NixOS and non-NixOS systems when applicable
 
 ## License
