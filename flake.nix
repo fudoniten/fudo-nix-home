@@ -15,6 +15,18 @@
       url = "github:fudoniten/doom-emacs-config";
       flake = false;
     };
+    polymuse = {
+      url = "github:fudoniten/polymuse";
+      flake = false;
+    };
+    typewrite-el = {
+      url = "github:fudoniten/typewrite.el";
+      flake = false;
+    };
+    canon-el = {
+      url = "github:fudoniten/canon.el";
+      flake = false;
+    };
     fudo-pkgs = {
       url = "github:fudoniten/fudo-nix-pkgs/24.05";
       inputs.nixpkgs.follows = "nixpkgs";

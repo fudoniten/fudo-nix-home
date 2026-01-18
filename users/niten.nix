@@ -19,6 +19,21 @@ let
 
   inherit (pkgs.stdenv) isLinux isDarwin;
 
+  # Build Emacs packages from flake inputs
+  polymusePackage = pkgs.emacsPackages.trivialBuild {
+    pname = "polymuse";
+    version = "0.1.0";
+    src = inputs.polymuse;
+    packageRequires = with pkgs.emacsPackages; [];
+  };
+
+  canonPackage = pkgs.emacsPackages.trivialBuild {
+    pname = "canon";
+    version = "0.1.0";
+    src = inputs.canon-el;
+    packageRequires = with pkgs.emacsPackages; [];
+  };
+
   sessionEnvVariables = {
     ALTERNATE_EDITOR = "";
 
@@ -155,6 +170,20 @@ in {
       desktopType = systemCfg.desktop.type;
       doomSource = inputs.doom-emacs;
       doomConfigSource = inputs.niten-doom-config;
+      emacsPackages = with pkgs.emacsPackages; [
+        chatgpt-shell
+        dirvish
+        elpher
+        flycheck-clj-kondo
+        hass
+        kubernetes
+        pylint
+        restclient
+        spotify
+        thrift
+        polymusePackage
+        canonPackage
+      ];
     };
 
     gtk.iconTheme = {
