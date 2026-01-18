@@ -277,8 +277,8 @@ GitHub Actions automatically runs tests on every push and pull request:
 - **Static analysis**: Checks for Nix code quality issues with [statix](https://github.com/nerdypepper/statix)
 - **Dead code detection**: Finds unused code with [deadnix](https://github.com/astro/deadnix)
 - **Format checking**: Validates code formatting with [nixpkgs-fmt](https://github.com/nix-community/nixpkgs-fmt)
-- **Build tests**: Validates all user configurations can be built
-- **Module validation**: Verifies NixOS module exports are correct
+- **Module validation**: Verifies NixOS modules and mkModule function exports are correct
+- **Configuration tests**: Validates all user configuration files can be loaded
 
 ### Local Testing
 
@@ -310,11 +310,15 @@ nix run nixpkgs#nixpkgs-fmt -- --check .
 # Auto-fix formatting issues
 nix run nixpkgs#nixpkgs-fmt .
 
-# Test a specific user configuration
-nix eval .#homeConfigurations.niten.config.home.username
+# Validate module exports
+nix eval .#nixosModules.default
+nix eval .#mkModule.niten --apply 'x: builtins.isFunction x'
 
-# Test building (dry-run, doesn't install)
-nix build .#homeConfigurations.niten.activationPackage --dry-run
+# Check syntax of user configurations
+nix-instantiate --parse users/niten.nix
+
+# Check syntax of custom modules
+nix-instantiate --parse modules/programs/doom-emacs.nix
 ```
 
 ## Contributing

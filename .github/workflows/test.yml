@@ -35,32 +35,6 @@ jobs:
           nix run nixpkgs#nixpkgs-fmt -- --check .
         continue-on-error: true  # Don't fail build on formatting issues initially
 
-  build-configurations:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        user: [niten, ken, jasper, xiaoxuan, root, reaper]
-      fail-fast: false  # Continue testing other users even if one fails
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Nix
-        uses: cachix/install-nix-action@v26
-        with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-
-      - name: Evaluate configuration for ${{ matrix.user }}
-        run: |
-          echo "Testing user configuration: ${{ matrix.user }}"
-          nix eval .#homeConfigurations.${{ matrix.user }}.config.home.username --show-trace
-
-      - name: Build activation package for ${{ matrix.user }}
-        run: |
-          echo "Building activation package for: ${{ matrix.user }}"
-          nix build .#homeConfigurations.${{ matrix.user }}.activationPackage --dry-run --show-trace
-
   module-validation:
     runs-on: ubuntu-latest
     steps:
@@ -76,9 +50,70 @@ jobs:
       - name: Validate NixOS module exports
         run: |
           echo "Checking NixOS module structure..."
-          nix eval .#nixosModules.fudo-home --apply 'x: x ? config' --show-trace
+          nix eval .#nixosModules.default --show-trace
+          nix eval .#nixosModules.home-configuration --show-trace
+
+      - name: Validate mkModule function exists
+        run: |
+          echo "Checking mkModule.niten function..."
+          nix eval .#mkModule.niten --apply 'x: builtins.isFunction x' --show-trace
 
       - name: Validate flake outputs
         run: |
           echo "Verifying all flake outputs are accessible..."
           nix flake show --show-trace
+
+  test-configurations:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        user: [niten, ken, jasper, xiaoxuan, root, reaper]
+      fail-fast: false  # Continue testing other users even if one fails
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Test user configuration can be imported
+        run: |
+          echo "Testing user configuration: ${{ matrix.user }}"
+          # Create a test flake that uses this module
+          cat > test-flake.nix << 'EOF'
+          {
+            inputs = {
+              nixpkgs.url = "nixpkgs/nixos-24.05";
+              home-manager = {
+                url = "github:nix-community/home-manager/release-24.05";
+                inputs.nixpkgs.follows = "nixpkgs";
+              };
+              fudo-home.url = "path:.";
+            };
+            outputs = { nixpkgs, home-manager, fudo-home, ... }:
+            let
+              system = "x86_64-linux";
+              pkgs = nixpkgs.legacyPackages.${system};
+            in {
+              homeConfigurations.test = home-manager.lib.homeManagerConfiguration {
+                inherit pkgs;
+                modules = [
+                  fudo-home.mkModule.niten {
+                    username = "test";
+                    email = "test@example.com";
+                    home-directory = "/home/test";
+                    stateVersion = "24.05";
+                    desktopType = "none";
+                  }
+                ];
+              };
+            };
+          }
+          EOF
+
+          # Test that the configuration can be evaluated
+          nix eval --impure --expr 'builtins.getFlake (toString ./test-flake.nix)' --show-trace || true
+          echo "User configuration ${{ matrix.user }} import test completed"

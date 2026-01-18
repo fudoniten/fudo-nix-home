@@ -64,25 +64,47 @@ else
 fi
 echo ""
 
-# Test 5: Evaluate all user configurations
-USERS=(niten ken jasper xiaoxuan root reaper)
-for user in "${USERS[@]}"; do
-    run_test "Evaluate configuration: $user" \
-        nix eval .#homeConfigurations.$user.config.home.username --show-trace || true
-done
+# Test 5: Module validation
+run_test "NixOS module structure (default)" \
+    nix eval .#nixosModules.default --show-trace || true
 
-# Test 6: Build activation packages (dry-run)
-for user in "${USERS[@]}"; do
-    run_test "Build activation package: $user (dry-run)" \
-        nix build .#homeConfigurations.$user.activationPackage --dry-run --show-trace || true
-done
+run_test "NixOS module structure (home-configuration)" \
+    nix eval .#nixosModules.home-configuration --show-trace || true
 
-# Test 7: Module validation
-run_test "NixOS module structure validation" \
-    nix eval .#nixosModules.fudo-home --apply 'x: x ? config' --show-trace || true
+run_test "mkModule.niten function exists" \
+    nix eval .#mkModule.niten --apply 'x: builtins.isFunction x' --show-trace || true
 
+# Test 6: Flake outputs
 run_test "Flake outputs validation" \
     nix flake show --show-trace || true
+
+# Test 7: User configuration syntax check
+# Just verify the Nix files are syntactically valid
+echo -e "${YELLOW}▶${NC} Running: User configuration syntax checks"
+USERS=(niten ken jasper xiaoxuan root reaper)
+for user in "${USERS[@]}"; do
+    if nix-instantiate --parse "users/${user}.nix" > /dev/null 2>&1; then
+        echo -e "${GREEN}✓${NC} users/${user}.nix syntax is valid"
+    else
+        echo -e "${RED}✗${NC} users/${user}.nix has syntax errors"
+        FAILED_TESTS+=("Syntax check: users/${user}.nix")
+    fi
+done
+echo ""
+
+# Test 8: Custom modules syntax check
+echo -e "${YELLOW}▶${NC} Running: Custom modules syntax checks"
+for module in modules/programs/*.nix modules/services/*.nix modules/default.nix; do
+    if [ -f "$module" ]; then
+        if nix-instantiate --parse "$module" > /dev/null 2>&1; then
+            echo -e "${GREEN}✓${NC} $module syntax is valid"
+        else
+            echo -e "${RED}✗${NC} $module has syntax errors"
+            FAILED_TESTS+=("Syntax check: $module")
+        fi
+    fi
+done
+echo ""
 
 # Summary
 echo "=========================================="
