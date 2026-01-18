@@ -266,12 +266,68 @@ The `desktopType` parameter configures environment-specific settings:
 - **`darwin`**: macOS/Darwin systems
 - **`none`**: Headless/server systems (no GUI)
 
+## Testing
+
+This repository includes automated testing to ensure configurations build correctly and catch issues early.
+
+### Continuous Integration
+
+GitHub Actions automatically runs tests on every push and pull request:
+- **Flake validation**: Ensures the flake structure is correct
+- **Static analysis**: Checks for Nix code quality issues with [statix](https://github.com/nerdypepper/statix)
+- **Dead code detection**: Finds unused code with [deadnix](https://github.com/astro/deadnix)
+- **Format checking**: Validates code formatting with [nixpkgs-fmt](https://github.com/nix-community/nixpkgs-fmt)
+- **Module validation**: Verifies NixOS modules and mkModule function exports are correct
+- **Configuration tests**: Validates all user configuration files can be loaded
+
+### Local Testing
+
+Before pushing changes, run the test suite locally:
+
+```bash
+./run-tests.sh
+```
+
+This script runs the same checks as CI and will catch most issues before they reach the repository.
+
+### Manual Testing
+
+You can also run individual checks:
+
+```bash
+# Validate flake structure
+nix flake check
+
+# Check code quality with statix
+nix run nixpkgs#statix -- check .
+
+# Find dead/unused code
+nix run nixpkgs#deadnix -- --fail .
+
+# Check code formatting
+nix run nixpkgs#nixpkgs-fmt -- --check .
+
+# Auto-fix formatting issues
+nix run nixpkgs#nixpkgs-fmt .
+
+# Validate module exports
+nix eval .#nixosModules.default
+nix eval .#mkModule.niten --apply 'x: builtins.isFunction x'
+
+# Check syntax of user configurations
+nix-instantiate --parse users/niten.nix
+
+# Check syntax of custom modules
+nix-instantiate --parse modules/programs/doom-emacs.nix
+```
+
 ## Contributing
 
 Contributions are welcome! Please ensure your changes:
 - Follow the existing code style
 - Include appropriate comments
 - Update documentation as needed
+- Pass all automated tests (run `./run-tests.sh`)
 - Test on both NixOS and non-NixOS systems when applicable
 
 ## License
