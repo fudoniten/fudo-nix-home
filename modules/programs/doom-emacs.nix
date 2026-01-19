@@ -113,8 +113,10 @@ let
             };
           };
 
-          # Polymuse music composition packages
-          polymuseLibs = inputs.polymuse.lib."${pkgs.system}";
+          # Polymuse music composition packages from separate flakes
+          polymusePkg = inputs.polymuse.packages."${pkgs.system}".default;
+          typewritePkg = inputs.typewrite.packages."${pkgs.system}".default;
+          canonPkg = inputs.canon.packages."${pkgs.system}".default;
 
         in {
           inherit doom-two-tone-themes;
@@ -123,9 +125,10 @@ let
           gptel = pkgsUnstable.emacsPackages.gptel;
 
           # Polymuse packages for music composition
-          polymuse = polymuseLibs.mkPolymuse eself;
-          canon = polymuseLibs.mkCanon eself;
-          typewrite = polymuseLibs.mkTypewrite eself;
+          # Use the packages directly from the flake outputs
+          polymuse = polymusePkg;
+          canon = canonPkg;
+          typewrite = typewritePkg;
         });
 
     in updatedEmacsPkgs.withPackages cfg.emacsPackages;
