@@ -28,6 +28,14 @@
       url = "github:fudoniten/polymuse/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    typewrite = {
+      url = "github:fudoniten/typewrite.el";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    canon = {
+      url = "github:fudoniten/canon.el";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { home-manager, ... }@inputs: {
