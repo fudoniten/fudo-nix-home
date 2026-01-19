@@ -118,7 +118,7 @@ let
           typewritePkg = inputs.typewrite.packages."${pkgs.system}".default;
           canonPkg = inputs.canon.packages."${pkgs.system}".default;
 
-        in {
+        in esuper // {
           inherit doom-two-tone-themes;
 
           # Use unstable gptel for latest AI integration
