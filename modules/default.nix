@@ -3,5 +3,6 @@
 {
   imports = [
     (import ./services)
+    (import ./locket)
   ];
 }

@@ -1,0 +1,240 @@
+#!/usr/bin/env bash
+# locket edit - Edit an existing secret
+#
+# Usage: locket edit <user> <name>
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+error() {
+    echo -e "${RED}Error:${NC} $1" >&2
+    exit 1
+}
+
+success() {
+    echo -e "${GREEN}$1${NC}"
+}
+
+info() {
+    echo -e "${BLUE}$1${NC}"
+}
+
+warn() {
+    echo -e "${YELLOW}$1${NC}"
+}
+
+show_help() {
+    cat << 'EOF'
+Usage: locket edit <user> <name>
+
+Edit an existing secret's content.
+
+Arguments:
+  <user>    Username
+  <name>    Secret name
+
+Options:
+  --key <path>    Path to a private key for decryption
+  --file <path>   Replace content from file instead of editor
+  -h, --help      Show this help message
+
+The command will:
+  1. Decrypt the secret using available keys
+  2. Open $EDITOR for you to modify the content
+  3. Re-encrypt to the same profiles
+
+You need at least one of the profile keys to decrypt the secret.
+Keys are searched in:
+  - ~/.config/locket/keys/<profile>.key
+  - Path specified with --key
+
+Examples:
+  locket edit niten ssh-github
+  locket edit niten api-token --key /path/to/my.key
+EOF
+}
+
+USER_NAME=""
+SECRET_NAME=""
+KEY_PATH=""
+INPUT_FILE=""
+KEY_DIR="${HOME}/.config/locket/keys"
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            --key)
+                KEY_PATH="$2"
+                shift 2
+                ;;
+            --file)
+                INPUT_FILE="$2"
+                shift 2
+                ;;
+            -*)
+                error "Unknown option: $1"
+                ;;
+            *)
+                if [[ -z "$USER_NAME" ]]; then
+                    USER_NAME="$1"
+                elif [[ -z "$SECRET_NAME" ]]; then
+                    SECRET_NAME="$1"
+                else
+                    error "Unexpected argument: $1"
+                fi
+                shift
+                ;;
+        esac
+    done
+}
+
+find_identity_args() {
+    local json_file="$1"
+    local args=()
+    
+    # If explicit key path provided
+    if [[ -n "$KEY_PATH" ]]; then
+        if [[ -f "$KEY_PATH" ]]; then
+            args+=("-i" "$KEY_PATH")
+        else
+            error "Key file not found: $KEY_PATH"
+        fi
+        echo "${args[@]}"
+        return
+    fi
+    
+    # Try profile-based keys
+    if command -v jq &> /dev/null && [[ -f "$json_file" ]]; then
+        local profiles
+        profiles=$(jq -r '.profiles[]' "$json_file")
+        for profile in $profiles; do
+            local key_file="$KEY_DIR/${profile}.key"
+            if [[ -f "$key_file" ]]; then
+                args+=("-i" "$key_file")
+            fi
+        done
+    fi
+    
+    # Also check for any .key files in key directory
+    if [[ -d "$KEY_DIR" ]]; then
+        while IFS= read -r -d '' keyfile; do
+            local already_added=false
+            for arg in "${args[@]:-}"; do
+                if [[ "$arg" == "$keyfile" ]]; then
+                    already_added=true
+                    break
+                fi
+            done
+            if [[ "$already_added" == "false" ]]; then
+                args+=("-i" "$keyfile")
+            fi
+        done < <(find "$KEY_DIR" -maxdepth 1 -name "*.key" -print0 2>/dev/null)
+    fi
+    
+    echo "${args[@]:-}"
+}
+
+main() {
+    parse_args "$@"
+    
+    if [[ -z "$USER_NAME" || -z "$SECRET_NAME" ]]; then
+        error "Usage: locket edit <user> <name>"
+    fi
+    
+    # Check for age command
+    if ! command -v age &> /dev/null; then
+        error "age not found. Please install age: https://github.com/FiloSottile/age"
+    fi
+    
+    local user_dir="$LOCKET_SECRETS_DIR/$USER_NAME"
+    local age_file="$user_dir/${SECRET_NAME}.age"
+    local json_file="$user_dir/${SECRET_NAME}.json"
+    
+    # Check if secret exists
+    if [[ ! -f "$age_file" ]]; then
+        error "Secret '$SECRET_NAME' not found for user '$USER_NAME'"
+    fi
+    
+    if [[ ! -f "$json_file" ]]; then
+        error "Metadata file missing for secret '$SECRET_NAME'"
+    fi
+    
+    # Find identity keys
+    local identity_args
+    identity_args=$(find_identity_args "$json_file")
+    
+    if [[ -z "$identity_args" ]]; then
+        error "No identity keys found. Provide a key with --key or place keys in $KEY_DIR/"
+    fi
+    
+    info "Decrypting secret '$SECRET_NAME'..."
+    
+    # Create temp file for editing
+    local temp_file
+    temp_file=$(mktemp)
+    trap "rm -f '$temp_file'" EXIT
+    
+    # Decrypt
+    # shellcheck disable=SC2086
+    if ! age -d $identity_args -o "$temp_file" "$age_file" 2>/dev/null; then
+        error "Failed to decrypt secret. Do you have the correct key?"
+    fi
+    
+    if [[ -n "$INPUT_FILE" ]]; then
+        # Replace from file
+        if [[ ! -f "$INPUT_FILE" ]]; then
+            error "Input file not found: $INPUT_FILE"
+        fi
+        cat "$INPUT_FILE" > "$temp_file"
+    else
+        # Open editor
+        local editor="${EDITOR:-vim}"
+        "$editor" "$temp_file"
+    fi
+    
+    # Check if content is empty
+    if [[ ! -s "$temp_file" ]]; then
+        error "Secret content is empty. Aborting."
+    fi
+    
+    # Get profiles from metadata
+    local profiles
+    if command -v jq &> /dev/null; then
+        profiles=$(jq -r '.profiles | join(",")' "$json_file")
+    else
+        error "jq is required to read secret metadata"
+    fi
+    
+    # Build recipient arguments
+    local recipient_args=()
+    IFS=',' read -ra PROFILE_ARRAY <<< "$profiles"
+    for profile in "${PROFILE_ARRAY[@]}"; do
+        profile=$(echo "$profile" | xargs)
+        local pubkey
+        pubkey=$(cat "$LOCKET_PROFILES_DIR/${profile}.pub")
+        recipient_args+=("-r" "$pubkey")
+    done
+    
+    # Re-encrypt
+    info "Re-encrypting..."
+    if ! age "${recipient_args[@]}" -o "$age_file" "$temp_file"; then
+        error "Failed to encrypt secret"
+    fi
+    
+    rm -f "$temp_file"
+    trap - EXIT
+    
+    success "Secret '$SECRET_NAME' updated successfully!"
+}
+
+main "$@"

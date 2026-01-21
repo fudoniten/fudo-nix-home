@@ -1,0 +1,268 @@
+#!/usr/bin/env bash
+# locket rekey - Re-encrypt secrets after profile changes
+#
+# Usage: locket rekey [user]
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+error() {
+    echo -e "${RED}Error:${NC} $1" >&2
+    exit 1
+}
+
+success() {
+    echo -e "${GREEN}$1${NC}"
+}
+
+info() {
+    echo -e "${BLUE}$1${NC}"
+}
+
+warn() {
+    echo -e "${YELLOW}$1${NC}"
+}
+
+show_help() {
+    cat << 'EOF'
+Usage: locket rekey [user]
+
+Re-encrypt secrets after profile key changes.
+
+Arguments:
+  [user]    Optional: only rekey secrets for this user
+
+Options:
+  --key <path>    Path to a private key for decryption
+  -h, --help      Show this help message
+
+Use this command when:
+  - You've added a new profile to a secret's metadata
+  - You've rotated a profile's keypair
+  - You want to ensure all secrets are encrypted to current profile keys
+
+You need at least one key that can decrypt each secret.
+
+Examples:
+  # Rekey all secrets
+  locket rekey
+
+  # Rekey secrets for specific user
+  locket rekey niten
+
+  # Rekey with specific key
+  locket rekey --key ~/.config/locket/keys/default.key
+EOF
+}
+
+TARGET_USER=""
+KEY_PATH=""
+KEY_DIR="${HOME}/.config/locket/keys"
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            --key)
+                KEY_PATH="$2"
+                shift 2
+                ;;
+            -*)
+                error "Unknown option: $1"
+                ;;
+            *)
+                if [[ -z "$TARGET_USER" ]]; then
+                    TARGET_USER="$1"
+                else
+                    error "Unexpected argument: $1"
+                fi
+                shift
+                ;;
+        esac
+    done
+}
+
+find_identity_args() {
+    local args=()
+    
+    # If explicit key path provided
+    if [[ -n "$KEY_PATH" ]]; then
+        if [[ -f "$KEY_PATH" ]]; then
+            args+=("-i" "$KEY_PATH")
+        else
+            error "Key file not found: $KEY_PATH"
+        fi
+        echo "${args[@]}"
+        return
+    fi
+    
+    # Find all available keys
+    if [[ -d "$KEY_DIR" ]]; then
+        while IFS= read -r -d '' keyfile; do
+            args+=("-i" "$keyfile")
+        done < <(find "$KEY_DIR" -maxdepth 1 -name "*.key" -print0 2>/dev/null)
+    fi
+    
+    echo "${args[@]:-}"
+}
+
+rekey_secret() {
+    local age_file="$1"
+    local json_file="$2"
+    local identity_args="$3"
+    
+    local secret_name
+    secret_name=$(basename "$age_file" .age)
+    
+    # Get profiles from metadata
+    if ! command -v jq &> /dev/null; then
+        error "jq is required to read secret metadata"
+    fi
+    
+    local profiles
+    profiles=$(jq -r '.profiles | join(",")' "$json_file")
+    
+    # Create temp file
+    local temp_file
+    temp_file=$(mktemp)
+    
+    # Decrypt
+    # shellcheck disable=SC2086
+    if ! age -d $identity_args -o "$temp_file" "$age_file" 2>/dev/null; then
+        rm -f "$temp_file"
+        return 1
+    fi
+    
+    # Build recipient arguments
+    local recipient_args=()
+    IFS=',' read -ra PROFILE_ARRAY <<< "$profiles"
+    for profile in "${PROFILE_ARRAY[@]}"; do
+        profile=$(echo "$profile" | xargs)
+        local pub_file="$LOCKET_PROFILES_DIR/${profile}.pub"
+        if [[ ! -f "$pub_file" ]]; then
+            warn "    Profile '$profile' not found, skipping"
+            rm -f "$temp_file"
+            return 2
+        fi
+        local pubkey
+        pubkey=$(cat "$pub_file")
+        recipient_args+=("-r" "$pubkey")
+    done
+    
+    # Re-encrypt
+    if ! age "${recipient_args[@]}" -o "$age_file" "$temp_file"; then
+        rm -f "$temp_file"
+        return 1
+    fi
+    
+    rm -f "$temp_file"
+    return 0
+}
+
+main() {
+    parse_args "$@"
+    
+    # Check for age command
+    if ! command -v age &> /dev/null; then
+        error "age not found. Please install age"
+    fi
+    
+    if ! command -v jq &> /dev/null; then
+        error "jq not found. Please install jq"
+    fi
+    
+    # Find identity keys
+    local identity_args
+    identity_args=$(find_identity_args)
+    
+    if [[ -z "$identity_args" ]]; then
+        error "No identity keys found. Provide a key with --key or place keys in $KEY_DIR/"
+    fi
+    
+    info "Re-encrypting secrets..."
+    echo
+    
+    local total=0
+    local succeeded=0
+    local failed=0
+    local skipped=0
+    
+    # Find user directories to process
+    local user_dirs=()
+    if [[ -n "$TARGET_USER" ]]; then
+        if [[ -d "$LOCKET_SECRETS_DIR/$TARGET_USER" ]]; then
+            user_dirs=("$LOCKET_SECRETS_DIR/$TARGET_USER")
+        else
+            error "No secrets found for user '$TARGET_USER'"
+        fi
+    else
+        while IFS= read -r -d '' dir; do
+            local dirname
+            dirname=$(basename "$dir")
+            # Skip profiles directory
+            if [[ "$dirname" != "profiles" ]]; then
+                user_dirs+=("$dir")
+            fi
+        done < <(find "$LOCKET_SECRETS_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+    fi
+    
+    for user_dir in "${user_dirs[@]}"; do
+        local username
+        username=$(basename "$user_dir")
+        
+        # Find all .age files
+        while IFS= read -r -d '' age_file; do
+            local secret_name
+            secret_name=$(basename "$age_file" .age)
+            local json_file="${age_file%.age}.json"
+            
+            ((total++)) || true
+            
+            if [[ ! -f "$json_file" ]]; then
+                warn "  $username/$secret_name: missing metadata, skipped"
+                ((skipped++)) || true
+                continue
+            fi
+            
+            # Get profiles for display
+            local profiles
+            profiles=$(jq -r '.profiles | join(", ")' "$json_file")
+            
+            if rekey_secret "$age_file" "$json_file" "$identity_args"; then
+                success "  $username/$secret_name: OK (profiles: $profiles)"
+                ((succeeded++)) || true
+            else
+                local exit_code=$?
+                if [[ $exit_code -eq 2 ]]; then
+                    warn "  $username/$secret_name: missing profile, skipped"
+                    ((skipped++)) || true
+                else
+                    warn "  $username/$secret_name: FAILED (missing key?)"
+                    ((failed++)) || true
+                fi
+            fi
+        done < <(find "$user_dir" -name "*.age" -print0 2>/dev/null)
+    done
+    
+    echo
+    if [[ $total -eq 0 ]]; then
+        info "No secrets found to rekey."
+    else
+        info "Summary: $succeeded succeeded, $failed failed, $skipped skipped (of $total total)"
+        
+        if [[ $failed -gt 0 ]]; then
+            exit 1
+        fi
+    fi
+}
+
+main "$@"
