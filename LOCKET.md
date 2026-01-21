@@ -52,6 +52,32 @@ Each secret is encrypted to one or more profile public keys. A host can decrypt 
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## Dependencies
+
+The `locket` scripts use `nix-shell` shebangs to automatically provide all required dependencies when run on NixOS or any system with Nix installed. The scripts will automatically fetch and use:
+
+- `age` / `age-keygen` - Encryption/decryption tool
+- `jq` - JSON parser for metadata files
+- `bash` - Shell interpreter
+- `coreutils` - Standard Unix utilities
+- `findutils` - File search utilities
+- `gnugrep` - Text search
+- `gnused` - Stream editor (for some operations)
+- `openssh` - SSH/SCP (for `locket-copy-keys` only)
+
+**No manual installation required!** The first time you run a locket script, Nix will automatically provide these dependencies. This ensures the scripts work consistently across all NixOS hosts without relying on global system state.
+
+### Optional: Add to User Profile
+
+While not required (thanks to the nix-shell shebangs), you may want to add these packages to your user profile for general use:
+
+```nix
+home.packages = with pkgs; [
+  age      # For manual encryption/decryption
+  jq       # For inspecting secret metadata
+];
+```
+
 ## Quick Start
 
 ### 1. Enable the Pre-commit Hook
@@ -376,6 +402,10 @@ Cleans up decrypted secrets on logout. Triggered by `exit.target`.
 5. **Audit trail** - Git history shows metadata changes (who added/modified secrets, which profiles).
 
 ## Troubleshooting
+
+### First run is slow
+
+The first time you run a locket script, `nix-shell` needs to fetch dependencies. This is a one-time cost - subsequent runs will be fast as dependencies are cached.
 
 ### "No identity keys found"
 

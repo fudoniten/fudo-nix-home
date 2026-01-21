@@ -44,6 +44,9 @@ in {
         pv                     # Pipe viewer
         racket                 # Racket programming language
 
+        # Secrets management (locket dependencies)
+        age                    # Modern encryption tool for locket secrets
+
         # Media
         spotify                # Music streaming
         xclip                  # X11 clipboard utility
