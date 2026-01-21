@@ -1,3 +1,17 @@
+# Fudo Home Manager Configuration
+#
+# This flake provides Home Manager configurations for Fudo Project users.
+#
+# Outputs:
+#   nixosModules.default / nixosModules.home-configuration
+#     - NixOS module for system-wide integration via fudo.home-manager options
+#
+#   mkModule.niten
+#     - Standalone Home Manager module for the niten user configuration
+#     - Can be used outside of NixOS (e.g., on macOS or non-NixOS Linux)
+#
+# See README.md for usage examples and documentation.
+
 {
   description = "Fudo Home Manager Configuration";
 

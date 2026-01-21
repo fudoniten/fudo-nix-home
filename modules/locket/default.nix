@@ -1,3 +1,16 @@
+# Locket - Profile-based secrets management for Home Manager
+#
+# This module provides:
+# - Systemd user units that watch for profile keys and trigger decryption
+# - Automatic cleanup of decrypted secrets on logout/reboot
+# - Support for symlink or copy modes for secret placement
+#
+# Secrets are stored encrypted in the repository and only decrypted when
+# the corresponding profile key is present on the host. Decrypted secrets
+# are stored in tmpfs (XDG_RUNTIME_DIR) for automatic cleanup.
+#
+# See LOCKET.md for full documentation and usage instructions.
+
 { config, lib, pkgs, ... }:
 
 with lib;

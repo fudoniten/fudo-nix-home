@@ -1,3 +1,25 @@
+# SuperCollider Audio Synthesis Server Module
+#
+# This module provides a systemd user service for running the SuperCollider
+# audio synthesis server (scsynth). SuperCollider is a platform for audio
+# synthesis and algorithmic composition, used by musicians, artists, and
+# researchers working with sound.
+#
+# The service starts automatically with the graphical session and restarts
+# on failure. It creates the necessary synthdef directory if it doesn't exist.
+#
+# Usage:
+#   services.supercollider = {
+#     enable = true;
+#     port = 57110;        # Default SC port
+#     memory = 8192;       # Memory allocation in MB
+#     listen-address = "127.0.0.1";  # Bind address
+#   };
+#
+# Environment variables set:
+#   SUPERCOLLIDER_HOST - The listen address
+#   SUPERCOLLIDER_PORT - The server port
+
 { config, lib, pkgs, ... }:
 
 with lib;

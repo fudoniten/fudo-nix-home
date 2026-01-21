@@ -1,3 +1,29 @@
+# Fudo Home Manager NixOS Module
+#
+# This module integrates Home Manager configurations into NixOS systems.
+# It provides the `fudo.home-manager` option namespace for configuring
+# user home directories declaratively.
+#
+# Features:
+# - Automatic user configuration loading from users/<username>.nix
+# - Desktop type configuration (x, wayland, darwin, none)
+# - Stylix theming integration
+# - Support for custom user-to-config mappings (config-user option)
+#
+# Usage:
+#   fudo.home-manager = {
+#     enable = true;
+#     users = [{
+#       username = "niten";
+#       email = "niten@fudo.org";
+#       home-directory = "/home/niten";
+#     }];
+#     system = {
+#       desktop.type = "wayland";
+#       stateVersion = "25.05";
+#     };
+#   };
+
 { stylix, nixpkgsUnstable, ... }@inputs:
 
 { config, lib, pkgs, ... }:

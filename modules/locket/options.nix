@@ -1,3 +1,17 @@
+# Locket Options
+#
+# This module defines the configuration options for Locket secrets management.
+# See LOCKET.md for full documentation on the secrets system.
+#
+# Key concepts:
+# - Profiles: Named groups that control which secrets a host can decrypt
+# - Secrets: Encrypted files stored in secrets/<user>/<name>.age
+# - Methods: How secrets are placed (symlink to tmpfs or copy to target)
+#
+# Secrets are only decrypted when the corresponding profile key is present
+# in the keyDirectory. Decrypted secrets are stored in tmpfs and cleaned
+# up automatically on logout/reboot.
+
 { lib, ... }:
 
 with lib;
