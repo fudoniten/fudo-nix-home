@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env nix-shell
+#! nix-shell -i bash -p age bash coreutils findutils gnugrep gnused
 # locket add - Add a new secret
 #
 # Usage: locket add <user> <name> --target <path> --profiles <p1,p2,...> [options]

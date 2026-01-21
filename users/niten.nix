@@ -57,6 +57,9 @@ let
     jdk                    # Java Development Kit
     ruby                   # Ruby programming language
 
+    # Secrets management (locket dependencies)
+    age                    # Modern encryption tool for locket secrets
+
     # Development tools - Nix ecosystem
     nil                    # Nix language server for IDE integration
     nixfmt-classic         # Nix code formatter

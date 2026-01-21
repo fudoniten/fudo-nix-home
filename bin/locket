@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env nix-shell
+#! nix-shell -i bash -p age bash coreutils findutils
 # Locket - Profile-based secrets management for NixOS Home Manager
 #
 # Usage: locket <command> [args]

@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env nix-shell
+#! nix-shell -i bash -p age bash coreutils findutils jq
 # locket edit - Edit an existing secret
 #
 # Usage: locket edit <user> <name>

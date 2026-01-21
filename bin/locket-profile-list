@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env nix-shell
+#! nix-shell -i bash -p bash coreutils findutils gnugrep jq
 # locket profile-list - List all profiles and their usage
 #
 # Usage: locket profile-list
