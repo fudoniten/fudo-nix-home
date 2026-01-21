@@ -1,0 +1,227 @@
+name: Locket Secrets Validation
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'secrets/**'
+      - 'bin/locket*'
+      - '.github/workflows/locket.yml'
+  pull_request:
+    branches: ['**']
+    paths:
+      - 'secrets/**'
+      - 'bin/locket*'
+      - '.github/workflows/locket.yml'
+
+jobs:
+  locket-check:
+    name: Validate Secrets Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Run locket check
+        run: |
+          export LOCKET_REPO_ROOT="${GITHUB_WORKSPACE}"
+          export LOCKET_SECRETS_DIR="${GITHUB_WORKSPACE}/secrets"
+          export LOCKET_PROFILES_DIR="${GITHUB_WORKSPACE}/secrets/profiles"
+          ./bin/locket-check --verbose
+
+  no-private-keys:
+    name: Check for Private Keys
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for diff
+
+      - name: Check for private key files in commit
+        run: |
+          echo "Checking for private key files..."
+          
+          # Patterns that indicate private keys
+          KEY_PATTERNS=(
+            '*.key'
+            '*.pem'
+            'id_rsa'
+            'id_ed25519'
+            'id_ecdsa'
+            'id_dsa'
+            '*_rsa'
+            '*_ed25519'
+            '*_ecdsa'
+            '*_dsa'
+          )
+          
+          FOUND_KEYS=false
+          
+          for pattern in "${KEY_PATTERNS[@]}"; do
+            # Find files matching pattern (excluding .pub files)
+            MATCHES=$(find . -name "$pattern" -type f ! -name "*.pub" ! -path "./.git/*" 2>/dev/null || true)
+            if [[ -n "$MATCHES" ]]; then
+              echo "::error::Found files matching private key pattern '$pattern':"
+              echo "$MATCHES"
+              FOUND_KEYS=true
+            fi
+          done
+          
+          if [[ "$FOUND_KEYS" == "true" ]]; then
+            echo ""
+            echo "::error::Private key files detected in repository!"
+            echo "These files should never be committed. Use 'locket add' to encrypt secrets."
+            exit 1
+          fi
+          
+          echo "✓ No private key files found"
+
+      - name: Check for AGE-SECRET-KEY in files
+        run: |
+          echo "Checking for embedded private keys in file contents..."
+          
+          # Search for age secret keys in file contents
+          if grep -r "AGE-SECRET-KEY-" --include="*" --exclude-dir=".git" . 2>/dev/null; then
+            echo ""
+            echo "::error::Found AGE-SECRET-KEY in repository files!"
+            echo "Private keys should never be committed to the repository."
+            exit 1
+          fi
+          
+          # Search for common private key headers
+          PRIVATE_KEY_HEADERS=(
+            "-----BEGIN.*PRIVATE KEY-----"
+            "-----BEGIN RSA PRIVATE KEY-----"
+            "-----BEGIN EC PRIVATE KEY-----"
+            "-----BEGIN OPENSSH PRIVATE KEY-----"
+          )
+          
+          for header in "${PRIVATE_KEY_HEADERS[@]}"; do
+            if grep -r -E "$header" --include="*" --exclude-dir=".git" --exclude="*.md" . 2>/dev/null; then
+              echo ""
+              echo "::error::Found private key header '$header' in repository!"
+              exit 1
+            fi
+          done
+          
+          echo "✓ No embedded private keys found in file contents"
+
+  validate-secrets-metadata:
+    name: Validate Secrets Metadata
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('secrets/**/*.json') != '' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Validate JSON metadata files
+        run: |
+          echo "Validating secrets metadata..."
+          ERRORS=0
+          
+          # Find all JSON files in secrets directory (excluding profiles)
+          while IFS= read -r -d '' json_file; do
+            # Skip profiles directory
+            if [[ "$json_file" == *"/profiles/"* ]]; then
+              continue
+            fi
+            
+            echo "Checking: $json_file"
+            
+            # Validate JSON syntax
+            if ! jq empty "$json_file" 2>/dev/null; then
+              echo "::error file=$json_file::Invalid JSON syntax"
+              ((ERRORS++)) || true
+              continue
+            fi
+            
+            # Check required fields
+            PROFILES=$(jq -r '.profiles // empty' "$json_file")
+            TARGET=$(jq -r '.target // empty' "$json_file")
+            
+            if [[ -z "$PROFILES" ]]; then
+              echo "::error file=$json_file::Missing required field 'profiles'"
+              ((ERRORS++)) || true
+            fi
+            
+            if [[ -z "$TARGET" ]]; then
+              echo "::error file=$json_file::Missing required field 'target'"
+              ((ERRORS++)) || true
+            fi
+            
+            # Validate method if present
+            METHOD=$(jq -r '.method // empty' "$json_file")
+            if [[ -n "$METHOD" ]] && [[ "$METHOD" != "symlink" ]] && [[ "$METHOD" != "copy" ]]; then
+              echo "::error file=$json_file::Invalid method '$METHOD' (must be 'symlink' or 'copy')"
+              ((ERRORS++)) || true
+            fi
+            
+            # Validate mode format if present
+            MODE=$(jq -r '.mode // empty' "$json_file")
+            if [[ -n "$MODE" ]] && [[ ! "$MODE" =~ ^[0-7]{3,4}$ ]]; then
+              echo "::error file=$json_file::Invalid mode '$MODE' (must be octal, e.g., 0600)"
+              ((ERRORS++)) || true
+            fi
+            
+          done < <(find secrets -name "*.json" -print0 2>/dev/null)
+          
+          if [[ $ERRORS -gt 0 ]]; then
+            echo ""
+            echo "::error::Found $ERRORS validation error(s) in secrets metadata"
+            exit 1
+          fi
+          
+          echo "✓ All secrets metadata is valid"
+
+  check-age-encryption:
+    name: Verify Age Encryption
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('secrets/**/*.age') != '' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install age
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y age
+
+      - name: Verify .age files are properly encrypted
+        run: |
+          echo "Verifying .age files are encrypted..."
+          ERRORS=0
+          
+          while IFS= read -r -d '' age_file; do
+            echo "Checking: $age_file"
+            
+            # Check if file starts with age header
+            # age encrypted files start with "age-encryption.org" header
+            if ! head -c 20 "$age_file" | grep -q "age-encryption.org"; then
+              echo "::error file=$age_file::File does not appear to be age-encrypted"
+              ((ERRORS++)) || true
+            fi
+            
+            # Check corresponding .json exists
+            json_file="${age_file%.age}.json"
+            if [[ ! -f "$json_file" ]]; then
+              echo "::warning file=$age_file::Missing metadata file: $json_file"
+            fi
+            
+          done < <(find secrets -name "*.age" -print0 2>/dev/null)
+          
+          if [[ $ERRORS -gt 0 ]]; then
+            echo ""
+            echo "::error::Found $ERRORS file(s) that are not properly age-encrypted"
+            exit 1
+          fi
+          
+          echo "✓ All .age files are properly encrypted"
