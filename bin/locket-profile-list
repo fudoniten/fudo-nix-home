@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# locket profile-list - List all profiles and their usage
+#
+# Usage: locket profile-list
+
+set -euo pipefail
+
+# Colors for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+DIM='\033[2m'
+NC='\033[0m' # No Color
+
+main() {
+    if [[ ! -d "$LOCKET_PROFILES_DIR" ]]; then
+        echo "No profiles directory found at: $LOCKET_PROFILES_DIR"
+        echo "Run 'locket profile-create <name>' to create your first profile."
+        exit 0
+    fi
+    
+    local profiles=()
+    while IFS= read -r -d '' pubfile; do
+        local name
+        name=$(basename "$pubfile" .pub)
+        profiles+=("$name")
+    done < <(find "$LOCKET_PROFILES_DIR" -maxdepth 1 -name "*.pub" -print0 2>/dev/null | sort -z)
+    
+    if [[ ${#profiles[@]} -eq 0 ]]; then
+        echo "No profiles found."
+        echo "Run 'locket profile-create <name>' to create your first profile."
+        exit 0
+    fi
+    
+    echo -e "${BLUE}Profiles:${NC}"
+    echo
+    
+    for profile in "${profiles[@]}"; do
+        # Count secrets using this profile
+        local count=0
+        
+        # Search through all user directories for secrets using this profile
+        if [[ -d "$LOCKET_SECRETS_DIR" ]]; then
+            while IFS= read -r -d '' jsonfile; do
+                if command -v jq &> /dev/null; then
+                    if jq -e --arg p "$profile" '.profiles | index($p)' "$jsonfile" &>/dev/null; then
+                        ((count++)) || true
+                    fi
+                else
+                    # Fallback: simple grep
+                    if grep -q "\"$profile\"" "$jsonfile" 2>/dev/null; then
+                        ((count++)) || true
+                    fi
+                fi
+            done < <(find "$LOCKET_SECRETS_DIR" -name "*.json" -print0 2>/dev/null)
+        fi
+        
+        local pubkey
+        pubkey=$(cat "$LOCKET_PROFILES_DIR/${profile}.pub" 2>/dev/null | head -1)
+        local short_key="${pubkey:0:20}..."
+        
+        printf "  ${GREEN}%-20s${NC} ${DIM}(%d secrets)${NC}\n" "$profile" "$count"
+        printf "    ${DIM}%s${NC}\n" "$short_key"
+    done
+}
+
+main "$@"

@@ -1,2 +1,14 @@
 .aider*
 .env
+
+# Locket secrets - never commit private keys
+*.key
+secrets/**/*.key
+
+# Ignore any files that look like unencrypted secrets
+# (encrypted files should be .age, metadata should be .json)
+secrets/**/*.pem
+secrets/**/id_rsa
+secrets/**/id_ed25519
+secrets/**/id_ecdsa
+secrets/**/id_dsa

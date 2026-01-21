@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+# Locket - Profile-based secrets management for NixOS Home Manager
+#
+# Usage: locket <command> [args]
+#
+# Commands:
+#   profile-create  Create a new profile
+#   profile-list    List all profiles
+#   add             Add a new secret
+#   remove          Remove a secret
+#   edit            Edit an existing secret
+#   rekey           Re-encrypt secrets after key changes
+#   list            List secrets for a user
+#   check           Validate secrets directory (for pre-commit)
+#   copy-keys       Copy profile keys to a remote host
+#   help            Show this help message
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Find the repository root (where secrets/ directory should be)
+find_repo_root() {
+    local dir="$SCRIPT_DIR"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -d "$dir/secrets" ]] || [[ -d "$dir/.git" ]]; then
+            echo "$dir"
+            return 0
+        fi
+        dir="$(dirname "$dir")"
+    done
+    # Default to script directory's parent if not found
+    dirname "$SCRIPT_DIR"
+}
+
+export LOCKET_REPO_ROOT="${LOCKET_REPO_ROOT:-$(find_repo_root)}"
+export LOCKET_SECRETS_DIR="${LOCKET_SECRETS_DIR:-$LOCKET_REPO_ROOT/secrets}"
+export LOCKET_PROFILES_DIR="${LOCKET_PROFILES_DIR:-$LOCKET_SECRETS_DIR/profiles}"
+
+show_help() {
+    cat << 'EOF'
+Locket - Profile-based secrets management for NixOS Home Manager
+
+Usage: locket <command> [args]
+
+Commands:
+  profile-create <name>     Create a new profile keypair
+  profile-list              List all profiles and their usage
+
+  add <user> <name>         Add a new secret
+    --target <path>           Target path relative to $HOME (required)
+    --profiles <p1,p2,...>    Profiles that can decrypt (required)
+    --mode <mode>             File permissions (default: 0600)
+    --method <symlink|copy>   Placement method (default: symlink)
+    --description <text>      Human-readable description
+
+  remove <user> <name>      Remove a secret
+
+  edit <user> <name>        Edit an existing secret's content
+
+  rekey [user]              Re-encrypt secrets (all users or specific user)
+
+  list [user]               List secrets (all users or specific user)
+
+  check                     Validate secrets directory structure
+
+  copy-keys <host> <p...>   Copy profile keys to a remote host
+    --all                     Copy all available keys
+
+  help                      Show this help message
+
+Environment Variables:
+  LOCKET_REPO_ROOT      Repository root directory
+  LOCKET_SECRETS_DIR    Secrets directory (default: $LOCKET_REPO_ROOT/secrets)
+  LOCKET_PROFILES_DIR   Profiles directory (default: $LOCKET_SECRETS_DIR/profiles)
+  EDITOR                Editor for secret content (default: vim)
+
+Examples:
+  # Create a new profile
+  locket profile-create desktop
+
+  # Add an SSH key secret
+  locket add niten ssh-github \
+    --target ".ssh/id_github" \
+    --profiles default,desktop \
+    --mode 0600 \
+    --method copy
+
+  # Edit an existing secret
+  locket edit niten ssh-github
+
+  # List all secrets
+  locket list
+
+  # Validate before commit
+  locket check
+
+  # Copy keys to a remote host
+  locket copy-keys myserver default desktop
+EOF
+}
+
+# Ensure required directories exist
+ensure_directories() {
+    mkdir -p "$LOCKET_SECRETS_DIR"
+    mkdir -p "$LOCKET_PROFILES_DIR"
+}
+
+main() {
+    if [[ $# -lt 1 ]]; then
+        show_help
+        exit 1
+    fi
+
+    local command="$1"
+    shift
+
+    case "$command" in
+        profile-create)
+            ensure_directories
+            exec "$SCRIPT_DIR/locket-profile-create" "$@"
+            ;;
+        profile-list)
+            ensure_directories
+            exec "$SCRIPT_DIR/locket-profile-list" "$@"
+            ;;
+        add)
+            ensure_directories
+            exec "$SCRIPT_DIR/locket-add" "$@"
+            ;;
+        remove)
+            ensure_directories
+            exec "$SCRIPT_DIR/locket-remove" "$@"
+            ;;
+        edit)
+            ensure_directories
+            exec "$SCRIPT_DIR/locket-edit" "$@"
+            ;;
+        rekey)
+            ensure_directories
+            exec "$SCRIPT_DIR/locket-rekey" "$@"
+            ;;
+        list)
+            ensure_directories
+            exec "$SCRIPT_DIR/locket-list" "$@"
+            ;;
+        check)
+            ensure_directories
+            exec "$SCRIPT_DIR/locket-check" "$@"
+            ;;
+        copy-keys)
+            exec "$SCRIPT_DIR/locket-copy-keys" "$@"
+            ;;
+        help|--help|-h)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo "Error: Unknown command '$command'"
+            echo "Run 'locket help' for usage information."
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

@@ -1,0 +1,219 @@
+#!/usr/bin/env bash
+# locket-copy-keys - Copy profile keys to a remote host
+#
+# Usage: locket-copy-keys <host> <profile...>
+#        locket-copy-keys <host> --all
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+error() {
+    echo -e "${RED}Error:${NC} $1" >&2
+    exit 1
+}
+
+success() {
+    echo -e "${GREEN}$1${NC}"
+}
+
+info() {
+    echo -e "${BLUE}$1${NC}"
+}
+
+warn() {
+    echo -e "${YELLOW}$1${NC}"
+}
+
+show_help() {
+    cat << 'EOF'
+Usage: locket-copy-keys <host> <profile...>
+       locket-copy-keys <host> --all
+
+Copy profile private keys to a remote host via SSH.
+
+Arguments:
+  <host>          Remote host (user@hostname or SSH config alias)
+  <profile...>    One or more profile names to copy
+
+Options:
+  --all           Copy all available profile keys
+  --key-dir <dir> Local key directory (default: ~/.config/locket/keys)
+  --remote-dir <dir> Remote key directory (default: .config/locket/keys)
+  --dry-run       Show what would be copied without copying
+  -h, --help      Show this help message
+
+The command will:
+  1. Find the specified profile keys locally
+  2. Create the remote key directory if needed
+  3. Copy keys via scp with secure permissions
+
+Examples:
+  # Copy specific profiles
+  locket-copy-keys myserver default desktop
+
+  # Copy all available keys
+  locket-copy-keys myserver --all
+
+  # Copy to specific user
+  locket-copy-keys niten@myserver default
+
+  # Dry run to see what would be copied
+  locket-copy-keys myserver --all --dry-run
+EOF
+}
+
+HOST=""
+PROFILES=()
+COPY_ALL=false
+KEY_DIR="${HOME}/.config/locket/keys"
+REMOTE_DIR=".config/locket/keys"
+DRY_RUN=false
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            --all)
+                COPY_ALL=true
+                shift
+                ;;
+            --key-dir)
+                KEY_DIR="$2"
+                shift 2
+                ;;
+            --remote-dir)
+                REMOTE_DIR="$2"
+                shift 2
+                ;;
+            --dry-run)
+                DRY_RUN=true
+                shift
+                ;;
+            -*)
+                error "Unknown option: $1"
+                ;;
+            *)
+                if [[ -z "$HOST" ]]; then
+                    HOST="$1"
+                else
+                    PROFILES+=("$1")
+                fi
+                shift
+                ;;
+        esac
+    done
+}
+
+main() {
+    parse_args "$@"
+    
+    # Validate arguments
+    if [[ -z "$HOST" ]]; then
+        error "Host required. Usage: locket-copy-keys <host> <profile...>"
+    fi
+    
+    if [[ "$COPY_ALL" == "false" && ${#PROFILES[@]} -eq 0 ]]; then
+        error "Specify profiles to copy or use --all"
+    fi
+    
+    # Check local key directory exists
+    if [[ ! -d "$KEY_DIR" ]]; then
+        error "Local key directory not found: $KEY_DIR"
+    fi
+    
+    # Find keys to copy
+    local keys_to_copy=()
+    
+    if [[ "$COPY_ALL" == "true" ]]; then
+        # Find all .key files
+        while IFS= read -r -d '' keyfile; do
+            keys_to_copy+=("$keyfile")
+        done < <(find "$KEY_DIR" -maxdepth 1 -name "*.key" -print0 2>/dev/null)
+        
+        if [[ ${#keys_to_copy[@]} -eq 0 ]]; then
+            error "No keys found in $KEY_DIR"
+        fi
+    else
+        # Find specified profiles
+        for profile in "${PROFILES[@]}"; do
+            local keyfile="$KEY_DIR/${profile}.key"
+            if [[ -f "$keyfile" ]]; then
+                keys_to_copy+=("$keyfile")
+            else
+                warn "Key not found for profile '$profile': $keyfile"
+            fi
+        done
+        
+        if [[ ${#keys_to_copy[@]} -eq 0 ]]; then
+            error "No keys found to copy"
+        fi
+    fi
+    
+    # Show what will be copied
+    info "Keys to copy to $HOST:"
+    for keyfile in "${keys_to_copy[@]}"; do
+        local profile_name
+        profile_name=$(basename "$keyfile" .key)
+        echo "  - $profile_name"
+    done
+    echo
+    
+    if [[ "$DRY_RUN" == "true" ]]; then
+        info "Dry run - no files copied"
+        exit 0
+    fi
+    
+    # Create remote directory
+    info "Creating remote directory..."
+    if ! ssh "$HOST" "mkdir -p ~/$REMOTE_DIR && chmod 700 ~/$REMOTE_DIR"; then
+        error "Failed to create remote directory"
+    fi
+    
+    # Copy keys
+    info "Copying keys..."
+    local copied=0
+    local failed=0
+    
+    for keyfile in "${keys_to_copy[@]}"; do
+        local profile_name
+        profile_name=$(basename "$keyfile" .key)
+        local remote_path="~/$REMOTE_DIR/${profile_name}.key"
+        
+        if scp -q "$keyfile" "$HOST:$remote_path"; then
+            # Set permissions on remote
+            if ssh "$HOST" "chmod 600 ~/$REMOTE_DIR/${profile_name}.key"; then
+                success "  Copied: $profile_name"
+                ((copied++)) || true
+            else
+                warn "  Copied but failed to set permissions: $profile_name"
+                ((copied++)) || true
+            fi
+        else
+            warn "  Failed: $profile_name"
+            ((failed++)) || true
+        fi
+    done
+    
+    echo
+    if [[ $failed -eq 0 ]]; then
+        success "Successfully copied $copied key(s) to $HOST"
+    else
+        warn "Copied $copied key(s), $failed failed"
+    fi
+    
+    echo
+    info "The locket systemd service should automatically detect the keys"
+    info "and decrypt secrets. To manually trigger:"
+    echo "  ssh $HOST 'systemctl --user start locket-decrypt.service'"
+}
+
+main "$@"

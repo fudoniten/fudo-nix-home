@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Pre-commit hook for Locket secrets validation
+#
+# Install with:
+#   git config core.hooksPath .githooks
+#
+# Or symlink:
+#   ln -sf ../../.githooks/pre-commit .git/hooks/pre-commit
+
+set -euo pipefail
+
+# Find repository root
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+# Check if secrets directory exists and has changes
+if [[ ! -d "$REPO_ROOT/secrets" ]]; then
+    exit 0
+fi
+
+# Check if any secrets files are being committed
+STAGED_SECRETS=$(git diff --cached --name-only -- 'secrets/' || true)
+if [[ -z "$STAGED_SECRETS" ]]; then
+    exit 0
+fi
+
+echo "Locket: Validating secrets..."
+
+# Run locket check
+export LOCKET_REPO_ROOT="$REPO_ROOT"
+export LOCKET_SECRETS_DIR="$REPO_ROOT/secrets"
+export LOCKET_PROFILES_DIR="$REPO_ROOT/secrets/profiles"
+
+# Find locket-check in bin directory or PATH
+LOCKET_CHECK=""
+if [[ -x "$REPO_ROOT/bin/locket-check" ]]; then
+    LOCKET_CHECK="$REPO_ROOT/bin/locket-check"
+elif command -v locket-check &> /dev/null; then
+    LOCKET_CHECK="locket-check"
+elif command -v locket &> /dev/null; then
+    LOCKET_CHECK="locket check"
+fi
+
+if [[ -z "$LOCKET_CHECK" ]]; then
+    echo "Warning: locket-check not found, skipping validation"
+    exit 0
+fi
+
+if ! $LOCKET_CHECK; then
+    echo
+    echo "Locket validation failed. Please fix the issues above."
+    echo "You can run 'locket check' manually for details."
+    exit 1
+fi
+
+# Extra safety: check for private keys in staged files
+STAGED_KEYS=$(git diff --cached --name-only | grep -E '\.(key|pem)$' || true)
+if [[ -n "$STAGED_KEYS" ]]; then
+    echo
+    echo "ERROR: Attempting to commit what looks like private key files:"
+    echo "$STAGED_KEYS"
+    echo
+    echo "If these are intentionally encrypted or public keys, rename them."
+    exit 1
+fi
+
+# Check for files that look like they should be encrypted
+SUSPICIOUS=$(git diff --cached --name-only -- 'secrets/' | grep -v -E '\.(age|json|pub)$' || true)
+if [[ -n "$SUSPICIOUS" ]]; then
+    echo
+    echo "WARNING: Non-standard files in secrets directory:"
+    echo "$SUSPICIOUS"
+    echo
+    echo "Files in secrets/ should be .age (encrypted), .json (metadata), or .pub (public keys)"
+    # This is a warning, not a failure
+fi
+
+echo "Locket: All checks passed."

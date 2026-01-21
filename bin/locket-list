@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# locket list - List secrets
+#
+# Usage: locket list [user]
+
+set -euo pipefail
+
+# Colors for output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+DIM='\033[2m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+show_help() {
+    cat << 'EOF'
+Usage: locket list [user]
+
+List secrets in the repository.
+
+Arguments:
+  [user]    Optional: only list secrets for this user
+
+Options:
+  -h, --help    Show this help message
+
+Examples:
+  locket list
+  locket list niten
+EOF
+}
+
+TARGET_USER=""
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            -*)
+                echo "Unknown option: $1" >&2
+                exit 1
+                ;;
+            *)
+                if [[ -z "$TARGET_USER" ]]; then
+                    TARGET_USER="$1"
+                else
+                    echo "Unexpected argument: $1" >&2
+                    exit 1
+                fi
+                shift
+                ;;
+        esac
+    done
+}
+
+main() {
+    parse_args "$@"
+    
+    if [[ ! -d "$LOCKET_SECRETS_DIR" ]]; then
+        echo "No secrets directory found."
+        exit 0
+    fi
+    
+    # Find user directories to process
+    local user_dirs=()
+    if [[ -n "$TARGET_USER" ]]; then
+        if [[ -d "$LOCKET_SECRETS_DIR/$TARGET_USER" ]]; then
+            user_dirs=("$LOCKET_SECRETS_DIR/$TARGET_USER")
+        else
+            echo "No secrets found for user '$TARGET_USER'"
+            exit 0
+        fi
+    else
+        while IFS= read -r -d '' dir; do
+            local dirname
+            dirname=$(basename "$dir")
+            # Skip profiles directory
+            if [[ "$dirname" != "profiles" ]]; then
+                user_dirs+=("$dir")
+            fi
+        done < <(find "$LOCKET_SECRETS_DIR" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | sort -z)
+    fi
+    
+    if [[ ${#user_dirs[@]} -eq 0 ]]; then
+        echo "No secrets found."
+        exit 0
+    fi
+    
+    local has_jq=false
+    if command -v jq &> /dev/null; then
+        has_jq=true
+    fi
+    
+    for user_dir in "${user_dirs[@]}"; do
+        local username
+        username=$(basename "$user_dir")
+        
+        # Count secrets for this user
+        local secret_count=0
+        while IFS= read -r -d '' _; do
+            ((secret_count++)) || true
+        done < <(find "$user_dir" -name "*.age" -print0 2>/dev/null)
+        
+        if [[ $secret_count -eq 0 ]]; then
+            continue
+        fi
+        
+        echo -e "${BLUE}Secrets for '$username':${NC}"
+        echo
+        
+        # List secrets
+        while IFS= read -r -d '' age_file; do
+            local secret_name
+            secret_name=$(basename "$age_file" .age)
+            local json_file="${age_file%.age}.json"
+            
+            if [[ -f "$json_file" ]] && [[ "$has_jq" == "true" ]]; then
+                local target profiles method mode description
+                target=$(jq -r '.target // ""' "$json_file")
+                profiles=$(jq -r '.profiles | join(", ")' "$json_file")
+                method=$(jq -r '.method // "symlink"' "$json_file")
+                mode=$(jq -r '.mode // "0600"' "$json_file")
+                description=$(jq -r '.description // ""' "$json_file")
+                
+                printf "  ${GREEN}%-20s${NC} -> ${CYAN}~/%s${NC}\n" "$secret_name" "$target"
+                printf "    ${DIM}profiles: [%s]  method: %s  mode: %s${NC}\n" "$profiles" "$method" "$mode"
+                if [[ -n "$description" ]]; then
+                    printf "    ${DIM}%s${NC}\n" "$description"
+                fi
+            else
+                printf "  ${GREEN}%s${NC}\n" "$secret_name"
+                if [[ ! -f "$json_file" ]]; then
+                    printf "    ${DIM}(metadata missing)${NC}\n"
+                fi
+            fi
+        done < <(find "$user_dir" -name "*.age" -print0 2>/dev/null | sort -z)
+        
+        echo
+    done
+}
+
+main "$@"
