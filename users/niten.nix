@@ -12,9 +12,10 @@ let
   _ = assert assertMsg (username != null && username != "")
     "username is required";
     assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
-    "systemCfg.desktop.type is required";
-    assert assertMsg (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
-    "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
+      "systemCfg.desktop.type is required";
+    assert assertMsg
+      (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
+      "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
     null;
 
   inherit (pkgs.stdenv) isLinux isDarwin;
@@ -35,100 +36,101 @@ let
   # Common packages available on all systems (both GUI and headless)
   commonPackages = with pkgs; [
     # Network utilities
-    dnsutils               # DNS lookup tools (dig, nslookup)
-    curl                   # HTTP client
-    wget                   # File downloader
-    (mosh.override { openssh = openssh_gssapi; })  # Mobile shell
-    mtr                    # Network diagnostic tool (traceroute + ping)
-    inetutils              # Network utilities (telnet, ftp, etc.)
+    dnsutils # DNS lookup tools (dig, nslookup)
+    curl # HTTP client
+    wget # File downloader
+    (mosh.override { openssh = openssh_gssapi; }) # Mobile shell
+    mtr # Network diagnostic tool (traceroute + ping)
+    inetutils # Network utilities (telnet, ftp, etc.)
 
     # Development tools - Build systems and compilers
-    gcc                    # GNU Compiler Collection
-    gnumake                # GNU Make build system
-    cmake                  # Cross-platform build system
-    stdenv                 # Standard build environment
+    gcc # GNU Compiler Collection
+    gnumake # GNU Make build system
+    cmake # Cross-platform build system
+    stdenv # Standard build environment
 
     # Development tools - Languages and runtimes
-    cargo                  # Rust package manager
-    rustc                  # Rust compiler
-    clojure                # Clojure programming language
-    go                     # Go programming language
-    guile                  # GNU Guile Scheme
-    jdk                    # Java Development Kit
-    ruby                   # Ruby programming language
+    cargo # Rust package manager
+    rustc # Rust compiler
+    clojure # Clojure programming language
+    go # Go programming language
+    guile # GNU Guile Scheme
+    jdk # Java Development Kit
+    ruby # Ruby programming language
 
     # Secrets management (locket dependencies)
-    age                    # Modern encryption tool for locket secrets
+    age # Modern encryption tool for locket secrets
 
     # Development tools - Nix ecosystem
-    nil                    # Nix language server for IDE integration
-    nixfmt-classic         # Nix code formatter
-    nix-index              # Search for packages by executable name
-    nix-prefetch-git       # Fetch git repositories for Nix
-    nix-prefetch-github    # Fetch GitHub repositories for Nix
-    bundix                 # Convert Ruby Gemfiles to Nix expressions
-    manix                  # Search NixOS documentation
-    statix                 # Nix linter for code quality
+    nil # Nix language server for IDE integration
+    nixfmt-classic # Nix code formatter
+    nix-index # Search for packages by executable name
+    nix-prefetch-git # Fetch git repositories for Nix
+    nix-prefetch-github # Fetch GitHub repositories for Nix
+    bundix # Convert Ruby Gemfiles to Nix expressions
+    manix # Search NixOS documentation
+    statix # Nix linter for code quality
 
     # File and text utilities
-    file                   # Determine file types
-    enca                   # Encoding detector and converter
-    unzip                  # ZIP archive extraction
-    cdrtools               # CD/DVD recording utilities
-    pv                     # Pipe viewer (monitor progress through pipes)
-    duf                    # Modern disk usage utility (better df)
+    file # Determine file types
+    enca # Encoding detector and converter
+    unzip # ZIP archive extraction
+    cdrtools # CD/DVD recording utilities
+    pv # Pipe viewer (monitor progress through pipes)
+    duf # Modern disk usage utility (better df)
 
     # System utilities
-    git                    # Version control system
-    gnupg                  # GNU Privacy Guard (encryption)
-    lsof                   # List open files
-    pciutils               # PCI utilities (lspci)
-    tmux                   # Terminal multiplexer
-    fzf                    # Fuzzy finder
-    pwgen                  # Password generator
-    fortune                # Random fortune cookie messages
-    direnv                 # Environment switcher
+    git # Version control system
+    gnupg # GNU Privacy Guard (encryption)
+    lsof # List open files
+    pciutils # PCI utilities (lspci)
+    tmux # Terminal multiplexer
+    fzf # Fuzzy finder
+    pwgen # Password generator
+    fortune # Random fortune cookie messages
+    direnv # Environment switcher
 
     # AI development tools
-    claude-code            # Claude Code CLI
-    opencode               # OpenCode CLI
+    claude-code # Claude Code CLI
+    opencode # OpenCode CLI
 
     # Document processing
-    texlive.combined.scheme-full  # Complete LaTeX distribution
-    graphviz               # Graph visualization (dot)
+    texlive.combined.scheme-full # Complete LaTeX distribution
+    graphviz # Graph visualization (dot)
 
     # Data processing
-    jq                     # JSON processor
-    yq                     # YAML/XML processor
+    jq # JSON processor
+    yq # YAML/XML processor
 
     # Container and cloud tools
-    kubectl                # Kubernetes command-line tool
-    fluxcd                 # GitOps Kubernetes operator
-    flux                   # Flux control tool
+    kubectl # Kubernetes command-line tool
+    fluxcd # GitOps Kubernetes operator
+    flux # Flux control tool
 
     # Smart home and IoT
-    home-assistant-cli     # Command-line interface for Home Assistant
-    mqttui                 # Terminal UI for MQTT
+    home-assistant-cli # Command-line interface for Home Assistant
+    mqttui # Terminal UI for MQTT
 
     # Media
-    yt-dlp                 # Video downloader (youtube-dl fork)
-    pipewire               # Audio/video routing
-    pipewire.jack          # JACK compatibility
+    yt-dlp # Video downloader (youtube-dl fork)
+    pipewire # Audio/video routing
+    pipewire.jack # JACK compatibility
 
     # Security and privacy
-    openssl                # SSL/TLS toolkit
-    openssl.out            # OpenSSL outputs
-    tor-browser            # Anonymous web browser
+    openssl # SSL/TLS toolkit
+    openssl.out # OpenSSL outputs
+    tor-browser # Anonymous web browser
 
     # Specialized tools
-    kubo                   # IPFS implementation
-    tio                    # Serial I/O terminal
+    kubo # IPFS implementation
+    tio # Serial I/O terminal
   ];
 
   # GUI packages for all desktop environments
-  commonGuiPackages = with pkgs; [
-    spotify                # Music streaming service
-  ];
+  commonGuiPackages = with pkgs;
+    [
+      spotify # Music streaming service
+    ];
 
   # Linux-specific packages (no GUI required)
   linuxPackages = with pkgs; [ ];
@@ -136,76 +138,91 @@ let
   # Linux GUI applications
   linuxGuiPackages = with pkgs; [
     # GNOME Extensions
-    gnomeExtensions.forge     # Tiling window manager
-    gnomeExtensions.vitals    # System monitoring
+    gnomeExtensions.forge # Tiling window manager
+    gnomeExtensions.vitals # System monitoring
 
     # Terminals
-    alacritty              # GPU-accelerated terminal emulator
-    kitty                  # Fast, GPU-based terminal emulator
-    cool-retro-term        # Retro-styled terminal emulator
+    alacritty # GPU-accelerated terminal emulator
+    kitty # Fast, GPU-based terminal emulator
+    cool-retro-term # Retro-styled terminal emulator
 
     # Productivity and office
-    abiword                # Lightweight word processor
-    libreoffice            # Full office suite
-    anki                   # Flashcard application for learning
+    abiword # Lightweight word processor
+    libreoffice # Full office suite
+    anki # Flashcard application for learning
 
     # Graphics and media
-    imagemagick            # Image manipulation tools
-    mplayer                # Media player
-    rhythmbox              # Music player and organizer
+    imagemagick # Image manipulation tools
+    mplayer # Media player
+    rhythmbox # Music player and organizer
 
     # Video editors
-    kdePackages.kdenlive   # Professional video editor
-    openshot-qt            # Simple video editor
-    shotcut                # Cross-platform video editor
+    kdePackages.kdenlive # Professional video editor
+    openshot-qt # Simple video editor
+    shotcut # Cross-platform video editor
 
     # Communication
-    signal-desktop         # Secure messaging
-    mumble                 # Low-latency voice chat
+    signal-desktop # Secure messaging
+    mumble # Low-latency voice chat
 
     # Music and audio
-    spotify-player         # Terminal UI for Spotify
-    spotify-qt             # Qt-based Spotify client
-    helvum                 # PipeWire patchbay (audio routing)
+    spotify-player # Terminal UI for Spotify
+    spotify-qt # Qt-based Spotify client
+    helvum # PipeWire patchbay (audio routing)
 
     # System tools
-    dconf-editor           # GNOME configuration editor
-    gnome-tweaks           # GNOME customization tool
-    gparted                # Partition editor
-    xclip                  # X11 clipboard utility
-    playerctl              # Media player controller
+    dconf-editor # GNOME configuration editor
+    gnome-tweaks # GNOME customization tool
+    gparted # Partition editor
+    xclip # X11 clipboard utility
+    playerctl # Media player controller
 
     # Web browsers
-    google-chrome          # Google Chrome browser
+    google-chrome # Google Chrome browser
 
     # Hardware tools
-    via                    # Keyboard firmware configuration
-    vial                   # Open-source keyboard firmware tool
+    via # Keyboard firmware configuration
+    vial # Open-source keyboard firmware tool
 
     # Games
-    mindustry              # Tower defense strategy game
-    openttd                # OpenTTD transport simulation
-    heroic                 # Game launcher
-    lutris                 # Game launcher
-    gogdl                  # GOG downloader
+    mindustry # Tower defense strategy game
+    openttd # OpenTTD transport simulation
+    heroic # Game launcher
+    lutris # Game launcher
+    gogdl # GOG downloader
+
+    gnome-chess # Chess game
+    gnome-mines # Minesweeper
+    gnome-mahjongg # Mahjong solitaire
+    gnome-sudoku # Sudoku puzzle game
+    gnome-robots # Robots puzzle game
+    gnome-tetravex # Tetris-like puzzle
+    gnome-klotski # Sliding block puzzle
+    gnome-taquin # Sliding puzzle game
+    aisleriot # Solitaire card games
+    atomix # Molecule puzzle game
+    hitori # Logic puzzle game
+    iagno # Reversi/Othello game
+    quadrapassel # Tetris clone
+    swell-foop # Puzzle game
 
     # Audio libraries
-    faudio                 # DirectX audio compatibility layer
-    openal                 # 3D audio API
+    faudio # DirectX audio compatibility layer
+    openal # 3D audio API
   ];
 
   # Font packages for Linux GUI systems
   fontPackages = optionals isLinux ((with pkgs; [
-    cantarell-fonts                    # GNOME default font
-    dejavu_fonts                       # High-quality general-purpose fonts
-    fira-code                          # Monospace font with programming ligatures
-    fira-code-symbols                  # Additional symbols for Fira Code
-    liberation_ttf                     # Metric-compatible with Arial/Times New Roman
-    proggyfonts                        # Small bitmap programming fonts
-    terminus_font                      # Monospace bitmap font
-    ubuntu-classic                     # Ubuntu's font family
-    ultimate-oldschool-pc-font-pack    # Retro computer fonts
-    unifont                            # Unicode bitmap font
+    cantarell-fonts # GNOME default font
+    dejavu_fonts # High-quality general-purpose fonts
+    fira-code # Monospace font with programming ligatures
+    fira-code-symbols # Additional symbols for Fira Code
+    liberation_ttf # Metric-compatible with Arial/Times New Roman
+    proggyfonts # Small bitmap programming fonts
+    terminus_font # Monospace bitmap font
+    ubuntu-classic # Ubuntu's font family
+    ultimate-oldschool-pc-font-pack # Retro computer fonts
+    unifont # Unicode bitmap font
   ]) ++ (with pkgs.nerd-fonts; [
     pkgs.nerd-fonts."_0xproto"
     pkgs.nerd-fonts."_3270"
@@ -484,8 +501,7 @@ in {
 
       packages = commonPackages ++ (optionals isGui commonGuiPackages)
         ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages))
-        ++ (optionals isLinux linuxPackages)
-        ++ (with pkgs; [
+        ++ (optionals isLinux linuxPackages) ++ (with pkgs; [
           graphite-cursors
           graphite-gtk-theme
           papirus-icon-theme
