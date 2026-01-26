@@ -3,5 +3,8 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports = [ (import ./doom-emacs.nix { inherit inputs; }) ];
+  imports = [
+    (import ./doom-emacs.nix { inherit inputs; })
+    (import ./hyprland.nix { inherit inputs; })
+  ];
 }

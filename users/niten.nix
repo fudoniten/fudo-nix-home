@@ -308,6 +308,10 @@ in {
       doomConfigSource = inputs.niten-doom-config;
     };
 
+    # Hyprland window manager (Wayland only)
+    programs.hyprland =
+      mkIf (systemCfg.desktop.type == "wayland") { enable = true; };
+
     gtk = {
       iconTheme = {
         name = "Papirus-Dark";
