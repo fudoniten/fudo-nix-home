@@ -1,0 +1,178 @@
+\documentclass[10pt,landscape,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{multicol}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{fontspec}
+\setmainfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
+
+% Custom colors
+\definecolor{headerblue}{RGB}{137, 180, 250}
+\definecolor{keybg}{RGB}{49, 50, 68}
+\definecolor{keytext}{RGB}{205, 214, 244}
+\definecolor{desctext}{RGB}{166, 173, 200}
+\definecolor{pagebg}{RGB}{30, 30, 46}
+
+\pagecolor{pagebg}
+\color{keytext}
+
+% Custom command for keybinding
+\newcommand{\key}[1]{%
+  \tikz[baseline=(key.base)]{
+    \node[
+      rectangle,
+      draw=headerblue,
+      fill=keybg,
+      inner sep=3pt,
+      rounded corners=2pt,
+      font=\ttfamily\small
+    ] (key) {#1};
+  }%
+}
+
+\newcommand{\kbd}[1]{\texttt{\textcolor{headerblue}{#1}}}
+
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{1.5em}
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+	{\Huge\textbf{\textcolor{headerblue}{StumpWM Keybindings Cheatsheet}}}\\[0.5em]
+	{\large\textit{fudo-home Configuration}}\\[0.3em]
+	{\small Emacs-friendly bindings using \key{SUPER} key | Matching Hyprland where possible}
+\end{center}
+
+\vspace{0.5em}
+
+\begin{multicols}{3}
+
+	\section*{\textcolor{headerblue}{Applications}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + Return} \\ Launch terminal (kitty)
+		\item \key{SUPER + D} \\ Application launcher (wofi)
+		\item \key{SUPER + E} \\ File manager (thunar)
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Window Management}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + Q} \\ Close window
+		\item \key{SUPER + SHIFT + Q} \\ Force kill window
+		\item \key{SUPER + M} \\ Toggle fullscreen
+		\item \key{SUPER + V} \\ Float window
+		\item \key{SUPER + SHIFT + V} \\ Unfloat window
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Focus Navigation}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + H} \\ Focus left
+		\item \key{SUPER + J} \\ Focus down
+		\item \key{SUPER + K} \\ Focus up
+		\item \key{SUPER + L} \\ Focus right
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Move Windows}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + SHIFT + H} \\ Move window left
+		\item \key{SUPER + SHIFT + J} \\ Move window down
+		\item \key{SUPER + SHIFT + K} \\ Move window up
+		\item \key{SUPER + SHIFT + L} \\ Move window right
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Workspaces (Groups)}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + 1-9} \\ Switch to workspace 1-9
+		\item \key{SUPER + Tab} \\ Next workspace
+		\item \key{SUPER + SHIFT + Tab} \\ Previous workspace
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Move to Workspace}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + SHIFT + 1-9} \\ Move window to workspace 1-9
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Frame Management}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + S} \\ Horizontal split
+		\item \key{SUPER + SHIFT + S} \\ Vertical split
+		\item \key{SUPER + R} \\ Remove current frame
+		\item \key{SUPER + SHIFT + R} \\ Remove all but current frame
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Resize Mode}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + SHIFT + R} \\ Enter resize map mode
+		\item[\textcolor{desctext}{(StumpWM built-in resize commands)}]
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Screenshots}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + Print} \\ Screenshot area (maim)
+		\item \key{SUPER + SHIFT + Print} \\ Screenshot full screen
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{System}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + CTRL + L} \\ Lock screen (xscreensaver)
+		\item \key{SUPER + SHIFT + Q} \\ Quit StumpWM
+		\item \key{SUPER + SHIFT + R} \\ Restart StumpWM
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Media Keys}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{XF86AudioPlay} \\ Play/Pause media
+		\item \key{XF86AudioNext} \\ Next track
+		\item \key{XF86AudioPrev} \\ Previous track
+		\item \key{XF86AudioRaiseVolume} \\ Volume up
+		\item \key{XF86AudioLowerVolume} \\ Volume down
+		\item \key{XF86AudioMute} \\ Mute/unmute
+		\item \key{XF86MonBrightnessUp} \\ Brightness up
+		\item \key{XF86MonBrightnessDown} \\ Brightness down
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Help \& Info}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item \key{SUPER + ?} \\ Show help
+		\item \key{SUPER + :} \\ Run StumpWM command
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{Additional Info}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item[\textcolor{desctext}{Window Manager:}] StumpWM (Common Lisp)
+		\item[\textcolor{desctext}{Terminal:}] kitty
+		\item[\textcolor{desctext}{Launcher:}] wofi
+		\item[\textcolor{desctext}{Status bar:}] mode-line (built-in)
+		\item[\textcolor{desctext}{Lock screen:}] xscreensaver
+		\item[\textcolor{desctext}{Screenshots:}] maim
+		\item[\textcolor{desctext}{Compositor:}] picom
+		\item[\textcolor{desctext}{File manager:}] thunar
+		\item[\textcolor{desctext}{System tray:}] trayer
+	\end{itemize}
+
+	\section*{\textcolor{headerblue}{StumpWM Concepts}}
+	\begin{itemize}[leftmargin=*,noitemsep]
+		\item[\textcolor{desctext}{Groups:}] Workspaces in StumpWM
+		\item[\textcolor{desctext}{Frames:}] Screen divisions (like tmux panes)
+		\item[\textcolor{desctext}{Windows:}] Applications within frames
+		\item[\textcolor{desctext}{Mode Line:}] Status bar at top of screen
+	\end{itemize}
+
+	\vfill
+
+	\begin{center}
+		\small\textcolor{desctext}{%
+			Configuration: \texttt{modules/programs/stumpwm.nix}\\
+			Config file: \texttt{\textasciitilde/.stumpwmrc}\\
+			Generated from fudo-home\\
+			All keybindings use \key{SUPER} to avoid Emacs conflicts\\[0.3em]
+			\textbf{Note:} Keybindings match Hyprland where possible for consistency
+		}
+	\end{center}
+
+\end{multicols}
+
+\end{document}

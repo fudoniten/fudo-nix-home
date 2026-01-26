@@ -312,6 +312,9 @@ in {
     programs.hyprland =
       mkIf (systemCfg.desktop.type == "wayland") { enable = true; };
 
+    # StumpWM window manager (X11 only)
+    programs.stumpwm = mkIf (systemCfg.desktop.type == "x") { enable = true; };
+
     gtk = {
       iconTheme = {
         name = "Papirus-Dark";
