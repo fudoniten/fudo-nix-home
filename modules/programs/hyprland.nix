@@ -485,13 +485,7 @@ in {
     ];
 
     # XDG desktop portal for screen sharing and file chooser
-    xdg.portal = {
-      enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-hyprland
-        xdg-desktop-portal-gtk
-      ];
-      config = { common = { default = [ "hyprland" "gtk" ]; }; };
-    };
+    # Note: Portal configuration is managed at the system level in nixos-config
+    # to avoid conflicts with multiple portal installations.
   };
 }
