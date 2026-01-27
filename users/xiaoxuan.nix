@@ -12,9 +12,10 @@ let
   _ = assert assertMsg (username != null && username != "")
     "username is required";
     assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
-    "systemCfg.desktop.type is required";
-    assert assertMsg (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
-    "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
+      "systemCfg.desktop.type is required";
+    assert assertMsg
+      (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
+      "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
     null;
 
   inherit (pkgs.stdenv) isLinux;
@@ -29,30 +30,30 @@ in {
 
       packages = with pkgs; [
         # Productivity and office
-        abiword                # Lightweight word processor
+        abiword # Lightweight word processor
 
         # Learning
-        anki                   # Flashcard application
+        anki # Flashcard application
 
         # System tools
-        gnome-tweaks           # GNOME customization tool
+        gnome-tweaks # GNOME customization tool
 
         # Web browsers
-        google-chrome          # Google Chrome browser
+        google-chrome # Google Chrome browser
 
         # Communication
-        mumble                 # Low-latency voice chat
+        mumble # Low-latency voice chat
 
         # Media
-        spotify                # Music streaming
-        redshift               # Screen color temperature
+        spotify # Music streaming
+        redshift # Screen color temperature
 
         # Utilities
-        pv                     # Pipe viewer
-        xclip                  # X11 clipboard utility
+        pv # Pipe viewer
+        xclip # X11 clipboard utility
 
         # Theme packages
-        graphite-cursors       # Cursor theme
+        graphite-cursors # Cursor theme
       ];
 
       keyboard = {
@@ -87,9 +88,8 @@ in {
       enable = true;
       type = "fcitx5";
       fcitx5.addons = with pkgs; [
-        qt6Packages.fcitx5-chinese-addons
-        fcitx5-gtk
-        fcitx5-rime
+        fcitx5-gtk # GTK application support
+        fcitx5-rime # Rime input engine with Pinyin support
       ];
     };
 
