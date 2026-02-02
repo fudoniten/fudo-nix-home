@@ -30,8 +30,10 @@ let
   cfg = config.programs.doom-emacs;
 
   # Determine state directory for Doom Emacs local files
-  stateDir =
-    if cfg.stateDirectory != null then cfg.stateDirectory else "${config.xdg.dataHome}/doom";
+  stateDir = if cfg.stateDirectory != null then
+    cfg.stateDirectory
+  else
+    "${config.xdg.dataHome}/doom";
 
   # Default Doom Emacs environment setup
   doomEmacsEnv = ''
@@ -45,41 +47,43 @@ let
   # Default Emacs dependencies
   # These packages are required for Doom Emacs to function properly
   defaultEmacsDeps = with pkgs; [
-    git                    # Version control (required by Doom)
-    (ripgrep.override { withPCRE2 = true; })  # Fast search with PCRE2 support
-    gnutls                 # TLS support for package downloads
-    gopls                  # Go language server
-    fd                     # Fast file finder (used by Doom's fuzzy finder)
-    imagemagick            # Image processing (for inline image display)
-    zstd                   # Compression (for package caching)
-    (aspellWithDicts (ds: with ds; [ en en-computers en-science ]))  # Spell checking
-    editorconfig-core-c    # EditorConfig support
-    sqlite                 # Database (used by org-roam and other packages)
-    xclip                  # X11 clipboard integration
-    openssh_hpnWithKerberos  # SSH support (for TRAMP remote editing)
-    diffutils              # Diff tools (for version control)
-    coreutils              # Core GNU utilities
-    gnutar                 # Archive extraction
-    bashInteractive        # Shell integration
-    clojure-lsp            # Clojure language server
-    clojure                # Clojure runtime
-    babashka               # Clojure scripting
-    curl                   # HTTP client
-    gnugrep                # GNU grep (used by various Doom features)
-    nodePackages.prettier  # Code formatter for web languages
-    basedpyright           # Python language server
-    ruff                   # Python linting LSP
-    python3                # Python runtime
-    nix                    # Nix for nix-mode
-    doas                   # Sudo alternative
-    supercollider          # Audio synthesis for music composition
-    pkgsUnstable.aider-chat  # AI coding assistant
+    git # Version control (required by Doom)
+    (ripgrep.override { withPCRE2 = true; }) # Fast search with PCRE2 support
+    gnutls # TLS support for package downloads
+    gopls # Go language server
+    fd # Fast file finder (used by Doom's fuzzy finder)
+    imagemagick # Image processing (for inline image display)
+    zstd # Compression (for package caching)
+    (aspellWithDicts
+      (ds: with ds; [ en en-computers en-science ])) # Spell checking
+    editorconfig-core-c # EditorConfig support
+    sqlite # Database (used by org-roam and other packages)
+    xclip # X11 clipboard integration
+    openssh_hpnWithKerberos # SSH support (for TRAMP remote editing)
+    diffutils # Diff tools (for version control)
+    coreutils # Core GNU utilities
+    gnutar # Archive extraction
+    bashInteractive # Shell integration
+    clojure-lsp # Clojure language server
+    clojure # Clojure runtime
+    babashka # Clojure scripting
+    curl # HTTP client
+    gnugrep # GNU grep (used by various Doom features)
+    nodePackages.prettier # Code formatter for web languages
+    basedpyright # Python language server
+    ruff # Python linting LSP
+    python3 # Python runtime
+    nix # Nix for nix-mode
+    doas # Sudo alternative
+    supercollider # Audio synthesis for music composition
+    pkgsUnstable.aider-chat # AI coding assistant
   ];
 
   # Linux-specific dependencies
-  defaultLinuxDeps = with pkgs; [
-    sbcl                   # Steel Bank Common Lisp (for some Emacs packages)
-  ];
+  defaultLinuxDeps = with pkgs;
+    [
+      sbcl # Steel Bank Common Lisp (for some Emacs packages)
+    ];
 
   # Build emacs with packages using custom overlay
   myEmacsWithPackages = emacs:
@@ -107,7 +111,8 @@ let
             '';
 
             meta = {
-              homepage = "https://github.com/eliraz-refael/doom-two-tone-themes";
+              homepage =
+                "https://github.com/eliraz-refael/doom-two-tone-themes";
               description = "Two-toned themes for Doom Emacs.";
               license = pkgs.lib.licenses.gpl3Plus;
             };
@@ -121,9 +126,6 @@ let
         in esuper // {
           inherit doom-two-tone-themes;
 
-          # Use unstable gptel for latest AI integration
-          gptel = pkgsUnstable.emacsPackages.gptel;
-
           # Polymuse packages for music composition
           # Use the packages directly from the flake outputs
           polymuse = polymusePkg;
@@ -134,20 +136,18 @@ let
     in updatedEmacsPkgs.withPackages cfg.emacsPackages;
 
   # Determine the appropriate emacs package based on platform and desktop type
-  emacsPackage =
-    let
-      basePackage =
-        if cfg.package != null then
-          cfg.package
-        else if pkgs.stdenv.isDarwin then
-          pkgs.emacs29
-        else if cfg.desktopType == "none" then
-          pkgs.emacs-nox
-        else if cfg.desktopType == "wayland" then
-          pkgs.emacs-pgtk
-        else
-          pkgs.emacs-gtk;
-    in myEmacsWithPackages basePackage;
+  emacsPackage = let
+    basePackage = if cfg.package != null then
+      cfg.package
+    else if pkgs.stdenv.isDarwin then
+      pkgs.emacs29
+    else if cfg.desktopType == "none" then
+      pkgs.emacs-nox
+    else if cfg.desktopType == "wayland" then
+      pkgs.emacs-pgtk
+    else
+      pkgs.emacs-gtk;
+  in myEmacsWithPackages basePackage;
 
 in {
   options.programs.doom-emacs = with types; {
@@ -156,13 +156,15 @@ in {
     package = mkOption {
       type = nullOr package;
       default = null;
-      description = "The Emacs package to use. If null, automatically determined based on platform and desktop type.";
+      description =
+        "The Emacs package to use. If null, automatically determined based on platform and desktop type.";
     };
 
     desktopType = mkOption {
       type = enum [ "x" "wayland" "darwin" "none" ];
       default = "none";
-      description = "The desktop type (x, wayland, darwin, or none). Affects which Emacs package is used.";
+      description =
+        "The desktop type (x, wayland, darwin, or none). Affects which Emacs package is used.";
     };
 
     doomSource = mkOption {
@@ -191,39 +193,41 @@ in {
 
     emacsPackages = mkOption {
       type = functionTo (listOf package);
-      default = epkgs: with epkgs; [
-        aider
-        aidermacs
-        babashka
-        bash-completion
-        canon
-        chatgpt-shell
-        dirvish
-        doom-two-tone-themes
-        edit-server
-        ellama
-        elpher
-        embark
-        flycheck-clj-kondo
-        gptel
-        hass
-        inf-clojure
-        ivy-prescient
-        kubernetes
-        nix-mode
-        noflet
-        org-roam
-        paredit
-        polymuse
-        pylint
-        restclient
-        spotify
-        stimmung-themes
-        thrift
-        transient
-        typewrite
-      ];
-      description = "Function that takes emacs packages and returns list of packages to install.";
+      default = epkgs:
+        with epkgs; [
+          aider
+          aidermacs
+          babashka
+          bash-completion
+          canon
+          chatgpt-shell
+          dirvish
+          doom-two-tone-themes
+          edit-server
+          ellama
+          elpher
+          embark
+          flycheck-clj-kondo
+          gptel
+          hass
+          inf-clojure
+          ivy-prescient
+          kubernetes
+          nix-mode
+          noflet
+          org-roam
+          paredit
+          polymuse
+          pylint
+          restclient
+          spotify
+          stimmung-themes
+          thrift
+          transient
+          typewrite
+        ];
+      description =
+        "Function that takes emacs packages and returns list of packages to install.";
     };
 
     enableDaemon = mkOption {
@@ -242,14 +246,14 @@ in {
       type = attrsOf str;
       default = { };
       description = "Extra shell aliases for Emacs.";
-      example = literalExpression "{ doom = \"~/.config/emacs/bin/doom\"; }";
+      example = literalExpression ''{ doom = "~/.config/emacs/bin/doom"; }'';
     };
 
     extraEnv = mkOption {
       type = attrsOf str;
       default = { };
       description = "Extra environment variables for Doom Emacs.";
-      example = literalExpression "{ DOOMDIR = \"~/.doom.d\"; }";
+      example = literalExpression ''{ DOOMDIR = "~/.doom.d"; }'';
     };
 
     syncTimeout = mkOption {
@@ -301,7 +305,8 @@ in {
             fi
           '';
 
-        packages = [ emacsPackage ] ++ defaultEmacsDeps ++ cfg.extraDependencies ++ cfg.extraPackages
+        packages = [ emacsPackage ] ++ defaultEmacsDeps ++ cfg.extraDependencies
+          ++ cfg.extraPackages
           ++ (optionals pkgs.stdenv.isLinux defaultLinuxDeps);
 
         sessionVariables = {
@@ -324,10 +329,7 @@ in {
         Service = {
           Environment = let
             binPath = makeBinPath ([ emacsPackage ] ++ config.home.packages);
-          in [
-            "PATH=$PATH:${binPath}"
-            "DOOMLOCALDIR=${stateDir}"
-          ];
+          in [ "PATH=$PATH:${binPath}" "DOOMLOCALDIR=${stateDir}" ];
           ExecStartPre = pkgs.writeShellScript "run-doom-sync" ''
             # Ensure state directory exists
             if [ ! -d ${stateDir} ]; then
@@ -362,7 +364,8 @@ in {
 
     # macOS-specific configuration
     (mkIf pkgs.stdenv.isDarwin {
-      home.packages = [ emacsPackage ] ++ defaultEmacsDeps ++ cfg.extraDependencies ++ cfg.extraPackages;
+      home.packages = [ emacsPackage ] ++ defaultEmacsDeps
+        ++ cfg.extraDependencies ++ cfg.extraPackages;
 
       launchd = mkIf cfg.enableDaemon {
         enable = true;
@@ -375,9 +378,7 @@ in {
               "-c"
               "export DOOMLOCALDIR='${stateDir}' && ${emacsPackage}/bin/emacs --fg-daemon"
             ];
-            EnvironmentVariables = {
-              DOOMLOCALDIR = stateDir;
-            };
+            EnvironmentVariables = { DOOMLOCALDIR = stateDir; };
             StandardErrorPath =
               "${config.home.homeDirectory}/Library/Logs/emacs-daemon.stderr.log";
             StandardOutPath =
