@@ -61,6 +61,7 @@ let
     xclip # X11 clipboard integration
     openssh_hpnWithKerberos # SSH support (for TRAMP remote editing)
     diffutils # Diff tools (for version control)
+    cljfmt
     coreutils # Core GNU utilities
     gnutar # Archive extraction
     bashInteractive # Shell integration
