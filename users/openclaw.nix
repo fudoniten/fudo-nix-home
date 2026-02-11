@@ -30,6 +30,7 @@ in {
 
         # Development and build tools
         binutils # Binary utilities
+        gh # GitHub tool
         stdenv # Standard build environment
 
         # Terminal utilities
