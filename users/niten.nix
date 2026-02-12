@@ -174,6 +174,7 @@ let
     dconf-editor # GNOME configuration editor
     gnome-tweaks # GNOME customization tool
     gparted # Partition editor
+    sops # Encryption tool for Kubernetes
     xclip # X11 clipboard utility
     playerctl # Media player controller
 
