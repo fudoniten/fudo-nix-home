@@ -192,16 +192,13 @@ let
     lutris # Game launcher
     gogdl # GOG downloader
 
-    gnome-chess # Chess game
     gnome-mines # Minesweeper
     gnome-mahjongg # Mahjong solitaire
     gnome-sudoku # Sudoku puzzle game
-    gnome-robots # Robots puzzle game
     gnome-tetravex # Tetris-like puzzle
     gnome-klotski # Sliding block puzzle
     gnome-taquin # Sliding puzzle game
     aisleriot # Solitaire card games
-    atomix # Molecule puzzle game
     hitori # Logic puzzle game
     iagno # Reversi/Othello game
     quadrapassel # Tetris clone
