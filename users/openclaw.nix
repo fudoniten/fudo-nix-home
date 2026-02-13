@@ -59,6 +59,14 @@ in {
       ];
     };
 
-    programs = { bash.enable = true; };
+    programs = {
+      bash.enable = true;
+
+      ssh = {
+        enable = true;
+        startAgent = true;
+        agentTimeout = "6h";
+      };
+    };
   };
 }
