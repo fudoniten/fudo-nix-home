@@ -59,13 +59,13 @@ in {
       ];
     };
 
-    programs = {
-      bash.enable = true;
-
-      ssh = {
+    services = {
+      ssh-agent = {
         enable = true;
-        startAgent = true;
+        enableBashIntegration = true;
       };
     };
+
+    programs = { bash.enable = true; };
   };
 }
