@@ -65,7 +65,6 @@ in {
       ssh = {
         enable = true;
         startAgent = true;
-        agentTimeout = "6h";
       };
     };
   };
