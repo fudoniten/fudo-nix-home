@@ -373,10 +373,14 @@ in {
 
       git = {
         enable = true;
-        userName = username;
-        userEmail = email;
-        ignores = [ "*~" ".DS_Store" ];
-        extraConfig.pull.rebase = true;
+        settings = {
+          user = {
+            name = username;
+            email = email;
+          };
+          pull.rebase = true;
+          ignores = [ "*~" ".DS_Store" ];
+        };
       };
 
       gh = {
