@@ -436,10 +436,12 @@ in {
       ssh = {
         enable = true;
         package = pkgs.openssh_hpnWithKerberos;
-        addKeysToAgent = "yes";
-        compression = true;
-        controlMaster = "yes";
-        forwardAgent = true;
+        matchBlocks."*" = {
+          addKeysToAgent = "yes";
+          compression = true;
+          controlMaster = "yes";
+          forwardAgent = true;
+        };
       };
 
       zsh.profileExtra = ''
