@@ -379,8 +379,8 @@ in {
             email = email;
           };
           pull.rebase = true;
-          ignores = [ "*~" ".DS_Store" ];
         };
+        ignores = [ "*~" ".DS_Store" ];
       };
 
       gh = {
