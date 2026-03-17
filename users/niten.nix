@@ -191,6 +191,7 @@ let
     heroic # Game launcher
     lutris # Game launcher
     gogdl # GOG downloader
+    mcpelauncher-client # Minecraft launcher
 
     gnome-mines # Minesweeper
     gnome-mahjongg # Mahjong solitaire

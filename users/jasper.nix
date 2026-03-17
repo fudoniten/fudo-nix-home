@@ -12,9 +12,10 @@ let
   _ = assert assertMsg (username != null && username != "")
     "username is required";
     assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
-    "systemCfg.desktop.type is required";
-    assert assertMsg (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
-    "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
+      "systemCfg.desktop.type is required";
+    assert assertMsg
+      (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
+      "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
     null;
 
   inherit (pkgs.stdenv) isLinux;
@@ -28,33 +29,36 @@ in {
 
       packages = with pkgs; [
         # Learning
-        anki                   # Flashcard application
+        anki # Flashcard application
 
         # System tools
-        gnome-tweaks           # GNOME customization tool
+        gnome-tweaks # GNOME customization tool
+
+        # Games
+        mcpelauncher-client # Minecraft launcher
 
         # Web browsers
-        google-chrome          # Google Chrome browser
+        google-chrome # Google Chrome browser
 
         # Communication
-        mumble                 # Low-latency voice chat
+        mumble # Low-latency voice chat
 
         # Development
-        python3                # Python runtime
-        pv                     # Pipe viewer
-        racket                 # Racket programming language
+        python3 # Python runtime
+        pv # Pipe viewer
+        racket # Racket programming language
 
         # Secrets management (locket dependencies)
-        age                    # Modern encryption tool for locket secrets
+        age # Modern encryption tool for locket secrets
 
         # Media
-        spotify                # Music streaming
-        xclip                  # X11 clipboard utility
+        spotify # Music streaming
+        xclip # X11 clipboard utility
 
         # Video editors
-        kdePackages.kdenlive   # Professional video editor
-        openshot-qt            # Simple video editor
-        shotcut                # Cross-platform video editor
+        kdePackages.kdenlive # Professional video editor
+        openshot-qt # Simple video editor
+        shotcut # Cross-platform video editor
       ];
 
       keyboard = {
