@@ -77,7 +77,7 @@ let
     nix # Nix for nix-mode
     doas # Sudo alternative
     supercollider # Audio synthesis for music composition
-    pkgsUnstable.aider-chat # AI coding assistant
+    # pkgsUnstable.aider-chat # AI coding assistant
     findutils
     gnugrep
   ];
@@ -198,8 +198,8 @@ in {
       type = functionTo (listOf package);
       default = epkgs:
         with epkgs; [
-          aider
-          aidermacs
+          # aider
+          # aidermacs
           babashka
           bash-completion
           canon
