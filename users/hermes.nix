@@ -35,7 +35,6 @@ in {
         # Development and build tools
         act # Test GitHub actions locally
         binutils # Binary utilities
-        clang
         cmake
         gcc
         gh # GitHub tool
