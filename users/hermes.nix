@@ -78,7 +78,6 @@ in {
         yq-go
         ripgrep
         fd
-        yq
       ];
     };
 
