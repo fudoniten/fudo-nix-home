@@ -545,9 +545,17 @@ in {
 
       sessionVariables = sessionEnvVariables // {
         GTK_THEME = "Graphite-Dark-Rimless";
-      };
+      } // (optionalAttrs isLinux {
+        # Override GNOME Keyring's SSH_AUTH_SOCK to use our SSH agent
+        SSH_AUTH_SOCK = "$XDG_RUNTIME_DIR/ssh-agent";
+      });
     };
 
-    systemd.user = mkIf isLinux { sessionVariables = sessionEnvVariables; };
+    systemd.user = mkIf isLinux {
+      sessionVariables = sessionEnvVariables // {
+        # Override GNOME Keyring's SSH_AUTH_SOCK to use our SSH agent
+        SSH_AUTH_SOCK = "%t/ssh-agent";
+      };
+    };
   };
 }
