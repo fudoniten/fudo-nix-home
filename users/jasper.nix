@@ -28,9 +28,6 @@ in {
       inherit username;
 
       packages = with pkgs; [
-        # Learning
-        anki # Flashcard application
-
         # System tools
         gnome-tweaks # GNOME customization tool
 
