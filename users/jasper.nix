@@ -54,7 +54,7 @@ in {
 
         # Video editors
         kdePackages.kdenlive # Professional video editor
-        openshot-qt # Simple video editor
+        # openshot-qt # Simple video editor
         shotcut # Cross-platform video editor
       ];
 
