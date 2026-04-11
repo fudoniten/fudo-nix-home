@@ -496,7 +496,11 @@ in {
       gpg-agent.enable = true;
 
       # GNOME keyring for credential storage (GUI only)
-      gnome-keyring.enable = isGui;
+      # SSH agent component disabled - using system SSH agent instead
+      gnome-keyring = {
+        enable = isGui;
+        components = mkIf isGui [ "pkcs11" "secrets" ];
+      };
 
       # Syncthing continuous file synchronization
       syncthing = {
