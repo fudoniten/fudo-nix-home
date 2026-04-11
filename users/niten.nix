@@ -149,7 +149,6 @@ let
     # Productivity and office
     abiword # Lightweight word processor
     libreoffice # Full office suite
-    anki # Flashcard application for learning
 
     # Graphics and media
     imagemagick # Image manipulation tools
@@ -158,7 +157,6 @@ let
 
     # Video editors
     kdePackages.kdenlive # Professional video editor
-    openshot-qt # Simple video editor
     shotcut # Cross-platform video editor
 
     # Communication
