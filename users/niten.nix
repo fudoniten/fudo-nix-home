@@ -495,6 +495,12 @@ in {
       # GPG agent for encryption and signing
       gpg-agent.enable = true;
 
+      # SSH agent for authentication
+      ssh-agent = {
+        enable = true;
+        enableBashIntegration = true;
+      };
+
       # GNOME keyring for credential storage (GUI only)
       # SSH agent component disabled - using system SSH agent instead
       gnome-keyring = {
