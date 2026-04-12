@@ -558,6 +558,8 @@ in {
       sessionVariables = sessionEnvVariables // {
         # Override GNOME Keyring's SSH_AUTH_SOCK to use our SSH agent
         SSH_AUTH_SOCK = "%t/ssh-agent";
+        # Disable GNOME Keyring's SSH agent component  
+        GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
       };
 
       # Service to export SSH_AUTH_SOCK to the systemd user environment
@@ -593,6 +595,16 @@ in {
           WantedBy = [ "default.target" ];
         };
       };
+    };
+
+    # Use systemd environment.d to set SSH_AUTH_SOCK very early in the boot process
+    # This overrides GNOME Keyring's PAM module which tries to set SSH_AUTH_SOCK during login
+    # Works for COSMIC, GNOME, and all other desktop environments
+    xdg.configFile."environment.d/10-ssh-agent.conf" = mkIf isLinux {
+      text = ''
+        SSH_AUTH_SOCK=''${XDG_RUNTIME_DIR}/ssh-agent
+        GSM_SKIP_SSH_AGENT_WORKAROUND=1
+      '';
     };
   };
 }
