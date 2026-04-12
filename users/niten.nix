@@ -502,7 +502,7 @@ in {
       };
 
       # GNOME keyring for credential storage (GUI only)
-      # SSH agent component disabled - using system SSH agent instead
+      # SSH agent component disabled - using dedicated SSH agent instead
       gnome-keyring = {
         enable = isGui;
         components = mkIf isGui [ "pkcs11" "secrets" ];
@@ -548,6 +548,9 @@ in {
       } // (optionalAttrs isLinux {
         # Override GNOME Keyring's SSH_AUTH_SOCK to use our SSH agent
         SSH_AUTH_SOCK = "$XDG_RUNTIME_DIR/ssh-agent";
+        # Disable GNOME Keyring's SSH agent component
+        # This prevents COSMIC, GNOME, and other DEs from starting keyring's SSH agent
+        GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
       });
     };
 
@@ -555,6 +558,61 @@ in {
       sessionVariables = sessionEnvVariables // {
         # Override GNOME Keyring's SSH_AUTH_SOCK to use our SSH agent
         SSH_AUTH_SOCK = "%t/ssh-agent";
+      };
+
+      # Service to export SSH_AUTH_SOCK to the systemd user environment
+      # This ensures all applications (graphical and console) use the correct SSH agent
+      # Works across COSMIC, GNOME, Wayland, X11, and console-only environments
+      services.ssh-agent-env = {
+        Unit = {
+          Description = "Export SSH agent environment to systemd user session";
+          After = [ "ssh-agent.service" ];
+          # Start before graphical session so environment is set early
+          Before = [ "graphical-session.target" ];
+        };
+
+        Service = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          # Set SSH_AUTH_SOCK in systemd user environment
+          # This overrides COSMIC/GNOME/other DE defaults that might set SSH_AUTH_SOCK to keyring
+          ExecStart = ''
+            ${pkgs.bash}/bin/bash -c '${pkgs.systemd}/bin/systemctl --user set-environment SSH_AUTH_SOCK=%t/ssh-agent; \
+            if command -v dbus-update-activation-environment >/dev/null 2>&1; then \
+              ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd SSH_AUTH_SOCK; \
+            fi'
+          '';
+          ExecStop = "${pkgs.systemd}/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
+        };
+
+        Install = {
+          # Start with default target (works for both graphical and console-only)
+          # For graphical sessions: starts before DE and sets environment early
+          # For console-only: runs on login and exports to systemd user session
+          WantedBy = [ "default.target" ];
+        };
+      };
+    };
+
+      # Service to export SSH_AUTH_SOCK to the systemd user environment
+      # This ensures graphical applications (especially in COSMIC/Wayland) can access the SSH agent
+      services.ssh-agent-env = {
+        Unit = {
+          Description = "Export SSH agent environment to systemd user session";
+          After = [ "ssh-agent.service" ];
+          PartOf = [ "graphical-session.target" ];
+        };
+
+        Service = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart =
+            "${pkgs.systemd}/bin/systemctl --user set-environment SSH_AUTH_SOCK=%t/ssh-agent";
+          ExecStop =
+            "${pkgs.systemd}/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
+        };
+
+        Install = { WantedBy = [ "graphical-session.target" ]; };
       };
     };
   };
