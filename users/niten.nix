@@ -582,7 +582,8 @@ in {
               ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd SSH_AUTH_SOCK; \
             fi'
           '';
-          ExecStop = "${pkgs.systemd}/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
+          ExecStop =
+            "${pkgs.systemd}/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
         };
 
         Install = {
@@ -591,28 +592,6 @@ in {
           # For console-only: runs on login and exports to systemd user session
           WantedBy = [ "default.target" ];
         };
-      };
-    };
-
-      # Service to export SSH_AUTH_SOCK to the systemd user environment
-      # This ensures graphical applications (especially in COSMIC/Wayland) can access the SSH agent
-      services.ssh-agent-env = {
-        Unit = {
-          Description = "Export SSH agent environment to systemd user session";
-          After = [ "ssh-agent.service" ];
-          PartOf = [ "graphical-session.target" ];
-        };
-
-        Service = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart =
-            "${pkgs.systemd}/bin/systemctl --user set-environment SSH_AUTH_SOCK=%t/ssh-agent";
-          ExecStop =
-            "${pkgs.systemd}/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
-        };
-
-        Install = { WantedBy = [ "graphical-session.target" ]; };
       };
     };
   };
