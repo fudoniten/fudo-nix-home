@@ -172,6 +172,7 @@ let
     dconf-editor # GNOME configuration editor
     gnome-tweaks # GNOME customization tool
     gparted # Partition editor
+    evince # Document reader
     sops # Encryption tool for Kubernetes
     xclip # X11 clipboard utility
     playerctl # Media player controller
@@ -188,6 +189,7 @@ let
     openttd # OpenTTD transport simulation
     heroic # Game launcher
     lutris # Game launcher
+    prismlauncher # Minecraft launcher
     gogdl # GOG downloader
     mcpelauncher-client # Minecraft launcher
 
