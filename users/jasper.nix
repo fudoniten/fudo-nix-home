@@ -52,6 +52,9 @@ in {
         spotify # Music streaming
         xclip # X11 clipboard utility
 
+        # Graphics editors
+        krita
+
         # Video editors
         kdePackages.kdenlive # Professional video editor
         # openshot-qt # Simple video editor
