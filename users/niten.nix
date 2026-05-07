@@ -65,13 +65,16 @@ let
     nil # Nix language server for IDE integration
     nixfmt-classic # Nix code formatter
     nix-index # Search for packages by executable name
+    nix-init # Attempt to generate full Nix package from URL
     nix-prefetch-git # Fetch git repositories for Nix
     nix-prefetch-github # Fetch GitHub repositories for Nix
+    nurl # Generate Nix fetch clause from URL
     bundix # Convert Ruby Gemfiles to Nix expressions
     manix # Search NixOS documentation
     statix # Nix linter for code quality
 
     # File and text utilities
+    comma # Run programs without installing them
     file # Determine file types
     enca # Encoding detector and converter
     unzip # ZIP archive extraction
@@ -602,11 +605,17 @@ in {
     # Use systemd environment.d to set SSH_AUTH_SOCK very early in the boot process
     # This overrides GNOME Keyring's PAM module which tries to set SSH_AUTH_SOCK during login
     # Works for COSMIC, GNOME, and all other desktop environments
-    xdg.configFile."environment.d/10-ssh-agent.conf" = mkIf isLinux {
-      text = ''
-        SSH_AUTH_SOCK=''${XDG_RUNTIME_DIR}/ssh-agent
-        GSM_SKIP_SSH_AGENT_WORKAROUND=1
-      '';
+    xdg.configFile = {
+      "environment.d/10-ssh-agent.conf" = mkIf isLinux {
+        text = ''
+          SSH_AUTH_SOCK=''${XDG_RUNTIME_DIR}/ssh-agent
+          GSM_SKIP_SSH_AGENT_WORKAROUND=1
+        '';
+      };
     };
+
+    # Enable VR configuration (OpenXR and OpenComposite)
+    # Configured via the fudo.vr module for Meta Quest 3 support
+    fudo.vr.enable = isLinux && isGui;
   };
 }
