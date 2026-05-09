@@ -38,8 +38,13 @@ with lib;
       force = false;
     };
 
-    # Add OpenComposite and WiVRn dashboard to user packages
-    home.packages = with pkgs; [ opencomposite wivrn ];
+    # Add VR-related packages to user environment
+    home.packages = with pkgs; [
+      opencomposite # SteamVR compatibility layer
+      wivrn # WiVRn dashboard and tools
+      bubblewrap # Container runtime (patched for VR CAP_SYS_NICE)
+      wayvr # Access Wayland/X11 desktop from VR
+    ];
 
     # Note: Per-game Steam launch options must be set manually:
     # PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
