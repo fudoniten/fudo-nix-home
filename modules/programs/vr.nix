@@ -46,6 +46,39 @@ with lib;
       wayvr # Access Wayland/X11 desktop from VR
     ];
 
+    # WiVRn discovers apps via .desktop files with X-WiVRn-VR in Categories.
+    # These entries make the apps available in the WiVRn application picker,
+    # launching them into WayVR's virtual desktop environment.
+    xdg.desktopEntries = {
+      firefox-vr = {
+        name = "Firefox (VR)";
+        exec = "firefox %U";
+        icon = "firefox";
+        categories = [ "X-WiVRn-VR" ];
+      };
+
+      kitty-vr = {
+        name = "Kitty (VR)";
+        exec = "kitty";
+        icon = "kitty";
+        categories = [ "X-WiVRn-VR" ];
+      };
+
+      emacs-vr = {
+        name = "Emacs (VR)";
+        exec = "emacs %F";
+        icon = "emacs";
+        categories = [ "X-WiVRn-VR" ];
+      };
+
+      spotify-vr = {
+        name = "Spotify (VR)";
+        exec = "spotify %U";
+        icon = "spotify";
+        categories = [ "X-WiVRn-VR" ];
+      };
+    };
+
     # Note: Per-game Steam launch options must be set manually:
     # PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
   };
