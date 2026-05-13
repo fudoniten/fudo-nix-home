@@ -66,7 +66,7 @@ with lib;
 
       emacs-vr = {
         name = "Emacs (VR)";
-        exec = "emacs %F";
+        exec = "emacsclient -c %F";
         icon = "emacs";
         categories = [ "X-WiVRn-VR" ];
       };
