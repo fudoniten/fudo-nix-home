@@ -99,9 +99,7 @@ in {
     };
 
     systemd.user.services.wivrn = {
-      Unit = {
-        Description = "WiVRn XR runtime service";
-      };
+      Unit = { Description = "WiVRn XR runtime service"; };
 
       Service = {
         ExecStart = "${lib.getExe pkgs.wivrn} -f ${wivrn-config}";
@@ -139,9 +137,7 @@ in {
         RestrictSUIDSGID = true;
       };
 
-      Install = {
-        WantedBy = [ "graphical-session.target" ];
-      };
+      Install = { WantedBy = [ "graphical-session.target" ]; };
     };
 
     # WiVRn discovers apps via .desktop files with X-WiVRn-VR in Categories.
@@ -176,22 +172,5 @@ in {
         categories = [ "X-WiVRn-VR" ];
       };
     };
-
-    # Steam configuration for native game support
-    # Priority: native > proton > flatpak runtime
-    programs.steam = {
-      enable = true;
-      # Run Steam natively, not in Flatpak
-      package = pkgs.steam.override {
-        extraLibraries = ps: with ps; [
-          libxkbcommon
-          libxcb
-          vulkan-loader
-        ];
-      };
-    };
-
-    # Note: Per-game Steam launch options can be set via Steam's Launch Options dialog:
-    # PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
   };
 }
