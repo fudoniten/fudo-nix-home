@@ -74,6 +74,8 @@ in {
 
     services.gnome-keyring.enable = true;
 
+    fudo.vr.enable = isLinux;
+
     stylix = mkIf (isLinux && isGui) {
       cursor = mkForce {
         package = pkgs.graphite-cursors;
