@@ -55,13 +55,7 @@ in {
     # Points to WiVRn as the active OpenXR runtime
     xdg.configFile."openxr/1/active_runtime.json" = {
       force = true;
-      text = builtins.toJSON {
-        file_format_version = "1.0.0";
-        runtime = {
-          name = "wivrn";
-          library_path = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
-        };
-      };
+      source = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
     };
 
     # OpenVR paths configuration for OpenComposite
