@@ -103,7 +103,7 @@ in {
           # Allow Steam games to discover WiVRn runtime via Pressure Vessel
           "PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1"
           # Nix profile and system bins so launched apps are found
-          "PATH=${config.home.homeDirectory}/.nix-profile/bin:/run/current-system/sw/bin:/run/wrappers/bin"
+          "PATH=${config.home.homeDirectory}/.nix-profile/bin:/run/current-system/sw/bin:/run/wrappers/bin:/usr/local/bin:/usr/bin:/bin"
         ];
 
         # Hardening options (from upstream NixOS module, non-highPriority mode)
