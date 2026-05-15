@@ -54,6 +54,7 @@ in {
     # OpenXR runtime configuration
     # Points to WiVRn as the active OpenXR runtime
     xdg.configFile."openxr/1/active_runtime.json" = {
+      force = true;
       text = builtins.toJSON {
         file_format_version = "1.0.0";
         runtime = {
@@ -71,8 +72,8 @@ in {
         runtime = [ "${pkgs.opencomposite}/lib/opencomposite" ];
         version = 1;
       };
-      # Don't force overwrite - WiVRn temporarily modifies this file during runtime
-      force = false;
+      # WiVRn temporarily modifies this file during runtime and restores it after
+      force = true;
     };
 
     home.packages = with pkgs; [
