@@ -22,6 +22,17 @@ let
     application = lib.getExe pkgs.wayvr;
   });
 
+  # Helper script to launch apps via wayvrctl
+  # This ensures apps render in VR instead of on the host desktop
+  wayvrctl-launcher = pkgs.writeShellScriptBin "wayvrctl-launcher" ''
+    set -e
+    app="$1"
+    shift
+    # Use wayvrctl process-launch to route the app through WayVR's virtual desktop
+    APP_PATH=$(which "$app" 2>/dev/null || echo "$app")
+    exec ${lib.getExe pkgs.wayvr}/bin/wayvrctl process-launch "$APP_PATH" "$@"
+  '';
+
 in {
   options = {
     fudo.vr = {
@@ -76,10 +87,16 @@ in {
       bubblewrap # Container runtime (patched for VR CAP_SYS_NICE)
       wayvr # Access Wayland/X11 desktop from VR
       xrizer # OpenXR-to-OpenVR compatibility layer
+      wayvrctl-launcher # Helper script for launching apps in VR
     ];
 
     # Make WiVRn's OpenXR runtime visible to Steam games via Pressure Vessel
-    home.sessionVariables.PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = "1";
+    # Also add Steam environment variables for VR support
+    home.sessionVariables = {
+      PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = "1";
+      # OpenXR runtime support in Proton/Pressure Vessel
+      PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
+    };
 
     systemd.user.services.wivrn = {
       Unit = {
@@ -129,38 +146,52 @@ in {
 
     # WiVRn discovers apps via .desktop files with X-WiVRn-VR in Categories.
     # These entries make the apps available in the WiVRn application picker,
-    # launching them into WayVR's virtual desktop environment.
+    # launching them through wayvrctl's process-launch for proper VR routing.
     xdg.desktopEntries = {
       firefox-vr = {
         name = "Firefox (VR)";
-        exec = "firefox";
+        exec = "wayvrctl-launcher firefox";
         icon = "firefox";
         categories = [ "X-WiVRn-VR" ];
       };
 
       kitty-vr = {
         name = "Kitty (VR)";
-        exec = "kitty";
+        exec = "wayvrctl-launcher kitty";
         icon = "kitty";
         categories = [ "X-WiVRn-VR" ];
       };
 
       emacs-vr = {
         name = "Emacs (VR)";
-        exec = "emacsclient -c";
+        exec = "wayvrctl-launcher emacsclient -- -c";
         icon = "emacs";
         categories = [ "X-WiVRn-VR" ];
       };
 
       spotify-vr = {
         name = "Spotify (VR)";
-        exec = "spotify";
+        exec = "wayvrctl-launcher spotify";
         icon = "spotify";
         categories = [ "X-WiVRn-VR" ];
       };
     };
 
-    # Note: Per-game Steam launch options must be set manually:
+    # Steam configuration for native game support
+    # Priority: native > proton > flatpak runtime
+    programs.steam = {
+      enable = true;
+      # Run Steam natively, not in Flatpak
+      package = pkgs.steam.override {
+        extraLibraries = ps: with ps; [
+          libxkbcommon
+          libxcb
+          vulkan-loader
+        ];
+      };
+    };
+
+    # Note: Per-game Steam launch options can be set via Steam's Launch Options dialog:
     # PRESSURE_VESSEL_FILESYSTEMS_RW=$XDG_RUNTIME_DIR/wivrn/comp_ipc %command%
   };
 }
