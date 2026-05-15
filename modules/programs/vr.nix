@@ -59,7 +59,7 @@ in {
         file_format_version = "1.0.0";
         runtime = {
           name = "wivrn";
-          library_path = "${pkgs.wivrn}/lib/libopenxr_wivrn.so";
+          library_path = "${pkgs.wivrn}/share/openxr/1/openxr_wivrn.json";
         };
       };
     };
