@@ -76,6 +76,13 @@ in {
 
     fudo.vr.enable = isLinux;
 
+    xdg.desktopEntries.obs-vr = {
+      name = "OBS (VR)";
+      exec = "obs";
+      icon = "obs";
+      categories = [ "X-WiVRn-VR" ];
+    };
+
     stylix = mkIf (isLinux && isGui) {
       cursor = mkForce {
         package = pkgs.graphite-cursors;

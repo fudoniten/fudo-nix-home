@@ -17,6 +17,9 @@ let
       offset_y = 0.0;
     }];
     bitrate = cfg.wivrn.bitrate;
+    # WayVR provides the Wayland compositor inside VR; without this, launched
+    # apps connect to the desktop compositor and never appear in the headset.
+    application = lib.getExe pkgs.wayvr;
   });
 
 in {
@@ -135,7 +138,7 @@ in {
     xdg.desktopEntries = {
       firefox-vr = {
         name = "Firefox (VR)";
-        exec = "firefox %U";
+        exec = "firefox";
         icon = "firefox";
         categories = [ "X-WiVRn-VR" ];
       };
@@ -149,14 +152,14 @@ in {
 
       emacs-vr = {
         name = "Emacs (VR)";
-        exec = "emacsclient -c %F";
+        exec = "emacsclient -c";
         icon = "emacs";
         categories = [ "X-WiVRn-VR" ];
       };
 
       spotify-vr = {
         name = "Spotify (VR)";
-        exec = "spotify %U";
+        exec = "spotify";
         icon = "spotify";
         categories = [ "X-WiVRn-VR" ];
       };
