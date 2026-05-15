@@ -77,6 +77,7 @@ in {
       wivrn # WiVRn dashboard and tools
       bubblewrap # Container runtime (patched for VR CAP_SYS_NICE)
       wayvr # Access Wayland/X11 desktop from VR
+      xrizer # OpenXR-to-OpenVR compatibility layer
     ];
 
     # Make WiVRn's OpenXR runtime visible to Steam games via Pressure Vessel
