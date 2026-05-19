@@ -30,7 +30,7 @@ let
     shift
     # Use wayvrctl process-launch to route the app through WayVR's virtual desktop
     APP_PATH=$(which "$app" 2>/dev/null || echo "$app")
-    exec ${lib.getExe pkgs.wayvr}/bin/wayvrctl process-launch "$APP_PATH" "$@"
+    exec ${lib.getExe pkgs.wayvr} process-launch "$APP_PATH" "$@"
   '';
 
 in {
