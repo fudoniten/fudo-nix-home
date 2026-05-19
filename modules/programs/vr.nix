@@ -23,14 +23,17 @@ let
   });
 
   # Helper script to launch apps via wayvrctl
-  # This ensures apps render in VR instead of on the host desktop
+  # Usage: wayvrctl-launcher <app> [resolution] [pos] [icon] [args...]
+  # resolution defaults to 1920x1080, pos defaults to 0,0,-1.5 (1.5m ahead)
   wayvrctl-launcher = pkgs.writeShellScriptBin "wayvrctl-launcher" ''
     set -e
     app="$1"
+    resolution="''${2:-1920x1080}"
+    pos="''${3:-0,0,-1.5}"
     shift
-    # Use wayvrctl process-launch to route the app through WayVR's virtual desktop
+    [ $# -ge 2 ] && shift 2 || shift $#
     APP_PATH=$(which "$app" 2>/dev/null || echo "$app")
-    exec ${pkgs.wayvr}/bin/wayvrctl process-launch "$APP_PATH" "$@"
+    exec ${pkgs.wayvr}/bin/wayvrctl process-launch "$APP_PATH" "$resolution" "$pos" "$@"
   '';
 
 in {
