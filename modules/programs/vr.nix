@@ -96,9 +96,30 @@ in {
     # Make WiVRn's OpenXR runtime visible to Steam games via Pressure Vessel
     # Also add Steam environment variables for VR support
     home.sessionVariables = {
+      # Import the host's OpenXR runtime (WiVRn) into the Pressure Vessel
+      # container so Steam games can reach the WiVRn socket.
       PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES = "1";
-      # OpenXR runtime support in Proton/Pressure Vessel
+      # Give the container read-write access to the WiVRn IPC socket.
       PRESSURE_VESSEL_FILESYSTEMS_RW = "$XDG_RUNTIME_DIR/wivrn/comp_ipc";
+
+      # Force OpenComposite as the OpenVR→OpenXR bridge for all OpenVR games.
+      #
+      # Problem: when PRESSURE_VESSEL_IMPORT_OPENXR_1_RUNTIMES=1 is set,
+      # Steam Pressure Vessel uses its *own bundled XRizer* to bridge OpenVR
+      # calls to OpenXR — completely bypassing the openvrpaths.vrpath that
+      # points to OpenComposite. XRizer 0.4.0 is missing IVRSystem_026 (and
+      # other newer interfaces), so games like No Man's Sky, Escape Simulator,
+      # etc. call VR_Init(), receive null back, log a WARN, and silently fall
+      # back to desktop mode.  The XR session immediately goes
+      # READY→SYNCHRONIZED→STOPPING→EXITING, which is exactly what the wivrn
+      # logs show.
+      #
+      # Fix: VR_OVERRIDE is checked by the OpenVR client library *before*
+      # openvrpaths.vrpath and before any Pressure Vessel overrides, so it
+      # wins regardless of what Steam configures.  OpenComposite supports the
+      # full range of IVRSystem interface versions (including 026) and has
+      # correct Quest 3 Touch controller action bindings.
+      VR_OVERRIDE = "${pkgs.opencomposite}/lib/opencomposite";
     };
 
     systemd.user.services.wivrn = {
