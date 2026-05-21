@@ -218,7 +218,6 @@ in {
           kubernetes
           nix-mode
           noflet
-          ob-babashka
           org-roam
           paredit
           polymuse

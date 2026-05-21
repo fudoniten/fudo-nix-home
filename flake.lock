@@ -483,11 +483,11 @@
     "niten-doom-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1779383667,
-        "narHash": "sha256-4XDbsCo+1TBTH95wg/4K4d7+JG+V7B+jeLcVPVPjPPI=",
+        "lastModified": 1779384040,
+        "narHash": "sha256-o0gm+G2Wyx3zDpWg79fjqSFLisX54PxPmmyVNaK+26g=",
         "owner": "fudoniten",
         "repo": "doom-emacs-config",
-        "rev": "a7e2f8b2e57090e4c28de3152abd60b7ba6b23d7",
+        "rev": "65753b932afe2203ace27cc6f9d7840709c4c330",
         "type": "github"
       },
       "original": {
