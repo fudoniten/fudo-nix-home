@@ -53,7 +53,7 @@ let
     basedpyright # Python language server
     bashInteractive # Shell integration
     black # Python formatting
-    clang-format
+    clang-tools
     cljfmt
     clojure # Clojure runtime
     clojure-lsp # Clojure language server
