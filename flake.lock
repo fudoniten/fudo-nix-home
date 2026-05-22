@@ -71,7 +71,9 @@
     "canon": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": ["nixpkgs"]
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1768720393,
@@ -91,7 +93,11 @@
       "inputs": {
         "devshell": "devshell",
         "nix-fetcher-data": "nix-fetcher-data",
-        "nixpkgs": ["fudo-pkgs", "helpers", "nixpkgs"]
+        "nixpkgs": [
+          "fudo-pkgs",
+          "helpers",
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1747498738,
@@ -130,7 +136,12 @@
     },
     "devshell": {
       "inputs": {
-        "nixpkgs": ["fudo-pkgs", "helpers", "clj-nix", "nixpkgs"]
+        "nixpkgs": [
+          "fudo-pkgs",
+          "helpers",
+          "clj-nix",
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1728330715,
@@ -214,7 +225,10 @@
     },
     "flake-parts_2": {
       "inputs": {
-        "nixpkgs-lib": ["stylix", "nixpkgs"]
+        "nixpkgs-lib": [
+          "stylix",
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1767609335,
@@ -322,7 +336,9 @@
       "inputs": {
         "google-photo-uploader-flake": "google-photo-uploader-flake",
         "helpers": "helpers",
-        "nixpkgs": ["nixpkgs"],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
         "unstableNixpkgs": "unstableNixpkgs",
         "utils": "utils_4"
       },
@@ -343,7 +359,12 @@
     },
     "gitignore": {
       "inputs": {
-        "nixpkgs": ["fudo-pkgs", "helpers", "clj2nix", "nixpkgs"]
+        "nixpkgs": [
+          "fudo-pkgs",
+          "helpers",
+          "clj2nix",
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1660459072,
@@ -440,7 +461,9 @@
     },
     "home-manager": {
       "inputs": {
-        "nixpkgs": ["nixpkgs"]
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1778905220,
@@ -476,7 +499,12 @@
     "nix-fetcher-data": {
       "inputs": {
         "flake-parts": "flake-parts",
-        "nixpkgs": ["fudo-pkgs", "helpers", "clj-nix", "nixpkgs"]
+        "nixpkgs": [
+          "fudo-pkgs",
+          "helpers",
+          "clj-nix",
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1728229178,
@@ -597,8 +625,14 @@
     },
     "nur": {
       "inputs": {
-        "flake-parts": ["stylix", "flake-parts"],
-        "nixpkgs": ["stylix", "nixpkgs"]
+        "flake-parts": [
+          "stylix",
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "stylix",
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1767886815,
@@ -617,7 +651,9 @@
     "polymuse": {
       "inputs": {
         "flake-utils": "flake-utils_3",
-        "nixpkgs": ["nixpkgs"]
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1779313542,
@@ -657,7 +693,9 @@
         "firefox-gnome-theme": "firefox-gnome-theme",
         "flake-parts": "flake-parts_2",
         "gnome-shell": "gnome-shell",
-        "nixpkgs": ["nixpkgs"],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
         "nur": "nur",
         "systems": "systems_7",
         "tinted-foot": "tinted-foot",
@@ -885,7 +923,9 @@
     "typewrite": {
       "inputs": {
         "flake-utils": "flake-utils_4",
-        "nixpkgs": ["nixpkgs"]
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1768718459,
