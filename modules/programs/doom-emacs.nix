@@ -77,7 +77,6 @@ let
     nix # Nix for nix-mode
     doas # Sudo alternative
     supercollider # Audio synthesis for music composition
-    pkgsUnstable.aider-chat # AI coding assistant
     findutils
     gnugrep
   ];
