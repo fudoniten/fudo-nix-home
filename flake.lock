@@ -343,11 +343,11 @@
         "utils": "utils_4"
       },
       "locked": {
-        "lastModified": 1779254387,
-        "narHash": "sha256-6CaBz8ELEuUQURzMWcaw7qwl3nshsBhiRC6FeuEbSN8=",
+        "lastModified": 1779379437,
+        "narHash": "sha256-GF/3gOacBHm1d3aENCOcAaVIkO1jtGoYs0hkUrHDGYk=",
         "owner": "fudoniten",
         "repo": "fudo-nix-pkgs",
-        "rev": "b2be2c9ba37bded25d0cd083834de0f215de410c",
+        "rev": "a1f1ceaa6413236ed5b773fef0fadb266678f9b7",
         "type": "github"
       },
       "original": {
@@ -483,11 +483,11 @@
     "niten-doom-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1779399732,
-        "narHash": "sha256-flV04EgIffM3NKy35+qA/clcAKM9YZWVAqVaR7dk6F0=",
+        "lastModified": 1779414639,
+        "narHash": "sha256-Zb2EsKfE5VXOZHIfwy23+HST9PNkQEz08oOGwE4ubyM=",
         "owner": "fudoniten",
         "repo": "doom-emacs-config",
-        "rev": "04cf620b1c4bf10f886f0505e9988111083bb9ab",
+        "rev": "609dee38c00d5893978e761bd5575732e2fa8b8c",
         "type": "github"
       },
       "original": {
