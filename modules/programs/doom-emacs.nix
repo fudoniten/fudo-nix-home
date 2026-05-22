@@ -80,7 +80,6 @@ let
     nodePackages.prettier # Code formatter for web languages
     openssh_hpnWithKerberos # SSH support (for TRAMP remote editing)
     pandoc
-    pkgsUnstable.aider-chat # AI coding assistant
     python3 # Python runtime
     racket
     (ripgrep.override { withPCRE2 = true; }) # Fast search with PCRE2 support
