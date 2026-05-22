@@ -47,39 +47,103 @@ let
   # Default Emacs dependencies
   # These packages are required for Doom Emacs to function properly
   defaultEmacsDeps = with pkgs; [
-    git # Version control (required by Doom)
-    (ripgrep.override { withPCRE2 = true; }) # Fast search with PCRE2 support
-    gnutls # TLS support for package downloads
-    gopls # Go language server
-    fd # Fast file finder (used by Doom's fuzzy finder)
-    imagemagick # Image processing (for inline image display)
-    zstd # Compression (for package caching)
     (aspellWithDicts
       (ds: with ds; [ en en-computers en-science ])) # Spell checking
-    editorconfig-core-c # EditorConfig support
-    sqlite # Database (used by org-roam and other packages)
-    xclip # X11 clipboard integration
-    openssh_hpnWithKerberos # SSH support (for TRAMP remote editing)
-    diffutils # Diff tools (for version control)
-    cljfmt
-    coreutils # Core GNU utilities
-    gnutar # Archive extraction
-    bashInteractive # Shell integration
-    clojure-lsp # Clojure language server
-    clojure # Clojure runtime
     babashka # Clojure scripting
-    curl # HTTP client
-    gnugrep # GNU grep (used by various Doom features)
-    nodePackages.prettier # Code formatter for web languages
     basedpyright # Python language server
-    ruff # Python linting LSP
-    python3 # Python runtime
-    nix # Nix for nix-mode
+    bashInteractive # Shell integration
+    black # Python formatting
+    clang-format
+    cljfmt
+    clojure # Clojure runtime
+    clojure-lsp # Clojure language server
+    coreutils # Core GNU utilities
+    curl # HTTP client
+    diffutils # Diff tools (for version control)
     doas # Sudo alternative
-    supercollider # Audio synthesis for music composition
+    editorconfig-core-c # EditorConfig support
+    fd # Fast file finder (used by Doom's fuzzy finder)
     findutils
+    git # Version control (required by Doom)
     gnugrep
+    gnugrep # GNU grep (used by various Doom features)
+    gnutar # Archive extraction
+    gnutls # TLS support for package downloads
+    gomodifytags
+    gopls # Go language server
+    gore
+    gotests
+    imagemagick # Image processing (for inline image display)
+    isort
+    multimarkdown
+    nix # Nix for nix-mode
+    nodePackages.prettier # Code formatter for web languages
+    openssh_hpnWithKerberos # SSH support (for TRAMP remote editing)
+    pandoc
+    pkgsUnstable.aider-chat # AI coding assistant
+    python3 # Python runtime
+    racket
+    (ripgrep.override { withPCRE2 = true; }) # Fast search with PCRE2 support
+    ruff # Python linting LSP
+    rust-analyzer
+    shellcheck
+    shfmt
+    sqlite # Database (used by org-roam and other packages)
+    supercollider # Audio synthesis for music composition
+    xclip # X11 clipboard integration
+    zstd # Compression (for package caching)
   ];
+
+  defaultEmacsPkgs = epkgs:
+    with epkgs; [
+      aider
+      aidermacs
+      babashka
+      bash-completion
+      canon
+      capf-autosuggest
+      chatgpt-shell
+      consult
+      diff-hl
+      dirvish
+      doom-two-tone-themes
+      eat
+      edit-server
+      ellama
+      elpher
+      embark
+      embark-consult
+      eshell-syntax-highlighting
+      flycheck-clj-kondo
+      git-link
+      gptel
+      hass
+      inf-clojure
+      kubernetes
+      magit-delta
+      marginalia
+      nix-mode
+      nix-ts-mode
+      noflet
+      orderless
+      org-modern
+      org-roam
+      paredit
+      pet
+      polymuse
+      pylint
+      restclient
+      sly-asdf
+      sly-quicklisp
+      spotify
+      stimmung-themes
+      thrift
+      transient
+      treesit-auto
+      typewrite
+      vertico
+      wgrep
+    ];
 
   # Linux-specific dependencies
   defaultLinuxDeps = with pkgs;
@@ -195,39 +259,7 @@ in {
 
     emacsPackages = mkOption {
       type = functionTo (listOf package);
-      default = epkgs:
-        with epkgs; [
-          aider
-          aidermacs
-          babashka
-          bash-completion
-          canon
-          chatgpt-shell
-          dirvish
-          doom-two-tone-themes
-          edit-server
-          ellama
-          elpher
-          embark
-          flycheck-clj-kondo
-          gptel
-          hass
-          inf-clojure
-          ivy-prescient
-          kubernetes
-          nix-mode
-          noflet
-          org-roam
-          paredit
-          polymuse
-          pylint
-          restclient
-          spotify
-          stimmung-themes
-          thrift
-          transient
-          typewrite
-        ];
+      default = defaultEmacsPkgs;
       description =
         "Function that takes emacs packages and returns list of packages to install.";
     };
