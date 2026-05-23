@@ -195,6 +195,7 @@ let
     prismlauncher # Minecraft launcher
     gogdl # GOG downloader
     mcpelauncher-client # Minecraft launcher
+    waylandcraft
 
     gnome-mines # Minesweeper
     gnome-mahjongg # Mahjong solitaire
