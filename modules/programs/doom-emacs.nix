@@ -59,6 +59,7 @@ let
     clojure-lsp # Clojure language server
     coreutils # Core GNU utilities
     curl # HTTP client
+    delta
     diffutils # Diff tools (for version control)
     doas # Sudo alternative
     editorconfig-core-c # EditorConfig support
