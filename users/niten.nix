@@ -20,6 +20,9 @@ let
 
   inherit (pkgs.stdenv) isLinux isDarwin;
 
+  # Access unstable packages for bleeding-edge tools
+  pkgsUnstable = inputs.nixpkgsUnstable.legacyPackages."${pkgs.system}";
+
   sessionEnvVariables = {
     ALTERNATE_EDITOR = "";
 
@@ -95,7 +98,7 @@ let
 
     # AI development tools
     claude-code # Claude Code CLI
-    opencode # OpenCode CLI
+    pkgsUnstable.opencode # OpenCode CLI
 
     # Document processing
     texlive.combined.scheme-full # Complete LaTeX distribution

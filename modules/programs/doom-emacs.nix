@@ -46,53 +46,54 @@ let
 
   # Default Emacs dependencies
   # These packages are required for Doom Emacs to function properly
-  defaultEmacsDeps = with pkgs; [
-    (aspellWithDicts
-      (ds: with ds; [ en en-computers en-science ])) # Spell checking
-    babashka # Clojure scripting
-    basedpyright # Python language server
-    bashInteractive # Shell integration
-    black # Python formatting
-    clang-tools
-    cljfmt
-    clojure # Clojure runtime
-    clojure-lsp # Clojure language server
-    coreutils # Core GNU utilities
-    curl # HTTP client
-    delta
-    diffutils # Diff tools (for version control)
-    doas # Sudo alternative
-    editorconfig-core-c # EditorConfig support
-    fd # Fast file finder (used by Doom's fuzzy finder)
-    findutils
-    git # Version control (required by Doom)
-    gnugrep
-    gnugrep # GNU grep (used by various Doom features)
-    gnutar # Archive extraction
-    gnutls # TLS support for package downloads
-    gomodifytags
-    gopls # Go language server
-    gore
-    gotests
-    imagemagick # Image processing (for inline image display)
-    isort
-    multimarkdown
-    nix # Nix for nix-mode
-    nodePackages.prettier # Code formatter for web languages
-    openssh_hpnWithKerberos # SSH support (for TRAMP remote editing)
-    pandoc
-    python3 # Python runtime
-    racket
-    (ripgrep.override { withPCRE2 = true; }) # Fast search with PCRE2 support
-    ruff # Python linting LSP
-    rust-analyzer
-    shellcheck
-    shfmt
-    sqlite # Database (used by org-roam and other packages)
-    supercollider # Audio synthesis for music composition
-    xclip # X11 clipboard integration
-    zstd # Compression (for package caching)
-  ] ++ [ pkgsUnstable.opencode pkgsUnstable.aider-chat ];
+  defaultEmacsDeps = with pkgs;
+    [
+      (aspellWithDicts
+        (ds: with ds; [ en en-computers en-science ])) # Spell checking
+      babashka # Clojure scripting
+      basedpyright # Python language server
+      bashInteractive # Shell integration
+      black # Python formatting
+      clang-tools
+      cljfmt
+      clojure # Clojure runtime
+      clojure-lsp # Clojure language server
+      coreutils # Core GNU utilities
+      curl # HTTP client
+      delta
+      diffutils # Diff tools (for version control)
+      doas # Sudo alternative
+      editorconfig-core-c # EditorConfig support
+      fd # Fast file finder (used by Doom's fuzzy finder)
+      findutils
+      git # Version control (required by Doom)
+      gnugrep
+      gnugrep # GNU grep (used by various Doom features)
+      gnutar # Archive extraction
+      gnutls # TLS support for package downloads
+      gomodifytags
+      gopls # Go language server
+      gore
+      gotests
+      imagemagick # Image processing (for inline image display)
+      isort
+      multimarkdown
+      nix # Nix for nix-mode
+      nodePackages.prettier # Code formatter for web languages
+      openssh_hpnWithKerberos # SSH support (for TRAMP remote editing)
+      pandoc
+      python3 # Python runtime
+      racket
+      (ripgrep.override { withPCRE2 = true; }) # Fast search with PCRE2 support
+      ruff # Python linting LSP
+      rust-analyzer
+      shellcheck
+      shfmt
+      sqlite # Database (used by org-roam and other packages)
+      supercollider # Audio synthesis for music composition
+      xclip # X11 clipboard integration
+      zstd # Compression (for package caching)
+    ] ++ (with pkgsUnstable; [ opencode aider-chat ]);
 
   defaultEmacsPkgs = epkgs:
     with epkgs; [
