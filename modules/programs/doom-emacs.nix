@@ -92,7 +92,7 @@ let
     supercollider # Audio synthesis for music composition
     xclip # X11 clipboard integration
     zstd # Compression (for package caching)
-  ];
+  ] ++ [ pkgsUnstable.opencode ];
 
   defaultEmacsPkgs = epkgs:
     with epkgs; [
@@ -102,7 +102,6 @@ let
       bash-completion
       canon
       capf-autosuggest
-      chatgpt-shell
       consult
       diff-hl
       dirvish
