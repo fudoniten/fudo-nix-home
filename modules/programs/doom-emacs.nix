@@ -92,17 +92,16 @@ let
     supercollider # Audio synthesis for music composition
     xclip # X11 clipboard integration
     zstd # Compression (for package caching)
-  ];
+  ] ++ [ pkgsUnstable.opencode pkgsUnstable.aider-chat ];
 
   defaultEmacsPkgs = epkgs:
     with epkgs; [
-      aider
+      agent-shell
       aidermacs
       babashka
       bash-completion
       canon
       capf-autosuggest
-      chatgpt-shell
       consult
       diff-hl
       dirvish
