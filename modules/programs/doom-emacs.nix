@@ -96,7 +96,7 @@ let
 
   defaultEmacsPkgs = epkgs:
     with epkgs; [
-      aider
+      agent-shell
       aidermacs
       babashka
       bash-completion
