@@ -79,6 +79,7 @@ let
       isort
       multimarkdown
       nix # Nix for nix-mode
+      nodejs
       nodePackages.prettier # Code formatter for web languages
       openssh_hpnWithKerberos # SSH support (for TRAMP remote editing)
       pandoc
