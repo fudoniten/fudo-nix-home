@@ -99,6 +99,7 @@ let
     # AI development tools
     claude-code # Claude Code CLI
     pkgsUnstable.opencode # OpenCode CLI
+    oh-my-pi
 
     # Document processing
     texlive.combined.scheme-full # Complete LaTeX distribution
