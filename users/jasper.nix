@@ -33,6 +33,7 @@ in {
 
         # Games
         mcpelauncher-client # Minecraft launcher
+        prismlauncher # Minecraft launcher
 
         # Web browsers
         google-chrome # Google Chrome browser
