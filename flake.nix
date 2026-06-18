@@ -16,10 +16,10 @@
   description = "Fudo Home Manager Configuration";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-25.11";
+    nixpkgs.url = "nixpkgs/nixos-26.05";
     nixpkgsUnstable.url = "nixpkgs/nixos-unstable";
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     doom-emacs = {
@@ -31,11 +31,11 @@
       flake = false;
     };
     fudo-pkgs = {
-      url = "github:fudoniten/fudo-nix-pkgs/25.11";
+      url = "github:fudoniten/fudo-nix-pkgs/26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     stylix = {
-      url = "github:danth/stylix/release-25.11";
+      url = "github:danth/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     polymuse = {
