@@ -172,7 +172,7 @@ let
     # Music and audio
     spotify-player # Terminal UI for Spotify
     spotify-qt # Qt-based Spotify client
-    helvum # PipeWire patchbay (audio routing)
+    crosspipe # PipeWire patchbay (audio routing)
 
     # System tools
     dconf-editor # GNOME configuration editor
