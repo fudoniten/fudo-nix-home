@@ -505,10 +505,7 @@ in {
       gpg-agent.enable = true;
 
       # SSH agent for authentication
-      ssh-agent = {
-        enable = true;
-        enableBashIntegration = true;
-      };
+      ssh-agent.enable = true;
 
       # GNOME keyring for credential storage (GUI only)
       # SSH agent component disabled - using dedicated SSH agent instead
