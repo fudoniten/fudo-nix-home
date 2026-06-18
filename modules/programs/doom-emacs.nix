@@ -80,7 +80,7 @@ let
       multimarkdown
       nix # Nix for nix-mode
       nodejs
-      nodePackages.prettier # Code formatter for web languages
+      prettier # Code formatter for web languages
       openssh_hpnWithKerberos # SSH support (for TRAMP remote editing)
       pandoc
       python3 # Python runtime
