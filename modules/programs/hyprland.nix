@@ -182,6 +182,7 @@ in {
       enable = true;
       xwayland.enable = true;
       systemd.enable = true;
+      configType = "lua";
 
       settings = {
         # Monitor configuration - auto-detect
