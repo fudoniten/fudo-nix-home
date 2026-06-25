@@ -55,6 +55,7 @@ let
     # Development tools - Languages and runtimes
     cargo # Rust package manager
     rustc # Rust compiler
+    clj-kondo # Clojure linter
     clojure # Clojure programming language
     go # Go programming language
     guile # GNU Guile Scheme
