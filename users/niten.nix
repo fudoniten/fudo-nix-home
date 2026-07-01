@@ -20,6 +20,197 @@ let
 
   inherit (pkgs.stdenv) isLinux isDarwin;
 
+  zen-browser = let
+    prefs = {
+      "extensions.pocket.enabled" = false;
+      "browser.urlbar.suggest.quicksuggest.sponsored" = false;
+      "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
+      "browser.urlbar.suggest.trending" = false;
+      "browser.urlbar.suggest.yelp" = false;
+      "browser.urlbar.quicksuggest.enabled" = false;
+      "browser.ml.chat.enabled" = false;
+      "signon.rememberSignons" = false;
+    };
+
+    mkExt = shortId: guid: {
+      name = guid;
+      value = {
+        install_url =
+          "https://addons.mozilla.org/en-US/firefox/downloads/latest/${shortId}/latest.xpi";
+        installation_mode = "normal_installed";
+      };
+    };
+
+    extensions = [
+      # Proton Pass
+      (mkExt "proton-pass" "78272b6fa58f4a1abaac99321d503a20@proton.me")
+      # Bitwarden
+      (mkExt "bitwarden-password-manager"
+        "{446900e4-71c2-419f-a6a7-df9c091e268b}")
+      # Karakeep self-hosted smart bookmarks
+      (mkExt "karakeep" "addon@karakeep.app")
+      # UBlock Origin
+      (mkExt "ublock-origin" "uBlock0@raymondhill.net")
+      # Multi-account containers--auto-open in container
+      (mkExt "multi-account-containers" "@testpilot-containers")
+    ];
+
+  in (pkgs.wrapFirefox
+    inputs.zen-browser.packages."${pkgs.stdenv.hostPlatform.system}".zen-browser-unwrapped {
+      extraPrefs = lib.concatLines (lib.mapAttrsToList (name: value:
+        "lockPref(${lib.strings.toJSON name}, ${lib.strings.toJSON value});")
+        prefs);
+      extraPolicies = {
+        DisableTelemetry = true;
+        ExtensionSettings = builtins.listToAttrs extensions;
+
+        DNSOverHTTPS = {
+          Enabled = false;
+          Locked = true;
+        };
+
+        Containers = {
+          Default = [
+            {
+              name = "Xiaoxuan";
+              icon = "fingerprint";
+              color = "pink";
+            }
+            {
+              name = "Jasper";
+              icon = "fingerprint";
+              color = "purple";
+            }
+            {
+              name = "JasperGaming";
+              icon = "pet";
+              color = "purple";
+            }
+            {
+              name = "Helen";
+              icon = "fingerprint";
+              color = "yellow";
+            }
+            {
+              name = "Admin";
+              icon = "fingerprint";
+              color = "red";
+            }
+            {
+              name = "xham";
+              icon = "food";
+              color = "orange";
+            }
+            {
+              name = "LinkedIn";
+              icon = "circle";
+              color = "blue";
+            }
+            {
+              name = "Google";
+              icon = "fence";
+              color = "blue";
+            }
+            {
+              name = "Amazon";
+              icon = "cart";
+              color = "yellow";
+            }
+            {
+              name = "Costco";
+              icon = "cart";
+              color = "blue";
+            }
+            {
+              name = "AliExpress";
+              icon = "cart";
+              color = "orange";
+            }
+            {
+              name = "Ebay";
+              icon = "cart";
+              color = "purple";
+            }
+            {
+              name = "GitHub";
+              icon = "briefcase";
+              color = "turquoise";
+            }
+            {
+              name = "Coinbase";
+              icon = "dollar";
+              color = "blue";
+            }
+            {
+              name = "Kraken";
+              icon = "dollar";
+              color = "pink";
+            }
+            {
+              name = "Hermes";
+              icon = "pet";
+              color = "blue";
+            }
+          ];
+        };
+
+        SearchEngines = {
+          Default = "google";
+          Add = [
+            {
+              Name = "nixpkgs packages";
+              URLTemplate =
+                "https://search.nixos.org/packages?query={searchTerms}";
+              IconURL = "https://wiki.nixos.org/favicon.ico";
+              Alias = "@np";
+            }
+            {
+              Name = "NixOS options";
+              URLTemplate =
+                "https://search.nixos.org/options?query={searchTerms}";
+              IconURL = "https://wiki.nixos.org/favicon.ico";
+              Alias = "@no";
+            }
+            {
+              Name = "NixOS Wiki";
+              URLTemplate =
+                "https://wiki.nixos.org/w/index.php?search={searchTerms}";
+              IconURL = "https://wiki.nixos.org/favicon.ico";
+              Alias = "@nw";
+            }
+            {
+              Name = "Amazon";
+              URLTemplate = "https://www.amazon.com?k={searchTerms}";
+              IconURL = "https://amazon.com/favicon.ico";
+              Alias = "@a";
+            }
+            {
+              Name = "Wikipedia";
+              URLTemplate =
+                "https://en.wikipedia.org/w/index.php?search={searchTerms}";
+              IconURL = "https://wikipedia.org/favicon.ico";
+              Alias = "@w";
+            }
+            {
+              Name = "Wiktionary";
+              URLTemplate =
+                "https://en.wiktionary.org/w/index.php?search={searchTerms}";
+              IconURL =
+                "https://en.wiktionary.org/static/favicon/wiktionary/en.ico";
+              Alias = "@wik";
+            }
+            {
+              Name = "SearXNG";
+              URLTemplate =
+                "https://search.kube.sea.fudo.link/search?q={searchTerms}";
+              IconURL = "https://search.kube.sea.fudo.link/favicon.ico";
+              Alias = "@s";
+            }
+          ];
+        };
+      };
+    });
+
   # Access unstable packages for bleeding-edge tools
   pkgsUnstable = inputs.nixpkgsUnstable.legacyPackages."${pkgs.system}";
 
@@ -131,6 +322,9 @@ let
     # Specialized tools
     kubo # IPFS implementation
     tio # Serial I/O terminal
+
+    # General tools
+    zen-browser
   ];
 
   # GUI packages for all desktop environments
