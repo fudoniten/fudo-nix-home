@@ -509,10 +509,6 @@ in {
       doomConfigSource = inputs.niten-doom-config;
     };
 
-    # Hyprland window manager (Wayland only)
-    programs.hyprland =
-      mkIf (systemCfg.desktop.type == "wayland") { enable = true; };
-
     # StumpWM window manager (X11 only)
     programs.stumpwm = mkIf (systemCfg.desktop.type == "x") { enable = true; };
 
