@@ -175,6 +175,24 @@ in {
       description = "Additional commands to run on Hyprland startup";
       example = [ "discord" "element-desktop" ];
     };
+
+    batteryFriendly = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        Disable animations, shadows, and enable VRR. Recommended on
+        laptops to reduce battery usage.
+      '';
+    };
+
+    lockCommand = mkOption {
+      type = types.str;
+      default = "swaylock";
+      description = ''
+        Command invoked by the manual screen-lock binding
+        ($mod CTRL, L) and by hypridle for auto-lock.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -203,6 +221,8 @@ in {
           "mako"
           "wl-paste --watch cliphist store"
           "dbus-update-activation-environment --systemd --all"
+          "hypridle"
+          "hyprpolkitagent"
         ] ++ cfg.extraAutostart;
 
         # Input configuration
@@ -225,13 +245,16 @@ in {
           "col.inactive_border" = "rgba(595959aa)";
           layout = "dwindle";
           allow_tearing = false;
+          vrr = mkIf cfg.batteryFriendly 1;
         };
 
         # Decorations
         decoration = {
           rounding = 8;
 
-          shadow = {
+          shadow = if cfg.batteryFriendly then {
+            enabled = false;
+          } else {
             enabled = true;
             range = 4;
             render_power = 3;
@@ -243,7 +266,7 @@ in {
 
         # Animations
         animations = {
-          enabled = true;
+          enabled = !cfg.batteryFriendly;
           bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
           animation = [
             "windows, 1, 7, myBezier"
@@ -284,6 +307,7 @@ in {
           # Application launchers
           "$mod, Return, exec, $terminal"
           "$mod, D, exec, $menu"
+          "$mod SHIFT, D, exec, wofi --show run"
           "$mod, E, exec, $fileManager"
 
           # Window management
@@ -342,7 +366,7 @@ in {
           "$mod SHIFT, Print, exec, grimblast copy screen"
 
           # Screen lock
-          "$mod CTRL, L, exec, swaylock"
+          "$mod CTRL, L, exec, ${cfg.lockCommand}"
 
           # Resize mode (submap)
           "$mod, R, submap, resize"
@@ -411,6 +435,8 @@ in {
           # Authentication dialogs
           "float, class:^(polkit-gnome-authentication-agent-1)$"
           "float, class:^(gcr-prompter)$"
+          "float, class:^(hyprpolkitagent)$"
+          "center, class:^(hyprpolkitagent)$"
         ];
       };
     };
@@ -435,6 +461,18 @@ in {
         show-failed-attempts = true;
       };
     };
+
+    # Wofi launcher styling (Catppuccin Mocha palette)
+    home.file.".config/wofi/style.css".source =
+      ./hyprland/wofi-style.css;
+
+    # Wofi launcher config
+    home.file.".config/wofi/config".source =
+      ./hyprland/wofi-config;
+
+    # Hypridle configuration (auto-lock and DPMS-off)
+    home.file.".config/hypr/hypridle.conf".source =
+      ./hyprland/hypridle.conf;
 
     # Mako notification daemon
     services.mako = {
@@ -478,6 +516,13 @@ in {
       pamixer # Audio control
       pavucontrol # PulseAudio volume control GUI
       playerctl # Media player control
+
+      # Idle management and lock screen
+      hypridle # Idle daemon (consumes hypridle.conf above)
+      hyprlock # Modern screen locker used by hypridle
+
+      # Polkit authentication agent (native to Hyprland)
+      hyprpolkitagent # Lets GUI apps prompt for sudo via Wayland
 
       # Additional utilities
       xdg-utils # XDG utilities for opening files

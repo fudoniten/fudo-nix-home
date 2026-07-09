@@ -1,0 +1,14 @@
+[window]
+location=center
+width=600
+height=400
+border=2
+
+[prompt]
+>
+
+[drun]
+matching=fuzzy
+
+[run]
+matching=fuzzy
