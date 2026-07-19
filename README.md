@@ -2,12 +2,12 @@
 
 Internal repository for managing [Home Manager](https://github.com/nix-community/home-manager) configurations across various systems for the Fudo Project.
 
-**Current users:** jasper, ken, niten, reaper, root, xiaoxuan
+**Current users:** hermes, jasper, ken, niten, openclaw, reaper, root, xiaoxuan
 
 ## What This Repo Does
 
 - Manages user-specific NixOS/Home Manager configurations for Fudo Project users
-- Provides custom modules (Doom Emacs, SuperCollider, Locket secrets) that we commonly use
+- Provides custom modules (Doom Emacs, Hyprland, StumpWM, VR, SuperCollider, Locket secrets) that we commonly use
 - Supports multiple desktop environments (X11, Wayland, macOS, headless)
 - Can be deployed as a NixOS module or standalone Home Manager configuration
 
@@ -18,13 +18,20 @@ Internal repository for managing [Home Manager](https://github.com/nix-community
 ├── flake.nix              # Main flake with inputs and outputs
 ├── module.nix             # NixOS module for system-wide integration
 ├── modules/               # Custom Home Manager modules
+│   ├── default.nix        # Aggregator (services + locket)
+│   ├── modules.nix        # Aggregator (services + programs + styling)
 │   ├── locket/            # Profile-based secrets management
 │   │   ├── default.nix
 │   │   └── options.nix
 │   ├── programs/
-│   │   └── doom-emacs.nix # Doom Emacs configuration module
-│   └── services/
-│       └── supercollider.nix # SuperCollider audio server
+│   │   ├── doom-emacs.nix # Doom Emacs configuration module
+│   │   ├── hyprland.nix   # Hyprland (Wayland) compositor setup
+│   │   ├── hyprland/      # Hyprland assets (hypridle, wofi configs)
+│   │   ├── stumpwm.nix    # StumpWM (X11) window manager
+│   │   └── vr.nix         # VR desktop support
+│   ├── services/
+│   │   └── supercollider.nix # SuperCollider audio server
+│   └── styling.nix        # Stylix theming glue
 ├── secrets/               # Encrypted secrets (Locket)
 │   └── profiles/          # Profile public keys
 ├── bin/                   # Locket CLI tools
@@ -32,13 +39,17 @@ Internal repository for managing [Home Manager](https://github.com/nix-community
 │   ├── locket-add
 │   ├── locket-check
 │   └── ...
+├── .githooks/             # Pre-commit hook (blocks committing private keys)
 ├── users/                 # User configurations
+│   ├── hermes.nix
 │   ├── jasper.nix
 │   ├── ken.nix
 │   ├── niten.nix
+│   ├── openclaw.nix
 │   ├── reaper.nix
 │   ├── root.nix
 │   └── xiaoxuan.nix
+├── run-tests.sh           # Local test runner (mirrors CI)
 ├── LOCKET.md              # Locket documentation
 └── README.md              # This file
 ```
@@ -54,15 +65,15 @@ If you're on NixOS and want to integrate your user configuration into your syste
 ```nix
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     fudo-nix-home = {
-      url = "github:fudoniten/fudo-nix-home/25.05";
+      url = "github:fudoniten/fudo-nix-home/26.05";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
@@ -86,7 +97,7 @@ If you're on NixOS and want to integrate your user configuration into your syste
 
             system = {
               desktop.type = "wayland";  # "x", "wayland", "darwin", or "none"
-              stateVersion = "25.05";
+              stateVersion = "26.05";
             };
           };
         }
@@ -121,15 +132,15 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 ```nix
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     fudo-nix-home = {
-      url = "github:fudoniten/fudo-nix-home/25.05";
+      url = "github:fudoniten/fudo-nix-home/26.05";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
@@ -148,7 +159,7 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
           username = "niten";
           email = "niten@fudo.org";
           home-directory = "/home/niten";
-          stateVersion = "25.05";
+          stateVersion = "26.05";
           desktopType = "wayland";  # "x", "wayland", "darwin", or "none"
         }
       ];
@@ -161,7 +172,7 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 
 ```bash
 # First time
-nix run home-manager/release-25.05 -- switch --flake .#niten
+nix run home-manager/release-26.05 -- switch --flake .#niten
 
 # After that
 home-manager switch --flake .#niten
@@ -234,6 +245,24 @@ programs.doom-emacs = {
 };
 ```
 
+#### Hyprland (`programs.hyprland`)
+
+Opinionated [Hyprland](https://hyprland.org/) Wayland compositor setup, including
+Waybar styling and a swaylock configuration. Intended for `desktopType = "wayland"`
+users. Enable with `programs.hyprland.enable = true;`. See
+[`docs/hyprland-cheatsheet.pdf`](docs/hyprland-cheatsheet.pdf) for keybindings.
+
+#### StumpWM (`programs.stumpwm`)
+
+[StumpWM](https://stumpwm.github.io/) tiling window manager for X11 users
+(`desktopType = "x"`). Enable with `programs.stumpwm.enable = true;`. See
+[`docs/stumpwm-cheatsheet.pdf`](docs/stumpwm-cheatsheet.pdf) for keybindings.
+
+#### VR (`programs.vr`)
+
+VR desktop support module for headset-based workflows. Enable with
+`programs.vr.enable = true;`.
+
 ### Services
 
 #### SuperCollider (`services.supercollider`)
@@ -258,7 +287,7 @@ services.supercollider = {
 
 This flake includes several specialized inputs:
 
-- **nixpkgs**: NixOS 25.05 package set
+- **nixpkgs**: NixOS 26.05 package set
 - **nixpkgsUnstable**: Unstable channel for bleeding-edge packages
 - **home-manager**: Home Manager for declarative dotfile management
 - **doom-emacs**: Doom Emacs framework source
