@@ -317,6 +317,7 @@ let
     # Security and privacy
     openssl # SSL/TLS toolkit
     openssl.out # OpenSSL outputs
+    proton-pass-cli # Proton CLI UI
     tor-browser # Anonymous web browser
 
     # Specialized tools
