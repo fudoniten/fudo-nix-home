@@ -332,7 +332,17 @@ in {
             if [ ! -d ${config.xdg.configHome}/emacs ]; then
               mkdir -p ${config.xdg.configHome}/emacs
             fi
-            ${pkgs.rsync}/bin/rsync -avz --chmod=D2755,F744 ${cfg.doomSource}/ ${config.xdg.configHome}/emacs/
+            # --delete: the Doom tree must exactly mirror doomSource. Without
+            #   it, files dropped by an upstream reorganization linger forever
+            #   and shadow the new layout (e.g. the pre-2026-06 bundled
+            #   modules/ tree, which lacks the .doommodules marker newer Doom
+            #   needs to scan a module's autodefs).
+            # --checksum: every file in the Nix store has mtime 1970-01-01, so
+            #   rsync's default size+mtime quick check never notices a changed
+            #   file that kept its size.
+            ${pkgs.rsync}/bin/rsync -avz --delete --checksum \
+              --exclude='/.local/' --exclude='/eln-cache/' \
+              --chmod=D2755,F744 ${cfg.doomSource}/ ${config.xdg.configHome}/emacs/
 
             # Create state directory if it doesn't exist
             if [ ! -d ${stateDir} ]; then

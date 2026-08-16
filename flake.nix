@@ -22,8 +22,15 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Doom's module library was moved out of the core repo (upstream commit
+    # eb04484, 2026-06-08) and is now the `sources/doom+` git submodule. The
+    # `github:` fetcher downloads a tarball, which never contains submodules,
+    # so it must be fetched with git+https and `submodules=1` — otherwise
+    # `sources/doom+/modules` is empty and no module (ui/popup, lang/*, ...)
+    # resolves, which breaks `doom sync` in confusing ways (e.g. the autodefs
+    # `set-popup-rules!` and friends silently never get generated).
     doom-emacs = {
-      url = "github:doomemacs/doomemacs";
+      url = "git+https://github.com/doomemacs/doomemacs?submodules=1";
       flake = false;
     };
     niten-doom-config = {
