@@ -22,6 +22,8 @@ let
 
   isGui = systemCfg.desktop.type != "none";
 
+  fudoPkgs = inputs.fudo-pkgs.packages."${pkgs.system}";
+
 in {
   config = mkIf isGui {
     home = {
@@ -34,6 +36,7 @@ in {
         # Games
         mcpelauncher-client # Minecraft launcher
         prismlauncher # Minecraft launcher
+        fudoPkgs.mcreator # Minecraft mod maker
 
         # Web browsers
         google-chrome # Google Chrome browser
