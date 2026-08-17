@@ -162,16 +162,18 @@
       "flake": false,
       "locked": {
         "lastModified": 1786861603,
-        "narHash": "sha256-NvKdWVXaP6hO7QSTD+hEkRQwpXVsMES+uvM6FqCNN9c=",
-        "owner": "doomemacs",
-        "repo": "doomemacs",
+        "narHash": "sha256-ANpkyh7IBS12Xzq9KH2jM5FVd/UuaitlRt1JwWkY5m4=",
+        "ref": "refs/heads/master",
         "rev": "0deceecf9edc7d4cd15db3e931452e12d762b1b1",
-        "type": "github"
+        "revCount": 21251,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/doomemacs/doomemacs"
       },
       "original": {
-        "owner": "doomemacs",
-        "repo": "doomemacs",
-        "type": "github"
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/doomemacs/doomemacs"
       }
     },
     "firefox-gnome-theme": {
@@ -345,11 +347,11 @@
         "utils": "utils_4"
       },
       "locked": {
-        "lastModified": 1782745345,
-        "narHash": "sha256-vAlV02sVrSUP3Knu8YHOV+y4QpxjMt2Lt8YEQMIh0Vo=",
+        "lastModified": 1786927305,
+        "narHash": "sha256-G9Hw2YuW9hYBJlIg9Wl0DMStAmBXJZQbv2fc+Sraqzs=",
         "owner": "fudoniten",
         "repo": "fudo-nix-pkgs",
-        "rev": "b7928bfbe600199213a8b2a330de2639a736a857",
+        "rev": "250a356fdd148bfe9ba0abc3158af5ea4fbd9731",
         "type": "github"
       },
       "original": {
@@ -467,11 +469,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785119570,
-        "narHash": "sha256-Rgs2xKnGLFWQscxUaXX07oyZeuMDOHEbqDOsgliLFGM=",
+        "lastModified": 1786924861,
+        "narHash": "sha256-hftabkb+73OcGzvwFAjCiQorAhprs9TnU1+FkGO5CIw=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "d4fd24667c8cbef124bb70a20380cab75ec8474d",
+        "rev": "09ae1b85a6db412d841d60f924b23f881f0d0a38",
         "type": "github"
       },
       "original": {
