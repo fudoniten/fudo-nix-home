@@ -41,6 +41,9 @@ let
       };
     };
 
+    # 1. Go to the extension's addons.mozilla.org page.
+    # 2. Scroll to More information.
+    # 3. Click Copy add-on ID. AMO currently shows that control directly on the RES page.
     extensions = [
       # Proton Pass
       (mkExt "proton-pass" "78272b6fa58f4a1abaac99321d503a20@proton.me")
@@ -53,6 +56,7 @@ let
       (mkExt "ublock-origin" "uBlock0@raymondhill.net")
       # Multi-account containers--auto-open in container
       (mkExt "multi-account-containers" "@testpilot-containers")
+      (mkExt "reddit-enhancement-suite" "jid1-xUfzOsOFlzSOXg@jetpack")
     ];
 
   in (pkgs.wrapFirefox
@@ -180,7 +184,7 @@ let
             }
             {
               Name = "Amazon";
-              URLTemplate = "https://www.amazon.com?k={searchTerms}";
+              URLTemplate = "https://www.amazon.com/s?k={searchTerms}";
               IconURL = "https://amazon.com/favicon.ico";
               Alias = "@a";
             }
@@ -205,6 +209,13 @@ let
                 "https://search.kube.sea.fudo.link/search?q={searchTerms}";
               IconURL = "https://search.kube.sea.fudo.link/favicon.ico";
               Alias = "@s";
+            }
+            {
+              Name = "YouTube";
+              URLTemplate =
+                "https://www.yahoo.com/results?search_query={searchTerms}";
+              IconURL = "https://youtube.com/favicon.ico";
+              Alias = "@y";
             }
           ];
         };
