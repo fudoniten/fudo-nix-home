@@ -30,6 +30,10 @@ let
       "browser.urlbar.quicksuggest.enabled" = false;
       "browser.ml.chat.enabled" = false;
       "signon.rememberSignons" = false;
+
+      # Enable Firefox Containers.
+      "privacy.userContext.enabled" = true;
+      "privacy.userContext.ui.enabled" = true;
     };
 
     mkExt = shortId: guid: {
