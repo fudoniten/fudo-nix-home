@@ -20,211 +20,156 @@ let
 
   inherit (pkgs.stdenv) isLinux isDarwin;
 
-  zen-browser = let
-    prefs = {
-      "extensions.pocket.enabled" = false;
-      "browser.urlbar.suggest.quicksuggest.sponsored" = false;
-      "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
-      "browser.urlbar.suggest.trending" = false;
-      "browser.urlbar.suggest.yelp" = false;
-      "browser.urlbar.quicksuggest.enabled" = false;
-      "browser.ml.chat.enabled" = false;
-      "signon.rememberSignons" = false;
-
-      # Enable Firefox Containers.
-      "privacy.userContext.enabled" = true;
-      "privacy.userContext.ui.enabled" = true;
+  mkExt = shortId: guid: {
+    name = guid;
+    value = {
+      install_url =
+        "https://addons.mozilla.org/en-US/firefox/downloads/latest/${shortId}/latest.xpi";
+      installation_mode = "normal_installed";
     };
+  };
 
-    mkExt = shortId: guid: {
-      name = guid;
-      value = {
-        install_url =
-          "https://addons.mozilla.org/en-US/firefox/downloads/latest/${shortId}/latest.xpi";
-        installation_mode = "normal_installed";
-      };
+  # 1. Go to the extension's addons.mozilla.org page.
+  # 2. Scroll to More information.
+  # 3. Click Copy add-on ID. AMO currently shows that control directly on the RES page.
+  zenExtensions = [
+    # Proton Pass
+    (mkExt "proton-pass" "78272b6fa58f4a1abaac99321d503a20@proton.me")
+    # Bitwarden
+    (mkExt "bitwarden-password-manager"
+      "{446900e4-71c2-419f-a6a7-df9c091e268b}")
+    # Karakeep self-hosted smart bookmarks
+    (mkExt "karakeep" "addon@karakeep.app")
+    # UBlock Origin
+    (mkExt "ublock-origin" "uBlock0@raymondhill.net")
+    # Multi-account containers--auto-open in container
+    (mkExt "multi-account-containers" "@testpilot-containers")
+    (mkExt "reddit-enhancement-suite" "jid1-xUfzOsOFlzSOXg@jetpack")
+  ];
+
+  # Zen's new native container implementation stores containers as part of
+  # the workspace/session state (zen-sessions.jsonlz4) rather than reading
+  # the legacy policies.json "Containers" key, so declaring them there (as
+  # this config used to) only ever seeded the containers a fresh profile
+  # started with. The zen-browser-flake Home Manager module below writes
+  # these into zen-sessions.jsonlz4 directly, which is why each entry now
+  # needs a stable numeric id (the underlying userContextId).
+  zenContainers = {
+    Xiaoxuan = {
+      icon = "fingerprint";
+      color = "pink";
+      id = 1;
     };
+    Jasper = {
+      icon = "fingerprint";
+      color = "purple";
+      id = 2;
+    };
+    JasperGaming = {
+      icon = "pet";
+      color = "purple";
+      id = 3;
+    };
+    Helen = {
+      icon = "fingerprint";
+      color = "yellow";
+      id = 4;
+    };
+    Admin = {
+      icon = "fingerprint";
+      color = "red";
+      id = 5;
+    };
+    xham = {
+      icon = "food";
+      color = "orange";
+      id = 6;
+    };
+    LinkedIn = {
+      icon = "circle";
+      color = "blue";
+      id = 7;
+    };
+    Google = {
+      icon = "fence";
+      color = "blue";
+      id = 8;
+    };
+    Amazon = {
+      icon = "cart";
+      color = "yellow";
+      id = 9;
+    };
+    Costco = {
+      icon = "cart";
+      color = "blue";
+      id = 10;
+    };
+    AliExpress = {
+      icon = "cart";
+      color = "orange";
+      id = 11;
+    };
+    Ebay = {
+      icon = "cart";
+      color = "purple";
+      id = 12;
+    };
+    GitHub = {
+      icon = "briefcase";
+      color = "turquoise";
+      id = 13;
+    };
+    Coinbase = {
+      icon = "dollar";
+      color = "blue";
+      id = 14;
+    };
+    Kraken = {
+      icon = "dollar";
+      color = "pink";
+      id = 15;
+    };
+    Hermes = {
+      icon = "pet";
+      color = "blue";
+      id = 16;
+    };
+  };
 
-    # 1. Go to the extension's addons.mozilla.org page.
-    # 2. Scroll to More information.
-    # 3. Click Copy add-on ID. AMO currently shows that control directly on the RES page.
-    extensions = [
-      # Proton Pass
-      (mkExt "proton-pass" "78272b6fa58f4a1abaac99321d503a20@proton.me")
-      # Bitwarden
-      (mkExt "bitwarden-password-manager"
-        "{446900e4-71c2-419f-a6a7-df9c091e268b}")
-      # Karakeep self-hosted smart bookmarks
-      (mkExt "karakeep" "addon@karakeep.app")
-      # UBlock Origin
-      (mkExt "ublock-origin" "uBlock0@raymondhill.net")
-      # Multi-account containers--auto-open in container
-      (mkExt "multi-account-containers" "@testpilot-containers")
-      (mkExt "reddit-enhancement-suite" "jid1-xUfzOsOFlzSOXg@jetpack")
-    ];
+  mkZenSearchEngine = template: alias: name: {
+    inherit name;
+    urls = [{ inherit template; }];
+    definedAliases = [ alias ];
+  };
 
-  in (pkgs.wrapFirefox
-    inputs.zen-browser.packages."${pkgs.stdenv.hostPlatform.system}".zen-browser-unwrapped {
-      extraPrefs = lib.concatLines (lib.mapAttrsToList (name: value:
-        "lockPref(${lib.strings.toJSON name}, ${lib.strings.toJSON value});")
-        prefs);
-      extraPolicies = {
-        DisableTelemetry = true;
-        ExtensionSettings = builtins.listToAttrs extensions;
-
-        DNSOverHTTPS = {
-          Enabled = false;
-          Locked = true;
-        };
-
-        Containers = {
-          Default = [
-            {
-              name = "Xiaoxuan";
-              icon = "fingerprint";
-              color = "pink";
-            }
-            {
-              name = "Jasper";
-              icon = "fingerprint";
-              color = "purple";
-            }
-            {
-              name = "JasperGaming";
-              icon = "pet";
-              color = "purple";
-            }
-            {
-              name = "Helen";
-              icon = "fingerprint";
-              color = "yellow";
-            }
-            {
-              name = "Admin";
-              icon = "fingerprint";
-              color = "red";
-            }
-            {
-              name = "xham";
-              icon = "food";
-              color = "orange";
-            }
-            {
-              name = "LinkedIn";
-              icon = "circle";
-              color = "blue";
-            }
-            {
-              name = "Google";
-              icon = "fence";
-              color = "blue";
-            }
-            {
-              name = "Amazon";
-              icon = "cart";
-              color = "yellow";
-            }
-            {
-              name = "Costco";
-              icon = "cart";
-              color = "blue";
-            }
-            {
-              name = "AliExpress";
-              icon = "cart";
-              color = "orange";
-            }
-            {
-              name = "Ebay";
-              icon = "cart";
-              color = "purple";
-            }
-            {
-              name = "GitHub";
-              icon = "briefcase";
-              color = "turquoise";
-            }
-            {
-              name = "Coinbase";
-              icon = "dollar";
-              color = "blue";
-            }
-            {
-              name = "Kraken";
-              icon = "dollar";
-              color = "pink";
-            }
-            {
-              name = "Hermes";
-              icon = "pet";
-              color = "blue";
-            }
-          ];
-        };
-
-        SearchEngines = {
-          Default = "google";
-          Add = [
-            {
-              Name = "nixpkgs packages";
-              URLTemplate =
-                "https://search.nixos.org/packages?query={searchTerms}";
-              IconURL = "https://wiki.nixos.org/favicon.ico";
-              Alias = "@np";
-            }
-            {
-              Name = "NixOS options";
-              URLTemplate =
-                "https://search.nixos.org/options?query={searchTerms}";
-              IconURL = "https://wiki.nixos.org/favicon.ico";
-              Alias = "@no";
-            }
-            {
-              Name = "NixOS Wiki";
-              URLTemplate =
-                "https://wiki.nixos.org/w/index.php?search={searchTerms}";
-              IconURL = "https://wiki.nixos.org/favicon.ico";
-              Alias = "@nw";
-            }
-            {
-              Name = "Amazon";
-              URLTemplate = "https://www.amazon.com/s?k={searchTerms}";
-              IconURL = "https://amazon.com/favicon.ico";
-              Alias = "@a";
-            }
-            {
-              Name = "Wikipedia";
-              URLTemplate =
-                "https://en.wikipedia.org/w/index.php?search={searchTerms}";
-              IconURL = "https://wikipedia.org/favicon.ico";
-              Alias = "@w";
-            }
-            {
-              Name = "Wiktionary";
-              URLTemplate =
-                "https://en.wiktionary.org/w/index.php?search={searchTerms}";
-              IconURL =
-                "https://en.wiktionary.org/static/favicon/wiktionary/en.ico";
-              Alias = "@wik";
-            }
-            {
-              Name = "SearXNG";
-              URLTemplate =
-                "https://search.kube.sea.fudo.link/search?q={searchTerms}";
-              IconURL = "https://search.kube.sea.fudo.link/favicon.ico";
-              Alias = "@s";
-            }
-            {
-              Name = "YouTube";
-              URLTemplate =
-                "https://www.yahoo.com/results?search_query={searchTerms}";
-              IconURL = "https://youtube.com/favicon.ico";
-              Alias = "@y";
-            }
-          ];
-        };
-      };
-    });
+  zenSearchEngines = {
+    nixpkgs-packages = mkZenSearchEngine
+      "https://search.nixos.org/packages?query={searchTerms}" "@np"
+      "nixpkgs packages";
+    nixos-options = mkZenSearchEngine
+      "https://search.nixos.org/options?query={searchTerms}" "@no"
+      "NixOS options";
+    nixos-wiki = mkZenSearchEngine
+      "https://wiki.nixos.org/w/index.php?search={searchTerms}" "@nw"
+      "NixOS Wiki";
+    amazon = mkZenSearchEngine "https://www.amazon.com/s?k={searchTerms}" "@a"
+      "Amazon";
+    wikipedia-en = mkZenSearchEngine
+      "https://en.wikipedia.org/w/index.php?search={searchTerms}" "@w"
+      "Wikipedia";
+    wiktionary-en = mkZenSearchEngine
+      "https://en.wiktionary.org/w/index.php?search={searchTerms}" "@wik"
+      "Wiktionary";
+    searxng = mkZenSearchEngine
+      "https://search.kube.sea.fudo.link/search?q={searchTerms}" "@s"
+      "SearXNG";
+    # NB: the old policies.json config had this one pointed at Yahoo, which
+    # looks like a copy/paste bug--fixed to actually search YouTube.
+    youtube = mkZenSearchEngine
+      "https://www.youtube.com/results?search_query={searchTerms}" "@y"
+      "YouTube";
+  };
 
   # Access unstable packages for bleeding-edge tools
   pkgsUnstable = inputs.nixpkgsUnstable.legacyPackages."${pkgs.system}";
@@ -338,9 +283,6 @@ let
     # Specialized tools
     kubo # IPFS implementation
     tio # Serial I/O terminal
-
-    # General tools
-    zen-browser
   ];
 
   # GUI packages for all desktop environments
@@ -514,7 +456,7 @@ let
   ]));
 
 in {
-  imports = [ ];
+  imports = [ inputs.zen-browser.homeModules.beta ];
 
   config = {
     # Doom Emacs configuration
@@ -644,6 +586,54 @@ in {
         enable = systemCfg.desktop.type != "none";
         package =
           (pkgs.firefox.override { cfg = { enableGnomeExtensions = true; }; });
+      };
+
+      # NB: containers, workspaces, pins, and keyboard shortcuts below are
+      # written into zen-sessions.jsonlz4 by the activation script (decompress
+      # -> edit with jq -> recompress), so close Zen before `home-manager
+      # switch` whenever one of those changes--otherwise the running browser
+      # can overwrite the freshly-written state on exit.
+      zen-browser = mkIf (isLinux && isGui) {
+        enable = true;
+
+        policies = {
+          DisableTelemetry = true;
+          DisablePocket = true;
+          OfferToSaveLogins = false;
+
+          DNSOverHTTPS = {
+            Enabled = false;
+            Locked = true;
+          };
+
+          ExtensionSettings = builtins.listToAttrs zenExtensions;
+
+          Preferences = mapAttrs (_: value: {
+            Value = value;
+            Status = "locked";
+          }) {
+            "browser.urlbar.suggest.quicksuggest.sponsored" = false;
+            "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
+            "browser.urlbar.suggest.trending" = false;
+            "browser.urlbar.suggest.yelp" = false;
+            "browser.urlbar.quicksuggest.enabled" = false;
+            "browser.ml.chat.enabled" = false;
+            # Firefox Containers--Zen's native container UI depends on this.
+            "privacy.userContext.enabled" = true;
+            "privacy.userContext.ui.enabled" = true;
+          };
+        };
+
+        profiles.default = {
+          containersForce = true;
+          containers = zenContainers;
+
+          search = {
+            force = true;
+            default = "google";
+            engines = zenSearchEngines;
+          };
+        };
       };
 
       obs-studio.enable = isLinux && isGui;
