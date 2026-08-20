@@ -60,9 +60,13 @@
     # Provides a Home Manager module (homeModules.beta/twilight/twilight-official)
     # with declarative support for Zen's reworked container/workspace storage
     # (zen-sessions.jsonlz4), not just the legacy policies.json Containers key.
+    #
+    # Follows nixpkgsUnstable rather than our stable nixpkgs: the package
+    # build wants ffmpeg_9, which doesn't exist yet on the nixos-26.05
+    # branch (only up to ffmpeg_7 there).
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgsUnstable";
     };
   };
 
