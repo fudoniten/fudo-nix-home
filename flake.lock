@@ -161,11 +161,11 @@
     "doom-emacs": {
       "flake": false,
       "locked": {
-        "lastModified": 1787113794,
-        "narHash": "sha256-DiBNqTTvvn2eXs44drh0cWCTzqCmhDiZdefkMOcD8gw=",
+        "lastModified": 1787195827,
+        "narHash": "sha256-eR6gb8rzdiZF3vsq+HAeUbriTmtagNjLhDYCaQhaJYk=",
         "ref": "refs/heads/master",
-        "rev": "cc6e8400a43350be06301954320061331d0e051a",
-        "revCount": 21271,
+        "rev": "0873a94339c6133ca78c2aa497d97fd66bc94d00",
+        "revCount": 21282,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/doomemacs/doomemacs"
@@ -571,11 +571,11 @@
     },
     "nixpkgsUnstable": {
       "locked": {
-        "lastModified": 1787070829,
-        "narHash": "sha256-xe+M6F3syqECh9nH7Fmyxrjs13PtQV3S9o/EbutKz84=",
-        "rev": "0ae2bc1419c3f345984c2629e72e7a631820fa4d",
+        "lastModified": 1787135253,
+        "narHash": "sha256-M5/r2v++FjVhdsxXYMb4BDJ5YLAdCWFt3aZotcshocA=",
+        "rev": "ffb3c9b700e759be2ef13237c9d8f953b32a1e46",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1057639.0ae2bc1419c3/nixexprs.tar.xz"
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1058091.ffb3c9b700e7/nixexprs.tar.xz"
       },
       "original": {
         "id": "nixpkgs",
@@ -1065,11 +1065,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786685380,
-        "narHash": "sha256-3ZuubfWk7CHPF/60w5BVrVkzdO7Oed1MgZ+ugLsgww8=",
+        "lastModified": 1787200418,
+        "narHash": "sha256-4d24Wa/CO8WsSEjKwzFwJXn+oxbI4Bm8xuMR77xJgYI=",
         "owner": "youwen5",
         "repo": "zen-browser-flake",
-        "rev": "e1e4aa6433a352f07059aeb8483ae42deb61f9b2",
+        "rev": "20195bc99e82b02abe82bb81ac366ae81c67dc5a",
         "type": "github"
       },
       "original": {
