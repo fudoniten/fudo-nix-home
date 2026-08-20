@@ -57,8 +57,11 @@
       url = "github:fudoniten/canon.el";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Provides a Home Manager module (homeModules.beta/twilight/twilight-official)
+    # with declarative support for Zen's reworked container/workspace storage
+    # (zen-sessions.jsonlz4), not just the legacy policies.json Containers key.
     zen-browser = {
-      url = "github:youwen5/zen-browser-flake";
+      url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
