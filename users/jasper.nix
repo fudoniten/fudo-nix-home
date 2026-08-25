@@ -61,8 +61,22 @@ in {
 
         # Video editors
         kdePackages.kdenlive # Professional video editor
-        # openshot-qt # Simple video editor
         shotcut # Cross-platform video editor
+
+        # Music & Audio
+        bitwig-studio
+        lmms
+        reaper
+        ardour
+        hydrogen
+        carla
+        qpwgraph
+        pavucontrol
+
+        # synths & plugins
+        surge-XT
+        vital
+        lsp-plugins
       ];
 
       keyboard = {
