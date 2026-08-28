@@ -57,7 +57,13 @@ in {
         xclip # X11 clipboard utility
 
         # Graphics editors
+        blender
         krita
+        pencil2d
+        synfigstudio
+        inkscape
+        mypaint
+        gimp
 
         # Video editors
         kdePackages.kdenlive # Professional video editor
