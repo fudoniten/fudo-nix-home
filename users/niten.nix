@@ -45,6 +45,7 @@ let
     # Multi-account containers--auto-open in container
     (mkExt "multi-account-containers" "@testpilot-containers")
     (mkExt "reddit-enhancement-suite" "jid1-xUfzOsOFlzSOXg@jetpack")
+    (mkExt "karakeep" "addon@karakeep.app")
   ];
 
   # Zen's new native container implementation stores containers as part of
@@ -144,12 +145,12 @@ let
   };
 
   zenSearchEngines = {
-    nixpkgs-packages = mkZenSearchEngine
-      "https://search.nixos.org/packages?query={searchTerms}" "@np"
-      "nixpkgs packages";
-    nixos-options = mkZenSearchEngine
-      "https://search.nixos.org/options?query={searchTerms}" "@no"
-      "NixOS options";
+    nixpkgs-packages =
+      mkZenSearchEngine "https://search.nixos.org/packages?query={searchTerms}"
+      "@np" "nixpkgs packages";
+    nixos-options =
+      mkZenSearchEngine "https://search.nixos.org/options?query={searchTerms}"
+      "@no" "NixOS options";
     nixos-wiki = mkZenSearchEngine
       "https://wiki.nixos.org/w/index.php?search={searchTerms}" "@nw"
       "NixOS Wiki";
@@ -162,8 +163,7 @@ let
       "https://en.wiktionary.org/w/index.php?search={searchTerms}" "@wik"
       "Wiktionary";
     searxng = mkZenSearchEngine
-      "https://search.kube.sea.fudo.link/search?q={searchTerms}" "@s"
-      "SearXNG";
+      "https://search.kube.sea.fudo.link/search?q={searchTerms}" "@s" "SearXNG";
     # NB: the old policies.json config had this one pointed at Yahoo, which
     # looks like a copy/paste bug--fixed to actually search YouTube.
     youtube = mkZenSearchEngine
