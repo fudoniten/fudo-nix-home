@@ -203,7 +203,56 @@ in {
       default = "swaylock";
       description = ''
         Command invoked by the manual screen-lock binding
-        ($mod CTRL, L) and by hypridle for auto-lock.
+        ($mod, Escape) and by hypridle for auto-lock.
+      '';
+    };
+
+    kbOptions = mkOption {
+      type = types.str;
+      default = "";
+      example = "caps:super";
+      description = ''
+        XKB options string (comma-separated, as in `setxkbmap -option` /
+        `localectl --keymap`), passed straight through to
+        `input.kb_options`. A hardware fix for a keyboard with no
+        physical Super key -- `"caps:super"` turns Caps Lock into
+        Super_L (Mod4), or `"menu:super"` does the same with an
+        otherwise-unused Menu/Application key. Only worth it if you are
+        not already relying on Caps Lock for something else (Ctrl, in
+        particular, is a common enough remap that this module also
+        offers a software-only `modKey` fallback below that touches no
+        physical key at all).
+      '';
+    };
+
+    modKey = mkOption {
+      type = types.str;
+      default = "SUPER";
+      example = "CTRL ALT";
+      description = ''
+        The modifier substituted for `$mod` in every binding below. The
+        default assumes a working physical Super key (see `kbOptions` if
+        you don't have one and can spare a key to remap).
+
+        If you'd rather not give up a key at all -- e.g. Caps Lock is
+        already your Ctrl and you're not willing to trade that -- a
+        space-separated *combination* of modifiers you're not otherwise
+        using bare-handed works as a software-only stand-in, with no XKB
+        changes: `"CTRL ALT"` is the natural choice, since Hyprland
+        matches a bind's modifier set exactly, so `CTRL ALT, D` does not
+        fire on plain Ctrl+D or plain Alt+D and single-modifier
+        Ctrl/Alt-based bindings elsewhere (Emacs' Meta key among them)
+        are untouched.
+
+        Avoid a single modifier already spoken for: plain `"ALT"`
+        collides with Emacs' Meta (`programs.doom-emacs` is enabled for
+        every user of this module), and plain `"CTRL"` with whatever you
+        use Ctrl for constantly.
+
+        This is a real trade, not a free one: chords that already add
+        SHIFT on top of $mod (movewindow, movetoworkspace, ...) become
+        three- or four-key combinations. Treat it as a stand-in until a
+        real Super key is available, not a permanent choice.
       '';
     };
   };
@@ -213,7 +262,19 @@ in {
       enable = true;
       xwayland.enable = true;
       systemd.enable = true;
-      configType = "lua";
+
+      # Every value below (the "$mod"/"$terminal" variables, bind = [...]
+      # strings, general/decoration/dwindle attrs, ...) is written in the
+      # classic hyprlang *text* config syntax, not Hyprland's native Lua API.
+      # HM's two `configType` renderers are not interchangeable: with "lua"
+      # (the default for stateVersion >= 26.05, which is what this repo
+      # pins), each settings key is emitted as a Lua call named after the
+      # key -- so "$fileManager" becomes the literal, invalid Lua source
+      # `hl.$fileManager(...)`, since `$` can't start an identifier. That
+      # surfaces as `hyprland.lua:5: <name> expected near '$'` the moment
+      # Hyprland actually starts, tripping emergency-bind mode. Pin
+      # "hyprlang" explicitly, matching the syntax this config is written in.
+      configType = "hyprlang";
 
       settings = {
         # Monitor configuration - auto-detect
@@ -240,6 +301,7 @@ in {
         # Input configuration
         input = {
           kb_layout = "us";
+          kb_options = cfg.kbOptions;
           follow_mouse = 1;
           touchpad = {
             natural_scroll = true;
@@ -309,7 +371,7 @@ in {
         };
 
         # Variables
-        "$mod" = "SUPER";
+        "$mod" = cfg.modKey;
         "$terminal" = "kitty";
         "$fileManager" = "thunar";
         "$menu" = "wofi --show drun";
@@ -377,22 +439,16 @@ in {
           "$mod, Print, exec, grimblast copy area"
           "$mod SHIFT, Print, exec, grimblast copy screen"
 
-          # Screen lock
-          "$mod CTRL, L, exec, ${cfg.lockCommand}"
+          # Screen lock. Deliberately not "$mod CTRL, L" (the L key is
+          # already claimed by movefocus/movewindow above, so the original
+          # disambiguated with an extra modifier) -- that broke the moment
+          # modKey itself contains CTRL, since "CTRL ALT CTRL" duplicates a
+          # token. Escape isn't claimed at this level, so no extra modifier
+          # is needed regardless of what modKey is set to.
+          "$mod, Escape, exec, ${cfg.lockCommand}"
 
           # Resize mode (submap)
           "$mod, R, submap, resize"
-        ];
-
-        # Resize submap keybindings
-        submap = [
-          "resize"
-          "binde = , H, resizeactive, -10 0"
-          "binde = , L, resizeactive, 10 0"
-          "binde = , K, resizeactive, 0 -10"
-          "binde = , J, resizeactive, 0 10"
-          "bind = , escape, submap, reset"
-          "submap = reset"
         ];
 
         # Mouse bindings
@@ -450,6 +506,26 @@ in {
           "float, class:^(hyprpolkitagent)$"
           "center, class:^(hyprpolkitagent)$"
         ];
+      };
+
+      # Resize submap, bound via "$mod, R, submap, resize" above.
+      #
+      # This is `submaps`, a dedicated option -- not a `submap` key stuffed
+      # into `settings`. HM's hyprlang renderer repeats a settings key for
+      # every element of a list value (that's how the flat `bind = [ ... ]`
+      # list above becomes one `bind = ...` line per entry), so a raw
+      # `submap = [ "resize" "binde = ..." ... ]` list would have rendered
+      # every line prefixed with a stray `submap = `, e.g.
+      # `submap = binde = , H, resizeactive, -10 0` -- not the submap
+      # declaration hyprlang expects.
+      submaps.resize.settings = {
+        binde = [
+          ", H, resizeactive, -10 0"
+          ", L, resizeactive, 10 0"
+          ", K, resizeactive, 0 -10"
+          ", J, resizeactive, 0 10"
+        ];
+        bind = [ ", escape, submap, reset" ];
       };
     };
 

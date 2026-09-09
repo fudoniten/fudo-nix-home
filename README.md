@@ -258,6 +258,24 @@ users. Enable with `programs.hyprland.enable = true;`. Set
 (e.g. `programs.quickshell`) provides the bar. See
 [`docs/hyprland-cheatsheet.pdf`](docs/hyprland-cheatsheet.pdf) for keybindings.
 
+Every binding is prefixed with `$mod`, which defaults to SUPER. Two ways
+to cope with a keyboard that has no physical Super key, depending on
+whether you can spare a key:
+
+- **A key to spare:** `kbOptions = "caps:super";` remaps Caps Lock to
+  Super_L, or `"menu:super"` does the same with an unused Menu key.
+- **No key to spare** (e.g. Caps Lock is already your Ctrl): set
+  `modKey = "CTRL ALT";` instead. Software-only, no XKB changes -- see
+  niten's config on system7. Hyprland matches a bind's modifiers
+  exactly, so a two-key `$mod` doesn't collide with plain Ctrl or plain
+  Alt bindings elsewhere (Emacs' Meta key among them). Meant as a
+  stand-in until Super is available for real; chords that already add
+  SHIFT get a third or fourth key in the meantime.
+
+Avoid changing `$mod` to plain `"ALT"` -- it collides constantly with
+Emacs' Meta key, and `programs.doom-emacs` is enabled for every user of
+this module.
+
 #### Quickshell (`fudo.quickshell`)
 
 [Quickshell](https://quickshell.org) desktop shell — a QML status bar for

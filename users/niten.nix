@@ -484,7 +484,17 @@ in {
     # Hyprland + Quickshell, offered as a second session alongside the host's
     # default desktop (COSMIC on system7). Selected at the greeter, so the
     # default session is still there to fall back to if the bar misbehaves.
-    programs.hyprland = mkIf useHyprland { enable = true; };
+    programs.hyprland = mkIf useHyprland {
+      enable = true;
+
+      # No physical Super key on the keyboard currently in use on system7,
+      # and Caps Lock is already Ctrl here -- used far more than the real
+      # Ctrl key, and not up for grabs. So this is the software-only stand-in
+      # (see modKey's description): CTRL+ALT together, not a physical
+      # remap. TEMPORARY -- meant to be dropped back to the default "SUPER"
+      # once the keyboard itself gets Super rebound at the firmware level.
+      modKey = "CTRL ALT";
+    };
 
     # NB: `fudo.quickshell`, not `programs.quickshell` -- the latter is Home
     # Manager's own module, which this one drives rather than replaces.
