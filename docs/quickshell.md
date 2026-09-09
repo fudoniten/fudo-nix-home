@@ -96,15 +96,18 @@ Consider making `~/src/quickshell-config` a git checkout of its own.
 
 ### Running a second config side by side
 
-`quickshell` (also installed as `qs`) can run a config from an arbitrary path:
-
-```
-qs -p ~/experiments/other-shell/shell.qml
-```
+`quickshell` is also installed as `qs`, and can run a config other than the
+one in `~/.config/quickshell` -- check `qs --help` for the current flags
+(recent versions take a config *name* resolved under `~/.config/quickshell/`,
+and a direct *path* to a `shell.qml`).
 
 Useful for trying something drastic without disturbing the running bar. Stop
 the service first (`systemctl --user stop quickshell`) if the experiment also
 draws a top-anchored panel, or they will overlap.
+
+Note that config resolution short-circuits: if `~/.config/quickshell/shell.qml`
+exists, named configs in subdirectories of that same directory are skipped.
+That is why this module owns the directory root rather than a named subdir.
 
 ## What is in the bar
 
