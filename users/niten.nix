@@ -486,10 +486,12 @@ in {
     # default session is still there to fall back to if the bar misbehaves.
     programs.hyprland = mkIf useHyprland { enable = true; };
 
-    programs.quickshell = mkIf useHyprland {
+    # NB: `fudo.quickshell`, not `programs.quickshell` -- the latter is Home
+    # Manager's own module, which this one drives rather than replaces.
+    fudo.quickshell = mkIf useHyprland {
       enable = true;
 
-      # ~/.config/quickshell becomes a writable directory seeded from the Nix
+      # The config directory becomes a writable directory seeded from the Nix
       # defaults, so QML edits apply live with no rebuild. See
       # docs/quickshell.md; set to false to go back to the reproducible copy.
       dev.enable = true;

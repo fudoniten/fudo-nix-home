@@ -2,8 +2,15 @@
 
 [Quickshell](https://quickshell.org) is a QtQuick toolkit for building desktop
 shell components — bars, launchers, lockscreens — in QML. This repo ships an
-opinionated bar for Wayland sessions as the `programs.quickshell` Home Manager
+opinionated bar for Wayland sessions as the `fudo.quickshell` Home Manager
 module.
+
+**`fudo.quickshell`, not `programs.quickshell`.** Home Manager 26.05 ships its
+own `programs.quickshell` module (package, config directory, systemd unit).
+This module does not redeclare those — declaring the same option twice is a
+hard evaluation error — it sits on top and sets them, adding the generated
+theme, the bar QML, and the live-editing mode. Anything upstream already
+handles, configure through `programs.quickshell` directly.
 
 Currently enabled for `niten` on **system7 only** (`users/niten.nix`,
 `hyprlandHosts`). `jazz` is untouched: it is shared, and Jasper uses GNOME
@@ -24,10 +31,13 @@ On system7 that is a **second session**, not a replacement:
   COSMIC one.
 - You pick the session at login. If the bar breaks, log out and pick COSMIC.
 
-The bar is started from Hyprland's `exec-once`, not from
-`graphical-session.target`. That is deliberate: a target-driven unit would also
-start it inside the COSMIC session, and you would get two bars stacked on top
-of each other.
+The bar is started by a systemd user unit bound to **`hyprland-session.target`**,
+not `graphical-session.target`. That is deliberate: the broader target is also
+reached by the COSMIC session, so it would start the bar there too and you
+would get two bars stacked on each other. The Hyprland target is created by
+`wayland.windowManager.hyprland.systemd.enable`, which `programs.hyprland`
+sets. Override with `fudo.quickshell.systemdTarget` if you move to a different
+compositor.
 
 ## The theme is generated
 
@@ -50,14 +60,14 @@ module resolves this with two modes.
 
 ### Frozen (`dev.enable = false`)
 
-`~/.config/quickshell` is a symlink to a store path built from
+`~/.config/quickshell/fudo` is a symlink to a store path built from
 `modules/programs/quickshell/*.qml` plus the generated theme. Reproducible,
 but every tweak needs a `home-manager switch`. This is the right mode once a
 config has settled.
 
 ### Live (`dev.enable = true`, the current setting for niten)
 
-`~/.config/quickshell` is an out-of-store symlink to
+`~/.config/quickshell/fudo` is an out-of-store symlink to
 `~/src/quickshell-config`, an ordinary directory you own. It is seeded from the
 Nix defaults on first activation and never overwritten afterwards. Quickshell
 watches the files and reloads on save, so edits apply immediately — no rebuild,
@@ -96,18 +106,22 @@ Consider making `~/src/quickshell-config` a git checkout of its own.
 
 ### Running a second config side by side
 
-`quickshell` is also installed as `qs`, and can run a config other than the
-one in `~/.config/quickshell` -- check `qs --help` for the current flags
-(recent versions take a config *name* resolved under `~/.config/quickshell/`,
-and a direct *path* to a `shell.qml`).
+This module installs its config as the *named* config `fudo`
+(`~/.config/quickshell/fudo/`), and the service runs `quickshell --config fudo`.
+So a scratch config can live beside it as another named directory:
+
+```
+mkdir -p ~/.config/quickshell/scratch   # then: qs --config scratch
+```
 
 Useful for trying something drastic without disturbing the running bar. Stop
 the service first (`systemctl --user stop quickshell`) if the experiment also
 draws a top-anchored panel, or they will overlap.
 
-Note that config resolution short-circuits: if `~/.config/quickshell/shell.qml`
-exists, named configs in subdirectories of that same directory are skipped.
-That is why this module owns the directory root rather than a named subdir.
+One trap in Quickshell's resolution: if a `shell.qml` exists at
+`~/.config/quickshell/shell.qml` — the directory *root* rather than a named
+subdirectory — named configs under it are skipped entirely. Don't put a stray
+`shell.qml` there.
 
 ## What is in the bar
 
@@ -157,3 +171,7 @@ next step:
   subdirectories need more ceremony, which is why everything here is flat.
 - **Multi-monitor is handled by `Variants`**, not by you. Do not instantiate
   `PanelWindow` directly for a specific screen.
+- **Don't declare options under `programs.quickshell`.** That namespace belongs
+  to Home Manager now. Redeclaring an option there fails evaluation for *every*
+  user on the host, not just the one with the bar enabled — the module tree is
+  shared.

@@ -258,35 +258,41 @@ users. Enable with `programs.hyprland.enable = true;`. Set
 (e.g. `programs.quickshell`) provides the bar. See
 [`docs/hyprland-cheatsheet.pdf`](docs/hyprland-cheatsheet.pdf) for keybindings.
 
-#### Quickshell (`programs.quickshell`)
+#### Quickshell (`fudo.quickshell`)
 
 [Quickshell](https://quickshell.org) desktop shell — a QML status bar for
 Wayland sessions, intended to run alongside `programs.hyprland`. Enabled for
 `niten` on system7 only.
 
-Unlike the Waybar config in the Hyprland module, its theme is **generated from
-your Stylix scheme** rather than hardcoded, so changing `stylix.base16Scheme`
-restyles the bar.
+Note the namespace: Home Manager 26.05 has its own `programs.quickshell`
+module, which owns the package, config directory and systemd unit. This module
+lives at **`fudo.quickshell`** and drives it, adding the parts upstream leaves
+to you — the bar QML, a theme **generated from your Stylix scheme** (so
+changing `stylix.base16Scheme` restyles the bar, unlike the hardcoded Waybar
+CSS), and a live-editing mode.
 
 **Options:**
-- `enable` — Enable the Quickshell bar
-- `package` / `extraQmlPackages` — Package, plus extra Qt QML modules to put on
-  `QML2_IMPORT_PATH` (e.g. `pkgs.qt6.qt5compat` for graphical effects)
+- `enable` — Enable the Fudo Quickshell bar
+- `extraQmlPackages` — Extra Qt QML modules to put on `QML2_IMPORT_PATH`
+  (e.g. `pkgs.qt6.qt5compat` for graphical effects)
 - `barHeight`, `gap`, `radius` — Bar geometry, passed through to `Theme.qml`
-- `autostart` — Start from Hyprland's `exec-once` (default true)
-- `dev.enable` / `dev.path` — Point `~/.config/quickshell` at a writable
+- `systemdTarget` — Target that starts the bar (default
+  `hyprland-session.target`, so it does not also start in another session)
+- `dev.enable` / `dev.path` — Point the config directory at a writable
   directory for live QML editing without rebuilds
 
 **Example:**
 ```nix
-programs.quickshell = {
+fudo.quickshell = {
   enable = true;
   dev.enable = true;   # live editing; see docs/quickshell.md
 };
 ```
 
 Enabling this sets `programs.hyprland.statusBar` to `"none"` by default so you
-don't get Waybar and Quickshell stacked on top of each other.
+don't get Waybar and Quickshell stacked on top of each other. Anything upstream
+already covers (package, `activeConfig`) can be set through
+`programs.quickshell` directly.
 
 See [docs/quickshell.md](docs/quickshell.md) for the live-editing workflow and
 the `fudo-quickshell` helper.
