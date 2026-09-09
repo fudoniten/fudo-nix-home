@@ -27,6 +27,8 @@ Internal repository for managing [Home Manager](https://github.com/nix-community
 │   │   ├── doom-emacs.nix # Doom Emacs configuration module
 │   │   ├── hyprland.nix   # Hyprland (Wayland) compositor setup
 │   │   ├── hyprland/      # Hyprland assets (hypridle, wofi configs)
+│   │   ├── quickshell.nix # Quickshell bar (QML desktop shell)
+│   │   ├── quickshell/    # Quickshell QML sources
 │   │   ├── stumpwm.nix    # StumpWM (X11) window manager
 │   │   └── vr.nix         # VR desktop support
 │   ├── services/
@@ -49,6 +51,8 @@ Internal repository for managing [Home Manager](https://github.com/nix-community
 │   ├── reaper.nix
 │   ├── root.nix
 │   └── xiaoxuan.nix
+├── docs/
+│   └── quickshell.md      # Quickshell setup + live-editing workflow
 ├── run-tests.sh           # Local test runner (mirrors CI)
 ├── LOCKET.md              # Locket documentation
 └── README.md              # This file
@@ -249,8 +253,43 @@ programs.doom-emacs = {
 
 Opinionated [Hyprland](https://hyprland.org/) Wayland compositor setup, including
 Waybar styling and a swaylock configuration. Intended for `desktopType = "wayland"`
-users. Enable with `programs.hyprland.enable = true;`. See
+users. Enable with `programs.hyprland.enable = true;`. Set
+`statusBar = "none"` to suppress the Waybar autostart when something else
+(e.g. `programs.quickshell`) provides the bar. See
 [`docs/hyprland-cheatsheet.pdf`](docs/hyprland-cheatsheet.pdf) for keybindings.
+
+#### Quickshell (`programs.quickshell`)
+
+[Quickshell](https://quickshell.org) desktop shell — a QML status bar for
+Wayland sessions, intended to run alongside `programs.hyprland`. Enabled for
+`niten` on system7 only.
+
+Unlike the Waybar config in the Hyprland module, its theme is **generated from
+your Stylix scheme** rather than hardcoded, so changing `stylix.base16Scheme`
+restyles the bar.
+
+**Options:**
+- `enable` — Enable the Quickshell bar
+- `package` / `extraQmlPackages` — Package, plus extra Qt QML modules to put on
+  `QML2_IMPORT_PATH` (e.g. `pkgs.qt6.qt5compat` for graphical effects)
+- `barHeight`, `gap`, `radius` — Bar geometry, passed through to `Theme.qml`
+- `autostart` — Start from Hyprland's `exec-once` (default true)
+- `dev.enable` / `dev.path` — Point `~/.config/quickshell` at a writable
+  directory for live QML editing without rebuilds
+
+**Example:**
+```nix
+programs.quickshell = {
+  enable = true;
+  dev.enable = true;   # live editing; see docs/quickshell.md
+};
+```
+
+Enabling this sets `programs.hyprland.statusBar` to `"none"` by default so you
+don't get Waybar and Quickshell stacked on top of each other.
+
+See [docs/quickshell.md](docs/quickshell.md) for the live-editing workflow and
+the `fudo-quickshell` helper.
 
 #### StumpWM (`programs.stumpwm`)
 

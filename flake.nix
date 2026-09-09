@@ -82,13 +82,13 @@
     };
 
     mkModule.niten = { username, email, home-directory, stateVersion
-      , desktopType ? "none", ... }: {
+      , desktopType ? "none", hostname ? "", ... }: {
         imports = [
           ./modules
           (import ./users/niten.nix inputs {
             inherit username email home-directory;
           } {
-            inherit stateVersion;
+            inherit stateVersion hostname;
             desktop.type = desktopType;
           })
         ];

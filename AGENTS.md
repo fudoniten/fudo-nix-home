@@ -76,13 +76,13 @@ module.nix         # NixOS module: the fudo.home-manager.* option namespace
 modules/           # custom Home Manager modules (imported by every user)
 ├── default.nix / modules.nix   # aggregators
 ├── locket/        # profile-based secrets (default.nix + options.nix)
-├── programs/      # doom-emacs, hyprland, stumpwm, vr
+├── programs/      # doom-emacs, hyprland, quickshell, stumpwm, vr
 ├── services/      # supercollider
 └── styling.nix    # stylix theming glue
 users/             # one file per user (curried-function convention above)
 bin/               # Locket CLI (locket, locket-add, locket-check, …)
 secrets/           # Locket-encrypted secrets + profiles/ public keys
-docs/              # WM cheatsheets (hyprland, stumpwm)
+docs/              # WM cheatsheets (hyprland, stumpwm) + quickshell.md
 .githooks/         # pre-commit hook (prevents committing private keys)
 run-tests.sh       # local test runner (mirrors CI)
 LOCKET.md          # Locket documentation
@@ -102,6 +102,24 @@ Working with it:
   `git config core.hooksPath .githooks`. It blocks committing private keys.
 - The Nix side is the `locket` HM module (`modules/locket/`); enable per user
   with `locket = { enable = true; profiles = [ … ]; }`.
+
+## Desktop sessions: the per-host / per-user split
+
+`systemOpts.desktop.type` is **host-wide**, but which session a user logs into
+is not. On a shared host (jazz: niten + jasper, who wants GNOME) that
+distinction matters, so `systemOpts.hostname` is threaded through from
+`nixos-config` and user configs gate host-specific desktop features on it --
+see `hyprlandHosts` in `users/niten.nix`. Prefer that over keying off
+`desktop.type` alone whenever a change would put desktop packages into another
+user's home directory on a machine they share.
+
+The system side of the same split lives in `nixos-config`:
+`fudo.services.desktop.extraSessions` offers a second session at the greeter
+without changing the host default.
+
+`programs.quickshell` is the current example: enabled for niten on system7
+only, alongside `programs.hyprland`, with COSMIC still the default session.
+See [`docs/quickshell.md`](./docs/quickshell.md).
 
 ## Key patterns & conventions
 
