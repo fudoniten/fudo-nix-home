@@ -207,21 +207,41 @@ in {
       '';
     };
 
+    kbVariant = mkOption {
+      type = types.str;
+      default = "";
+      example = "dvp";
+      description = ''
+        XKB layout variant, passed straight through to `input.kb_variant`
+        (paired with `kb_layout`, hardcoded to "us" below -- every
+        variant of interest so far is a `us` one; expose `kbLayout` too
+        if that stops being true). `"dvp"` is Programmer Dvorak.
+      '';
+    };
+
     kbOptions = mkOption {
       type = types.str;
       default = "";
-      example = "caps:super";
+      example = "caps:super,ctrl:nocaps";
       description = ''
         XKB options string (comma-separated, as in `setxkbmap -option` /
         `localectl --keymap`), passed straight through to
-        `input.kb_options`. A hardware fix for a keyboard with no
-        physical Super key -- `"caps:super"` turns Caps Lock into
-        Super_L (Mod4), or `"menu:super"` does the same with an
-        otherwise-unused Menu/Application key. Only worth it if you are
-        not already relying on Caps Lock for something else (Ctrl, in
-        particular, is a common enough remap that this module also
-        offers a software-only `modKey` fallback below that touches no
-        physical key at all).
+        `input.kb_options`. Two unrelated things commonly live here:
+
+        - A hardware fix for a keyboard with no physical Super key --
+          `"caps:super"` turns Caps Lock into Super_L (Mod4), or
+          `"menu:super"` does the same with an otherwise-unused
+          Menu/Application key. Only worth it if you are not already
+          relying on Caps Lock for something else (Ctrl, in particular,
+          is a common enough remap that this module also offers a
+          software-only `modKey` fallback below that touches no
+          physical key at all).
+        - `"ctrl:nocaps"` -- Caps Lock produces Ctrl instead of toggling
+          case, entirely replacing the key's function (not a toggle
+          layered on top of it). This is a different xkb option group
+          from `caps:super` above and the two are mutually exclusive by
+          construction (one key, one job) -- pick whichever the
+          keyboard actually needs.
       '';
     };
 
@@ -301,6 +321,7 @@ in {
         # Input configuration
         input = {
           kb_layout = "us";
+          kb_variant = cfg.kbVariant;
           kb_options = cfg.kbOptions;
           follow_mouse = 1;
           touchpad = {

@@ -276,6 +276,20 @@ Avoid changing `$mod` to plain `"ALT"` -- it collides constantly with
 Emacs' Meta key, and `programs.doom-emacs` is enabled for every user of
 this module.
 
+Keyboard layout/variant/options are all configurable (`kb_layout` is
+hardcoded to `"us"`; open `kbLayout` up if that ever needs to change).
+`kbVariant = "dvp"` is Programmer Dvorak; `kbOptions = "ctrl:nocaps"` makes
+Caps Lock a second Ctrl (replacing its usual function, not layering on
+top of it) -- see niten's config for both together. Combining that with a
+`modKey` containing CTRL is not a conflict: Caps-as-Ctrl and physical Ctrl
+set the same modifier bit, so Caps+Alt works the same as Ctrl+Alt.
+
+One thing switching layout doesn't do: binds match by the *letter*
+produced (keysym), not physical key position, so the vim-style hjkl
+binds keep working under Dvorak -- but Dvorak moves the letters
+themselves, so h/j/k/l are no longer adjacent keys. That's a finger
+position to relearn, not something to rebind.
+
 #### Quickshell (`fudo.quickshell`)
 
 [Quickshell](https://quickshell.org) desktop shell — a QML status bar for

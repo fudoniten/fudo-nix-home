@@ -494,6 +494,20 @@ in {
       # remap. TEMPORARY -- meant to be dropped back to the default "SUPER"
       # once the keyboard itself gets Super rebound at the firmware level.
       modKey = "CTRL ALT";
+
+      # Programmer Dvorak, Caps Lock as Ctrl (replacing its usual function
+      # entirely, not layering Ctrl on top of it). Note: Caps-as-Ctrl now
+      # satisfies the CTRL half of modKey above directly -- Caps+Alt works
+      # the same as Ctrl+Alt.
+      #
+      # Binds throughout this module are keysym-based (the letter produced,
+      # e.g. "H"), not physical-position-based, so the vim-style hjkl
+      # focus/window-move binds still work by letter under Dvorak -- but
+      # Dvorak moves the letters themselves: h/j/k/l are not adjacent keys
+      # the way they are on qwerty. Expect to relearn the finger positions,
+      # not rebind anything.
+      kbVariant = "dvp";
+      kbOptions = "ctrl:nocaps";
     };
 
     # NB: `fudo.quickshell`, not `programs.quickshell` -- the latter is Home
