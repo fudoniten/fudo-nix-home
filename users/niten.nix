@@ -487,11 +487,13 @@ in {
     programs.hyprland = mkIf useHyprland {
       enable = true;
 
-      # No physical Super key on the keyboard currently in use on system7 --
-      # every $mod binding in the module needs something to press instead.
-      # Caps Lock -> Super_L (Mod4), rather than remapping $mod itself to
-      # Alt, which would collide constantly with Emacs' Meta key.
-      kbOptions = "caps:super";
+      # No physical Super key on the keyboard currently in use on system7,
+      # and Caps Lock is already Ctrl here -- used far more than the real
+      # Ctrl key, and not up for grabs. So this is the software-only stand-in
+      # (see modKey's description): CTRL+ALT together, not a physical
+      # remap. TEMPORARY -- meant to be dropped back to the default "SUPER"
+      # once the keyboard itself gets Super rebound at the firmware level.
+      modKey = "CTRL ALT";
     };
 
     # NB: `fudo.quickshell`, not `programs.quickshell` -- the latter is Home

@@ -203,7 +203,7 @@ in {
       default = "swaylock";
       description = ''
         Command invoked by the manual screen-lock binding
-        ($mod CTRL, L) and by hypridle for auto-lock.
+        ($mod, Escape) and by hypridle for auto-lock.
       '';
     };
 
@@ -214,15 +214,45 @@ in {
       description = ''
         XKB options string (comma-separated, as in `setxkbmap -option` /
         `localectl --keymap`), passed straight through to
-        `input.kb_options`. Every binding in this module is prefixed with
-        `$mod` (= SUPER), so a keyboard with no physical Super key needs
-        something remapped to it here -- `"caps:super"` turns Caps Lock
-        into Super_L (Mod4), which is the standard fix and doesn't
-        collide with Ctrl/Alt-based bindings the way changing `$mod`
-        itself to Alt would (Alt is Emacs' Meta, used constantly by
-        programs.doom-emacs). If your keyboard has an otherwise-unused
-        Menu/Application key, `"menu:super"` does the same without giving
-        up Caps Lock.
+        `input.kb_options`. A hardware fix for a keyboard with no
+        physical Super key -- `"caps:super"` turns Caps Lock into
+        Super_L (Mod4), or `"menu:super"` does the same with an
+        otherwise-unused Menu/Application key. Only worth it if you are
+        not already relying on Caps Lock for something else (Ctrl, in
+        particular, is a common enough remap that this module also
+        offers a software-only `modKey` fallback below that touches no
+        physical key at all).
+      '';
+    };
+
+    modKey = mkOption {
+      type = types.str;
+      default = "SUPER";
+      example = "CTRL ALT";
+      description = ''
+        The modifier substituted for `$mod` in every binding below. The
+        default assumes a working physical Super key (see `kbOptions` if
+        you don't have one and can spare a key to remap).
+
+        If you'd rather not give up a key at all -- e.g. Caps Lock is
+        already your Ctrl and you're not willing to trade that -- a
+        space-separated *combination* of modifiers you're not otherwise
+        using bare-handed works as a software-only stand-in, with no XKB
+        changes: `"CTRL ALT"` is the natural choice, since Hyprland
+        matches a bind's modifier set exactly, so `CTRL ALT, D` does not
+        fire on plain Ctrl+D or plain Alt+D and single-modifier
+        Ctrl/Alt-based bindings elsewhere (Emacs' Meta key among them)
+        are untouched.
+
+        Avoid a single modifier already spoken for: plain `"ALT"`
+        collides with Emacs' Meta (`programs.doom-emacs` is enabled for
+        every user of this module), and plain `"CTRL"` with whatever you
+        use Ctrl for constantly.
+
+        This is a real trade, not a free one: chords that already add
+        SHIFT on top of $mod (movewindow, movetoworkspace, ...) become
+        three- or four-key combinations. Treat it as a stand-in until a
+        real Super key is available, not a permanent choice.
       '';
     };
   };
@@ -341,7 +371,7 @@ in {
         };
 
         # Variables
-        "$mod" = "SUPER";
+        "$mod" = cfg.modKey;
         "$terminal" = "kitty";
         "$fileManager" = "thunar";
         "$menu" = "wofi --show drun";
@@ -409,8 +439,13 @@ in {
           "$mod, Print, exec, grimblast copy area"
           "$mod SHIFT, Print, exec, grimblast copy screen"
 
-          # Screen lock
-          "$mod CTRL, L, exec, ${cfg.lockCommand}"
+          # Screen lock. Deliberately not "$mod CTRL, L" (the L key is
+          # already claimed by movefocus/movewindow above, so the original
+          # disambiguated with an extra modifier) -- that broke the moment
+          # modKey itself contains CTRL, since "CTRL ALT CTRL" duplicates a
+          # token. Escape isn't claimed at this level, so no extra modifier
+          # is needed regardless of what modKey is set to.
+          "$mod, Escape, exec, ${cfg.lockCommand}"
 
           # Resize mode (submap)
           "$mod, R, submap, resize"
