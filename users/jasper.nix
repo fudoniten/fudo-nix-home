@@ -24,6 +24,8 @@ let
 
   fudoPkgs = inputs.fudo-pkgs.packages."${pkgs.system}";
 
+  zen-browser = inputs.zen-browser.packages."${pkgs.system}".default;
+
 in {
   config = mkIf isGui {
     home = {
@@ -40,6 +42,7 @@ in {
 
         # Web browsers
         google-chrome # Google Chrome browser
+        zen-browser
 
         # Communication
         mumble # Low-latency voice chat
