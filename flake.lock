@@ -347,11 +347,11 @@
         "utils": "utils_4"
       },
       "locked": {
-        "lastModified": 1787241882,
-        "narHash": "sha256-FAzRfaNPCS3hfDrVdsfu9oHl1PW3e6Jyc/Wrbc8wuB8=",
+        "lastModified": 1788913499,
+        "narHash": "sha256-qc+841k6/A/wi1gOl0kivpfoXrf4Pcu7BUoBofJgG2k=",
         "owner": "fudoniten",
         "repo": "fudo-nix-pkgs",
-        "rev": "d6bbc880fe84c90d98a4a4bfb0443eeaeba4f709",
+        "rev": "ff03deb3b245a73076f1d8b57a993ab74e695868",
         "type": "github"
       },
       "original": {
