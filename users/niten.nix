@@ -187,6 +187,17 @@ let
   isGui = systemCfg.desktop.type != "none";
   isX = systemCfg.desktop.type == "x";
 
+  # Hosts where I pick the Hyprland + Quickshell session at the greeter
+  # instead of the host default. This is a host allow-list rather than just a
+  # desktop-type check on purpose: jazz is shared with Jasper, who uses GNOME,
+  # and `desktop.type` is host-wide -- so keying off it alone would install
+  # Hyprland, Waybar, mako and a bar into my home directory there too, on a
+  # machine I have no intention of changing yet.
+  hyprlandHosts = [ "system7" ];
+
+  useHyprland = isGui && isLinux && systemCfg.desktop.type == "wayland"
+    && elem (systemCfg.hostname or "") hyprlandHosts;
+
   # Common packages available on all systems (both GUI and headless)
   commonPackages = with pkgs; [
     # Network utilities
@@ -469,6 +480,20 @@ in {
 
     # StumpWM window manager (X11 only)
     programs.stumpwm = mkIf (systemCfg.desktop.type == "x") { enable = true; };
+
+    # Hyprland + Quickshell, offered as a second session alongside the host's
+    # default desktop (COSMIC on system7). Selected at the greeter, so the
+    # default session is still there to fall back to if the bar misbehaves.
+    programs.hyprland = mkIf useHyprland { enable = true; };
+
+    programs.quickshell = mkIf useHyprland {
+      enable = true;
+
+      # ~/.config/quickshell becomes a writable directory seeded from the Nix
+      # defaults, so QML edits apply live with no rebuild. See
+      # docs/quickshell.md; set to false to go back to the reproducible copy.
+      dev.enable = true;
+    };
 
     gtk = {
       iconTheme = {

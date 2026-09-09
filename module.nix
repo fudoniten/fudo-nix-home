@@ -98,6 +98,16 @@ in {
         default = "none";
       };
 
+      hostname = mkOption {
+        type = str;
+        description = ''
+          Hostname of the parent system, so a user config can enable
+          host-specific features. Empty in the standalone `mkModule` path
+          unless the caller passes one, so user configs must tolerate "".
+        '';
+        default = "";
+      };
+
       stateVersion = mkOption {
         type = str;
         description =

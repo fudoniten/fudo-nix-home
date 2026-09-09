@@ -176,6 +176,19 @@ in {
       example = [ "discord" "element-desktop" ];
     };
 
+    statusBar = mkOption {
+      type = types.enum [ "waybar" "none" ];
+      default = "waybar";
+      description = ''
+        Status bar to autostart with the session. Set to "none" when
+        something else provides the bar -- programs.quickshell sets this
+        for you when enabled, since two stacked bars is never the intent.
+
+        The Waybar config files are written either way, so flipping this
+        back to "waybar" takes effect on the next login with no rebuild.
+      '';
+    };
+
     batteryFriendly = mkOption {
       type = types.bool;
       default = false;
@@ -216,8 +229,7 @@ in {
         ];
 
         # Autostart applications
-        exec-once = [
-          "waybar"
+        exec-once = (optional (cfg.statusBar == "waybar") "waybar") ++ [
           "mako"
           "wl-paste --watch cliphist store"
           "dbus-update-activation-environment --systemd --all"
