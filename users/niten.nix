@@ -484,7 +484,15 @@ in {
     # Hyprland + Quickshell, offered as a second session alongside the host's
     # default desktop (COSMIC on system7). Selected at the greeter, so the
     # default session is still there to fall back to if the bar misbehaves.
-    programs.hyprland = mkIf useHyprland { enable = true; };
+    programs.hyprland = mkIf useHyprland {
+      enable = true;
+
+      # No physical Super key on the keyboard currently in use on system7 --
+      # every $mod binding in the module needs something to press instead.
+      # Caps Lock -> Super_L (Mod4), rather than remapping $mod itself to
+      # Alt, which would collide constantly with Emacs' Meta key.
+      kbOptions = "caps:super";
+    };
 
     # NB: `fudo.quickshell`, not `programs.quickshell` -- the latter is Home
     # Manager's own module, which this one drives rather than replaces.

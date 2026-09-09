@@ -206,6 +206,25 @@ in {
         ($mod CTRL, L) and by hypridle for auto-lock.
       '';
     };
+
+    kbOptions = mkOption {
+      type = types.str;
+      default = "";
+      example = "caps:super";
+      description = ''
+        XKB options string (comma-separated, as in `setxkbmap -option` /
+        `localectl --keymap`), passed straight through to
+        `input.kb_options`. Every binding in this module is prefixed with
+        `$mod` (= SUPER), so a keyboard with no physical Super key needs
+        something remapped to it here -- `"caps:super"` turns Caps Lock
+        into Super_L (Mod4), which is the standard fix and doesn't
+        collide with Ctrl/Alt-based bindings the way changing `$mod`
+        itself to Alt would (Alt is Emacs' Meta, used constantly by
+        programs.doom-emacs). If your keyboard has an otherwise-unused
+        Menu/Application key, `"menu:super"` does the same without giving
+        up Caps Lock.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -252,6 +271,7 @@ in {
         # Input configuration
         input = {
           kb_layout = "us";
+          kb_options = cfg.kbOptions;
           follow_mouse = 1;
           touchpad = {
             natural_scroll = true;

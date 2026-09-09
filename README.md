@@ -258,6 +258,13 @@ users. Enable with `programs.hyprland.enable = true;`. Set
 (e.g. `programs.quickshell`) provides the bar. See
 [`docs/hyprland-cheatsheet.pdf`](docs/hyprland-cheatsheet.pdf) for keybindings.
 
+Every binding is prefixed with `$mod` (SUPER). On a keyboard with no
+physical Super key, set `kbOptions = "caps:super";` to remap Caps Lock to
+it (`"menu:super"` instead, if you have a spare Menu key and want to keep
+Caps Lock) -- see niten's config on system7 for an example. Prefer this
+over changing `$mod` itself to Alt, which collides constantly with Emacs'
+Meta key.
+
 #### Quickshell (`fudo.quickshell`)
 
 [Quickshell](https://quickshell.org) desktop shell — a QML status bar for
