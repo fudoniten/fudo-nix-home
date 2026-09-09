@@ -353,16 +353,26 @@ in {
         };
 
         # Dwindle layout settings
-        dwindle = {
-          pseudotile = true;
-          preserve_split = true;
-        };
+        #
+        # `pseudotile` (whether new windows request pseudotiling by default)
+        # was removed from Hyprland's dwindle options entirely -- confirmed
+        # against the pinned version's actual option table
+        # (src/config/values/ConfigValues.cpp), not just inferred from the
+        # error. There's no replacement key; the per-window `pseudo`
+        # dispatcher below ($mod, P) is a separate, still-valid feature and
+        # is unaffected.
+        dwindle = { preserve_split = true; };
 
         # Master layout settings (alternative)
         master = { new_status = "master"; };
 
         # Gestures
-        gestures = { workspace_swipe = true; };
+        #
+        # The plain on/off `workspace_swipe` toggle was removed too --
+        # touchpad workspace-swipe is unconditional now (Hyprland has a
+        # family of `gestures:workspace_swipe_*` tuning options for
+        # distance/invert/direction-lock/etc, but no master switch). Nothing
+        # to set here to get the old "on" behavior back; it already is.
 
         # Miscellaneous settings
         misc = {
@@ -389,7 +399,12 @@ in {
           "$mod, M, fullscreen, 0"
           "$mod, V, togglefloating"
           "$mod, P, pseudo" # dwindle
-          "$mod, J, togglesplit" # dwindle
+          # `togglesplit` was removed as a standalone dispatcher -- dwindle-
+          # specific commands now go through the generic `layoutmsg`
+          # dispatcher, which forwards the string to the active layout
+          # (confirmed in src/layout/algorithm/tiled/dwindle/DwindleAlgorithm.cpp,
+          # which still handles the literal string "togglesplit").
+          "$mod, J, layoutmsg, togglesplit" # dwindle
 
           # Move focus with vim keys
           "$mod, H, movefocus, l"
@@ -471,40 +486,54 @@ in {
         ];
 
         # Window rules
-        windowrulev2 = [
+        # `windowrulev2` is deprecated -- unified into a single `windowrule`
+        # directive with a different criteria syntax. Confirmed against the
+        # pinned version's real parser (handleWindowrule in
+        # src/config/legacy/ConfigManager.cpp) and its match-property/effect
+        # tables (src/desktop/rule/Rule.cpp,
+        # src/desktop/rule/windowRule/WindowRuleEffectContainer.cpp), not
+        # guessed from the deprecation message alone:
+        #   - Fields are still comma-separated, one rule per line.
+        #   - A match criterion is now `match:<prop> <value>` (space, not
+        #     colon, before the value) instead of the old `<prop>:<value>`.
+        #   - An effect (float, opacity, size, pin, center, workspace, ...)
+        #     is unprefixed and *requires* a value even for booleans --
+        #     plain `float` with nothing after it is a parse error here;
+        #     `float 1` is what the old bare `float` meant.
+        windowrule = [
           # Float dialogs and preferences
-          "float, class:^(.*dialog.*)$"
-          "float, class:^(.*Dialog.*)$"
-          "float, title:^(.*Preferences.*)$"
-          "float, title:^(.*Settings.*)$"
+          "float 1, match:class ^(.*dialog.*)$"
+          "float 1, match:class ^(.*Dialog.*)$"
+          "float 1, match:title ^(.*Preferences.*)$"
+          "float 1, match:title ^(.*Settings.*)$"
 
           # Transparency
-          "opacity 0.9 0.9, class:^(kitty)$"
-          "opacity 0.9 0.9, class:^(Alacritty)$"
-          "opacity 0.95 0.95, class:^(Code)$"
+          "opacity 0.9 0.9, match:class ^(kitty)$"
+          "opacity 0.9 0.9, match:class ^(Alacritty)$"
+          "opacity 0.95 0.95, match:class ^(Code)$"
 
           # Picture-in-picture
-          "float, title:^(Picture-in-Picture)$"
-          "pin, title:^(Picture-in-Picture)$"
-          "size 400 225, title:^(Picture-in-Picture)$"
+          "float 1, match:title ^(Picture-in-Picture)$"
+          "pin 1, match:title ^(Picture-in-Picture)$"
+          "size 400 225, match:title ^(Picture-in-Picture)$"
 
           # Firefox sharing indicator
-          "workspace special:silent, title:^(Firefox — Sharing Indicator)$"
-          "workspace special:silent, title:^(.* Sharing Indicator)$"
+          "workspace special:silent, match:title ^(Firefox — Sharing Indicator)$"
+          "workspace special:silent, match:title ^(.* Sharing Indicator)$"
 
           # Center floating windows
-          "center, floating:1"
+          "center 1, match:float 1"
 
           # File chooser dialogs
-          "float, title:^(Open File)$"
-          "float, title:^(Save File)$"
-          "float, title:^(Open Folder)$"
+          "float 1, match:title ^(Open File)$"
+          "float 1, match:title ^(Save File)$"
+          "float 1, match:title ^(Open Folder)$"
 
           # Authentication dialogs
-          "float, class:^(polkit-gnome-authentication-agent-1)$"
-          "float, class:^(gcr-prompter)$"
-          "float, class:^(hyprpolkitagent)$"
-          "center, class:^(hyprpolkitagent)$"
+          "float 1, match:class ^(polkit-gnome-authentication-agent-1)$"
+          "float 1, match:class ^(gcr-prompter)$"
+          "float 1, match:class ^(hyprpolkitagent)$"
+          "center 1, match:class ^(hyprpolkitagent)$"
         ];
       };
 
