@@ -117,9 +117,15 @@ The system side of the same split lives in `nixos-config`:
 `fudo.services.desktop.extraSessions` offers a second session at the greeter
 without changing the host default.
 
-`programs.quickshell` is the current example: enabled for niten on system7
-only, alongside `programs.hyprland`, with COSMIC still the default session.
-See [`docs/quickshell.md`](./docs/quickshell.md).
+`fudo.quickshell` is the current example: enabled for niten on system7 only,
+alongside `programs.hyprland`, with COSMIC still the default session. See
+[`docs/quickshell.md`](./docs/quickshell.md).
+
+Note its namespace. Home Manager 26.05 ships `programs.quickshell` upstream, so
+our module sits at `fudo.quickshell` (like `fudo.vr`) and *drives* the upstream
+one. **Before adding a module under `programs.*`, check that Home Manager does
+not already declare it** -- a duplicate declaration is a hard eval error that
+takes down every user on the host, not just the one using the feature.
 
 ## Key patterns & conventions
 

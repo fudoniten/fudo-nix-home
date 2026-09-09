@@ -181,7 +181,7 @@ in {
       default = "waybar";
       description = ''
         Status bar to autostart with the session. Set to "none" when
-        something else provides the bar -- programs.quickshell sets this
+        something else provides the bar -- fudo.quickshell sets this
         for you when enabled, since two stacked bars is never the intent.
 
         The Waybar config files are written either way, so flipping this

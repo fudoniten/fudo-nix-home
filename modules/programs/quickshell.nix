@@ -1,22 +1,25 @@
-# Quickshell Desktop Shell
+# Quickshell Desktop Shell -- Fudo layer
 #
-# Quickshell (https://quickshell.org) is a QtQuick toolkit for building shell
-# components -- bars, launchers, lockscreens -- as QML. This module provides an
-# opinionated bar for Wayland sessions, plus a workflow for editing it live.
+# Home Manager ships its own `programs.quickshell` (package, config directory,
+# systemd unit). This module does NOT redeclare those; it sits on top and adds
+# the parts upstream deliberately leaves to you:
 #
-# Two things are worth understanding before changing anything here:
+#   1. A theme generated from Stylix. `Theme.qml` is produced from
+#      `config.lib.stylix.colors` at build time, so the bar follows
+#      `stylix.base16Scheme` rather than carrying its own palette (which is
+#      what the Waybar config in hyprland.nix does, and why that one is stuck
+#      on Catppuccin while the rest of the system is not).
 #
-#   1. The theme is generated, not written. `Theme.qml` is produced from your
-#      Stylix base16 scheme at build time, so the bar follows
-#      `stylix.base16Scheme` instead of carrying its own hardcoded palette
-#      (which is what the Waybar config in hyprland.nix does, and why that one
-#      is stuck on Catppuccin while the rest of the system is not).
+#   2. A bar worth shipping -- the QML in ./quickshell.
 #
-#   2. QML wants to be edited live; the Nix store is read-only. `dev.enable`
-#      resolves that by pointing ~/.config/quickshell at a real directory you
-#      own, seeded once from the defaults below. See docs/quickshell.md.
+#   3. A live-editing mode. QML wants to be edited and reloaded; the Nix store
+#      is read-only. `dev.enable` points the config directory at a real
+#      directory you own, seeded once from the defaults. See docs/quickshell.md.
 #
-# Only active when enabled via programs.quickshell.enable.
+# Options live under `fudo.quickshell` (matching `fudo.vr`) precisely so they
+# cannot collide with the upstream module again.
+#
+# Only active when enabled via fudo.quickshell.enable.
 
 { ... }:
 
@@ -24,10 +27,15 @@
 
 with lib;
 let
-  cfg = config.programs.quickshell;
+  cfg = config.fudo.quickshell;
 
   colors = config.lib.stylix.colors.withHashtag;
   inherit (config.stylix) fonts;
+
+  # The name of the config directory under ~/.config/quickshell, passed to
+  # quickshell as `--config`. A named config rather than the directory root, so
+  # scratch experiments can live alongside it.
+  configName = "fudo";
 
   # base16 role mapping. base00-07 are greyscale (background -> foreground),
   # base08-0F are the accent hues; see https://github.com/chriskempson/base16.
@@ -165,15 +173,8 @@ let
   };
 
 in {
-  options.programs.quickshell = {
-    enable = mkEnableOption "Quickshell desktop shell";
-
-    package = mkOption {
-      type = types.package;
-      default = wrappedPackage;
-      defaultText = literalExpression "pkgs.quickshell";
-      description = "Quickshell package to use.";
-    };
+  options.fudo.quickshell = {
+    enable = mkEnableOption "the Fudo Quickshell bar";
 
     extraQmlPackages = mkOption {
       type = types.listOf types.package;
@@ -204,14 +205,17 @@ in {
       description = "Corner radius used by bar widgets.";
     };
 
-    autostart = mkOption {
-      type = types.bool;
-      default = true;
+    systemdTarget = mkOption {
+      type = types.str;
+      default = "hyprland-session.target";
       description = ''
-        Start Quickshell from Hyprland's exec-once. This is deliberately not
-        wired to graphical-session.target: on a host that also offers another
-        desktop, a target-driven unit would start the bar in that session too
-        and you would get two bars stacked on each other.
+        systemd user target that starts the bar.
+
+        Deliberately the Hyprland session target rather than
+        graphical-session.target: on a host that offers more than one session
+        (system7 offers both COSMIC and Hyprland) the broader target would
+        start the bar inside the other session too, and you would get two bars
+        stacked on each other.
       '';
     };
 
@@ -220,10 +224,10 @@ in {
         type = types.bool;
         default = false;
         description = ''
-          Point ~/.config/quickshell at `dev.path` (an ordinary, writable
-          directory) instead of the read-only store copy, and seed it from the
-          defaults on first activation. Quickshell reloads QML on change, so
-          edits apply immediately with no rebuild.
+          Point the Quickshell config directory at `dev.path` (an ordinary,
+          writable directory) instead of the read-only store copy, and seed it
+          from the defaults on first activation. Quickshell reloads QML on
+          change, so edits apply immediately with no rebuild.
 
           The trade-off is that the directory is then yours, not Nix's: it is
           no longer reproducible, and Theme.qml stops tracking Stylix until you
@@ -235,19 +239,33 @@ in {
       path = mkOption {
         type = types.str;
         default = "${config.home.homeDirectory}/src/quickshell-config";
-        defaultText = literalExpression ''"''${config.home.homeDirectory}/src/quickshell-config"'';
+        defaultText =
+          literalExpression ''"''${config.home.homeDirectory}/src/quickshell-config"'';
         description = "Directory holding the live-editable Quickshell config.";
       };
     };
   };
 
   config = mkIf cfg.enable {
-    home.packages = [ cfg.package devTool ];
+    # Drive the upstream Home Manager module rather than reimplementing it --
+    # it owns the package, the `--config` flag and the systemd unit.
+    programs.quickshell = {
+      enable = true;
+      package = mkDefault wrappedPackage;
+      activeConfig = configName;
 
-    # Quickshell searches $XDG_CONFIG_HOME/quickshell/shell.qml first, then the
-    # same path under each XDG_CONFIG_DIRS entry, so owning this directory is
-    # all that is needed to be picked up -- no -c flag, no env var.
-    xdg.configFile."quickshell".source = if cfg.dev.enable then
+      systemd = {
+        enable = true;
+        target = cfg.systemdTarget;
+      };
+    };
+
+    home.packages = [ devTool ];
+
+    # Upstream's `configs` option takes a plain path, which cannot express an
+    # out-of-store symlink, so the config directory is written here instead --
+    # `configs` is left empty and the two do not overlap.
+    xdg.configFile."quickshell/${configName}".source = if cfg.dev.enable then
       config.lib.file.mkOutOfStoreSymlink cfg.dev.path
     else
       defaultConfig;
@@ -263,32 +281,9 @@ in {
         fi
       '');
 
-    # No [Install] section on purpose -- see the `autostart` description. The
-    # unit exists so the shell gets journald logging and `systemctl --user
-    # restart quickshell`, and PartOf still tears it down at session end.
-    systemd.user.services.quickshell = {
-      Unit = {
-        Description = "Quickshell desktop shell";
-        Documentation = "https://quickshell.org";
-        PartOf = [ "graphical-session.target" ];
-        After = [ "graphical-session.target" ];
-      };
-
-      Service = {
-        ExecStart = getExe cfg.package;
-        Restart = "on-failure";
-        RestartSec = 2;
-        Slice = "session.slice";
-      };
-    };
-
-    programs.hyprland = mkIf config.programs.hyprland.enable {
-      # Two bars is never what anyone wants; mkDefault so you can still force
-      # Waybar back on if you want to compare them side by side.
-      statusBar = mkDefault "none";
-
-      extraAutostart =
-        optional cfg.autostart "systemctl --user start quickshell.service";
-    };
+    # Two bars is never what anyone wants; mkDefault so you can still force
+    # Waybar back on if you want to compare them side by side.
+    programs.hyprland =
+      mkIf config.programs.hyprland.enable { statusBar = mkDefault "none"; };
   };
 }
