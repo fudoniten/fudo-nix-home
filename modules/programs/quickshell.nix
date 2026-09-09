@@ -46,6 +46,7 @@ let
     pragma Singleton
 
     import Quickshell
+    import QtQuick // for the `color` value type -- Quickshell alone doesn't provide it
 
     Singleton {
         readonly property color bg: "${colors.base00}"
