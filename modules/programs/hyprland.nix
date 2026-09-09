@@ -213,7 +213,19 @@ in {
       enable = true;
       xwayland.enable = true;
       systemd.enable = true;
-      configType = "lua";
+
+      # Every value below (the "$mod"/"$terminal" variables, bind = [...]
+      # strings, general/decoration/dwindle attrs, ...) is written in the
+      # classic hyprlang *text* config syntax, not Hyprland's native Lua API.
+      # HM's two `configType` renderers are not interchangeable: with "lua"
+      # (the default for stateVersion >= 26.05, which is what this repo
+      # pins), each settings key is emitted as a Lua call named after the
+      # key -- so "$fileManager" becomes the literal, invalid Lua source
+      # `hl.$fileManager(...)`, since `$` can't start an identifier. That
+      # surfaces as `hyprland.lua:5: <name> expected near '$'` the moment
+      # Hyprland actually starts, tripping emergency-bind mode. Pin
+      # "hyprlang" explicitly, matching the syntax this config is written in.
+      configType = "hyprlang";
 
       settings = {
         # Monitor configuration - auto-detect
@@ -384,17 +396,6 @@ in {
           "$mod, R, submap, resize"
         ];
 
-        # Resize submap keybindings
-        submap = [
-          "resize"
-          "binde = , H, resizeactive, -10 0"
-          "binde = , L, resizeactive, 10 0"
-          "binde = , K, resizeactive, 0 -10"
-          "binde = , J, resizeactive, 0 10"
-          "bind = , escape, submap, reset"
-          "submap = reset"
-        ];
-
         # Mouse bindings
         bindm =
           [ "$mod, mouse:272, movewindow" "$mod, mouse:273, resizewindow" ];
@@ -450,6 +451,26 @@ in {
           "float, class:^(hyprpolkitagent)$"
           "center, class:^(hyprpolkitagent)$"
         ];
+      };
+
+      # Resize submap, bound via "$mod, R, submap, resize" above.
+      #
+      # This is `submaps`, a dedicated option -- not a `submap` key stuffed
+      # into `settings`. HM's hyprlang renderer repeats a settings key for
+      # every element of a list value (that's how the flat `bind = [ ... ]`
+      # list above becomes one `bind = ...` line per entry), so a raw
+      # `submap = [ "resize" "binde = ..." ... ]` list would have rendered
+      # every line prefixed with a stray `submap = `, e.g.
+      # `submap = binde = , H, resizeactive, -10 0` -- not the submap
+      # declaration hyprlang expects.
+      submaps.resize.settings = {
+        binde = [
+          ", H, resizeactive, -10 0"
+          ", L, resizeactive, 10 0"
+          ", K, resizeactive, 0 -10"
+          ", J, resizeactive, 0 10"
+        ];
+        bind = [ ", escape, submap, reset" ];
       };
     };
 
