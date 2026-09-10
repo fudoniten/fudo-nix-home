@@ -200,7 +200,7 @@ in {
 
     lockCommand = mkOption {
       type = types.str;
-      default = "hyprlock";
+      default = "swaylock";
       description = ''
         Command invoked by the manual screen-lock binding ($mod, Escape)
         and by hypridle for both its 5-minute idle timeout and any
@@ -208,14 +208,22 @@ in {
         hypridle.conf templates `lock_cmd` from this same value, so the
         two paths can no longer disagree on which locker actually runs.
 
-        Defaults to hyprlock: it was already the de-facto locker before
-        this option existed to say so -- hypridle.conf hardcoded
-        `pidof hyprlock || hyprlock` regardless of what this option
-        claimed, so the auto-lock path (the one that actually matters --
-        it is what fires when you step away) was never swaylock even
-        when this default said it was. Set to "swaylock" to use that
-        instead; `programs.swaylock` below still configures it either
-        way, so switching back costs nothing.
+        Defaults to swaylock, not hyprlock, despite hyprlock being the
+        one actually running here until this was caught (hypridle.conf
+        used to hardcode it regardless of what this option said -- see
+        git history if that distinction matters to you). hyprlock has an
+        open, unresolved class of bug matching a real incident on this
+        exact machine: password box rendered, mouse worked, keyboard
+        silently produced nothing, no crash, no log line -- see
+        hyprwm/hyprlock#101 and #273 upstream, both closed without a
+        fix. Confirmed on our side too: Hyprland's own instance log
+        showed zero evidence of the keyboard device being lost around
+        the incident, meaning whatever ate the keystrokes was inside
+        hyprlock's focus handling, not the device or the compositor.
+        swaylock isn't bug-free either (its own known issue is keys
+        typed while DPMS is still off getting dropped), but that is a
+        narrower, different failure mode from what actually happened
+        here, where the dialog was already visibly rendering.
       '';
     };
 
