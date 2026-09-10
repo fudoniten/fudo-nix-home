@@ -200,10 +200,22 @@ in {
 
     lockCommand = mkOption {
       type = types.str;
-      default = "swaylock";
+      default = "hyprlock";
       description = ''
-        Command invoked by the manual screen-lock binding
-        ($mod, Escape) and by hypridle for auto-lock.
+        Command invoked by the manual screen-lock binding ($mod, Escape)
+        and by hypridle for both its 5-minute idle timeout and any
+        external `loginctl lock-session` call (before-sleep included) --
+        hypridle.conf templates `lock_cmd` from this same value, so the
+        two paths can no longer disagree on which locker actually runs.
+
+        Defaults to hyprlock: it was already the de-facto locker before
+        this option existed to say so -- hypridle.conf hardcoded
+        `pidof hyprlock || hyprlock` regardless of what this option
+        claimed, so the auto-lock path (the one that actually matters --
+        it is what fires when you step away) was never swaylock even
+        when this default said it was. Set to "swaylock" to use that
+        instead; `programs.swaylock` below still configures it either
+        way, so switching back costs nothing.
       '';
     };
 
@@ -608,9 +620,28 @@ in {
     home.file.".config/wofi/config".source =
       ./hyprland/wofi-config;
 
-    # Hypridle configuration (auto-lock and DPMS-off)
-    home.file.".config/hypr/hypridle.conf".source =
-      ./hyprland/hypridle.conf;
+    # Hypridle configuration (auto-lock and DPMS-off). Generated, not a
+    # static asset, so lock_cmd can't drift from cfg.lockCommand the way it
+    # did before this templating existed (hardcoded to hyprlock here while
+    # the option claimed to control it and defaulted to swaylock).
+    home.file.".config/hypr/hypridle.conf".text = ''
+      general {
+          lock_cmd = pidof ${cfg.lockCommand} || ${cfg.lockCommand}
+          before_sleep_cmd = loginctl lock-session
+          after_sleep_cmd = hyprctl dispatch dpms on
+      }
+
+      listener {
+          timeout = 300
+          on-timeout = loginctl lock-session
+      }
+
+      listener {
+          timeout = 330
+          on-timeout = hyprctl dispatch dpms off
+          on-resume = hyprctl dispatch dpms on
+      }
+    '';
 
     # Mako notification daemon
     services.mako = {
