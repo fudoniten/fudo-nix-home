@@ -68,20 +68,30 @@ config has settled.
 ### Live (`dev.enable = true`, the current setting for niten)
 
 `~/.config/quickshell/fudo` is an out-of-store symlink to
-`~/src/quickshell-config`, an ordinary directory you own. It is seeded from the
-Nix defaults on first activation and never overwritten afterwards. Quickshell
-watches the files and reloads on save, so edits apply immediately — no rebuild,
-no restart.
+`~/src/quickshell-config`, an ordinary directory you own. The component QML
+(`shell.qml`, `Bar.qml`, ...) is seeded from the Nix defaults on first
+activation and never overwritten afterwards. Quickshell watches the files and
+reloads on save, so edits apply immediately — no rebuild, no restart.
 
-The trade-off is real and worth stating: that directory is now yours, not
-Nix's. It is not reproducible, it is not in git unless you put it there, and
-`Theme.qml` stops tracking Stylix until you refresh it.
+**`Theme.qml` is the one exception.** It's regenerated from
+`stylix.base16Scheme` and overwritten on *every* `home-manager switch`,
+dev mode or not — nothing about it is meant to be hand-edited (its own
+header says so). This isn't just tidiness: seed-once for Theme.qml used to
+mean a fix to the generator in `modules/programs/quickshell.nix` needed a
+manual `fudo-quickshell theme` to actually reach an existing dev install —
+which is exactly what let a real bug (a missing `import QtQuick`) keep
+crashing quickshell after the fix had already landed and been rebuilt. If
+you're seeing that class of "fixed but still broken" after a `git pull` +
+switch now, something's wrong with activation itself, not a stale file.
+
+The trade-off that's still real: the component QML directory is yours, not
+Nix's. It is not reproducible, and it is not in git unless you put it there.
 
 The `fudo-quickshell` helper manages the boundary:
 
 ```
 fudo-quickshell init      # seed the dev directory (refuses to overwrite)
-fudo-quickshell theme     # pull a fresh Theme.qml from the current Stylix scheme
+fudo-quickshell theme     # refresh Theme.qml by hand (normally automatic)
 fudo-quickshell diff      # what have I changed vs. the shipped defaults?
 fudo-quickshell reset     # throw away local changes, back to defaults (prompts)
 fudo-quickshell defaults  # print the store path of the shipped config
