@@ -265,6 +265,25 @@ in {
       };
     };
 
+    # Additive merge onto the unit upstream's systemd.enable above creates --
+    # not a replacement, since it only sets ExecStart/Restart.
+    #
+    # Quickshell has been observed leaking file descriptors until it hits
+    # the default limit (1024) and dies with a Wayland-fatal
+    # "dup failed: Too many open files" -- the same failure signature other
+    # Wayland clients (OBS, sway) hit under plain fd exhaustion, since
+    # libwayland needs to dup() a descriptor to marshal several requests
+    # (buffer/format-table ones happened to be first in this case, but
+    # that's incidental to what's actually leaking). This does not fix the
+    # leak -- its source hasn't been identified -- it just raises the
+    # ceiling so a session is far less likely to hit it, on the theory that
+    # whatever's leaking is slow enough that 1024 was the real constraint.
+    # If this is still getting hit, `lsof -p $(pgrep quickshell)` over time
+    # is the next diagnostic step: watching what kind of fd count is
+    # climbing (sockets vs. pipes vs. dmabuf handles) would actually
+    # localize the leak instead of guessing at it.
+    systemd.user.services.quickshell.Service.LimitNOFILE = 65536;
+
     home.packages = [ devTool ];
 
     # Upstream's `configs` option takes a plain path, which cannot express an
