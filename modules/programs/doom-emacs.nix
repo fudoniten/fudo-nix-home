@@ -133,6 +133,7 @@ let
       pet
       polymuse
       pylint
+      qml-mode
       restclient
       sly-asdf
       sly-quicklisp
