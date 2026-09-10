@@ -507,11 +507,11 @@
     "niten-doom-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1780382275,
-        "narHash": "sha256-Z5KZyeI3AvCXIMZ0W7A8MuI3ru15npfjLv8KTdSZgoU=",
+        "lastModified": 1789002417,
+        "narHash": "sha256-uwhIcP7hhVoAkN6r1PHDA5QFadnt85l+pZpUG2nrkyc=",
         "owner": "fudoniten",
         "repo": "doom-emacs-config",
-        "rev": "be79cb6140ecf58a168fedd96576e25dc1e666ea",
+        "rev": "fe7d69c9b4cba1ea2d129683bd3a70f7df3240fd",
         "type": "github"
       },
       "original": {
@@ -666,11 +666,11 @@
     },
     "nixpkgs_6": {
       "locked": {
-        "lastModified": 1788807765,
-        "narHash": "sha256-HpUcFydtAyJ4v+HhQYitv0hXM/sAld/boLdsnSRiRPs=",
-        "rev": "93108a538f079596c9a16c72cf03e9322782b6dd",
+        "lastModified": 1788921488,
+        "narHash": "sha256-JLopN/XSodSsJIZ7v7tEjpPZ+QXc883s3HoUIxHD8Io=",
+        "rev": "6aefcda9401be8acc2b74244fb3b37520ea1f0a8",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/26.05/nixos-26.05.9334.93108a538f07/nixexprs.tar.xz"
+        "url": "https://releases.nixos.org/nixos/26.05/nixos-26.05.9440.6aefcda9401b/nixexprs.tar.xz"
       },
       "original": {
         "id": "nixpkgs",
@@ -1087,11 +1087,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788864239,
-        "narHash": "sha256-a2BIiekLSIgruRro3fXQgohmw3xlCFJBGW/TKK4x+E8=",
+        "lastModified": 1788994759,
+        "narHash": "sha256-EZZ47C41RLXQHfxJDW4tF5b769WH0aSZ7JSfmq5M8KE=",
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
-        "rev": "018726119b87c9fb906857af802d3cbfbc10a46d",
+        "rev": "e6a3f69206143e49218fdf7642f1f0ed117337cd",
         "type": "github"
       },
       "original": {
