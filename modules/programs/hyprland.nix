@@ -513,9 +513,9 @@ in {
 
         # Media keys
         bindl = [
-          ", XF86AudioPlay, exec, playerctl play-pause"
-          ", XF86AudioNext, exec, playerctl next"
-          ", XF86AudioPrev, exec, playerctl previous"
+          ", XF86AudioPlay, exec, qs -c fudo ipc call mpris playPause"
+          ", XF86AudioNext, exec, qs -c fudo ipc call mpris next"
+          ", XF86AudioPrev, exec, qs -c fudo ipc call mpris previous"
         ];
 
         bindle = [
@@ -621,12 +621,10 @@ in {
     };
 
     # Wofi launcher styling (Catppuccin Mocha palette)
-    home.file.".config/wofi/style.css".source =
-      ./hyprland/wofi-style.css;
+    home.file.".config/wofi/style.css".source = ./hyprland/wofi-style.css;
 
     # Wofi launcher config
-    home.file.".config/wofi/config".source =
-      ./hyprland/wofi-config;
+    home.file.".config/wofi/config".source = ./hyprland/wofi-config;
 
     # Hypridle configuration (auto-lock and DPMS-off). Generated, not a
     # static asset, so lock_cmd can't drift from cfg.lockCommand the way it
