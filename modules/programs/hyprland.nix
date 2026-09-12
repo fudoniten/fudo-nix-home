@@ -434,6 +434,7 @@ in {
           "$mod, D, exec, $menu"
           "$mod SHIFT, D, exec, wofi --show run"
           "$mod, E, exec, $fileManager"
+          "$mod, G, exec, qs -c fudo ipc call launcher toggle"
 
           # Window management
           "$mod, Q, killactive"
