@@ -9,6 +9,10 @@
 # - Desktop type configuration (x, wayland, darwin, none)
 # - Stylix theming integration
 # - Support for custom user-to-config mappings (config-user option)
+# - Two deploy modes (deployMode): the generation can ride in the system
+#   closure, or ship as its own deploy-rs profile
+# - A place for the system layer to contribute per-user Home Manager config
+#   that works in both modes (extraUserModules)
 #
 # Usage:
 #   fudo.home-manager = {
@@ -32,6 +36,24 @@ with lib;
 let
   cfg = config.fudo.home-manager;
 
+  # Whether *this* layer generates the Home Manager configuration.
+  #
+  # In "profile" mode the options are still declared and still resolve --
+  # the deploy flake reads `users` and `system` off the host's evaluation to
+  # decide what to build -- but nothing here writes `home-manager.users`,
+  # because the generation ships as its own deploy-rs profile instead.
+  #
+  # Note this is not the same as `enable = false`. A disabled host has no
+  # Home Manager at all and must not get a profile; a profile-mode host has
+  # one that arrives by another route. Only the option can tell them apart,
+  # which is why it exists rather than the deploy flake keying off `enable`.
+  systemManaged = cfg.enable && cfg.deployMode == "system";
+
+  # Users reaching `home-manager.users` from somewhere other than this
+  # module. Forced only inside the profile-mode assertion below, so the
+  # merge it triggers costs nothing in the default "system" mode.
+  strayHomeUsers = attrNames config.home-manager.users;
+
   userOpts.options = with types; {
     username = mkOption { type = str; };
     email = mkOption { type = str; };
@@ -48,7 +70,7 @@ let
 
   versionSetModule = usernames: stateVersion:
     { ... }: {
-      config = mkIf cfg.enable {
+      config = mkIf systemManaged {
         home-manager.users =
           genAttrs usernames (username: { home = { inherit stateVersion; }; });
       };
@@ -56,7 +78,7 @@ let
 
   hmModulesModule = usernames:
     { ... }: {
-      config = mkIf cfg.enable {
+      config = mkIf systemManaged {
         home-manager.users = listToAttrs (map ({ username, ... }@userOpts:
           nameValuePair username {
             imports = [
@@ -71,11 +93,57 @@ let
 
   commonModule = usernames:
     { ... }: {
-      config = mkIf cfg.enable {
+      config = mkIf systemManaged {
         home-manager.users = genAttrs usernames
           (username: { imports = [ stylix.homeModules.stylix ]; });
       };
     };
+
+  # Home Manager config contributed by the *system* layer -- config that
+  # depends on data this repo has no access to, such as the Kerberos realms
+  # behind a user's .k5login.
+  #
+  # It exists so that layer has somewhere to put such config other than
+  # `home-manager.users`, which only the system deploy mode can reach. A
+  # module written straight there would keep being applied in profile mode,
+  # where the NixOS side is supposed to have stopped managing the user
+  # entirely, and the host would activate a second generation aimed at the
+  # same lineage as the one the home profile deploys.
+  #
+  # Keyed by username rather than filtered against `existingUsers`: the
+  # system layer contributes for users this repo may have no `users/<n>.nix`
+  # for at all (root, and any local user without one), which is what it did
+  # when it wrote `home-manager.users` directly.
+  extraModulesModule = { ... }: {
+    config = mkIf systemManaged {
+      home-manager.users =
+        mapAttrs (_: modules: { imports = modules; }) cfg.extraUserModules;
+    };
+  };
+
+  # In profile mode, nothing may reach `home-manager.users` -- see the
+  # comment on `extraUserModules`. The failure this catches is silent
+  # otherwise: the host looks converted, and goes on activating a system-side
+  # generation underneath the profile.
+  profileGuardModule = { ... }: {
+    config = mkIf (cfg.enable && cfg.deployMode == "profile") {
+      assertions = [{
+        assertion = strayHomeUsers == [ ];
+        message = ''
+          fudo.home-manager.deployMode is "profile", but home-manager.users
+          is non-empty: ${concatStringsSep ", " strayHomeUsers}
+
+          In profile mode the per-user generation is deployed as its own
+          deploy-rs profile, so the NixOS side must not build one too --
+          both would be aimed at the same generation lineage.
+
+          Whatever defines those users should contribute through
+          fudo.home-manager.extraUserModules instead, which both deploy
+          modes consume.
+        '';
+      }];
+    };
+  };
 
   homeFileExists = userOpts: pathExists ./users/${getConfigUser userOpts}.nix;
 
@@ -85,11 +153,51 @@ in {
   options.fudo.home-manager = with types; {
     enable = mkEnableOption "Enable Home Manager for known users.";
 
+    deployMode = mkOption {
+      type = enum [ "system" "profile" ];
+      description = ''
+        How this host's Home Manager generation reaches it.
+
+        "system" (the default) is the historical behaviour: the generation is
+        built into the system closure and activated by switch-to-configuration.
+
+        "profile" means it is deployed separately, as its own deploy-rs
+        profile. The options here are still declared and still resolve -- the
+        deploy flake reads them off this host's evaluation to decide what to
+        build -- but nothing in this module writes `home-manager.users`, and
+        it is an error for anything else to either.
+
+        Distinct from `enable = false`, which means the host has no Home
+        Manager at all and should get no profile.
+      '';
+      default = "system";
+    };
+
     users = mkOption {
       type = listOf (submodule userOpts);
       description =
         "List of users for whom to generate a homedir, if available.";
       default = [ ];
+    };
+
+    extraUserModules = mkOption {
+      type = attrsOf (listOf unspecified);
+      description = ''
+        Home Manager modules contributed per user by the system layer, for
+        configuration that depends on data this repo cannot see.
+
+        Use this rather than defining `home-manager.users` directly: that
+        attribute is reachable only in the "system" deploy mode, so a module
+        written there is silently kept alive on a host that has moved to
+        "profile" mode. Both modes consume this option.
+
+        Keys are usernames, and need not correspond to a `users/<name>.nix`
+        in this repo.
+      '';
+      default = { };
+      example = literalExpression ''
+        { niten = [ { home.file.".k5login".text = "niten@FUDO.ORG"; } ]; }
+      '';
     };
 
     system = {
@@ -121,9 +229,11 @@ in {
     (versionSetModule usernames cfg.system.stateVersion)
     (hmModulesModule usernames)
     (commonModule usernames)
+    extraModulesModule
+    profileGuardModule
   ];
 
-  config = mkIf cfg.enable {
+  config = mkIf systemManaged {
     home-manager = {
       useGlobalPkgs = true;
       users = listToAttrs (map ({ username, ... }@opts:

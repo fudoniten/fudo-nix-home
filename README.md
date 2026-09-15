@@ -117,6 +117,46 @@ If you're on NixOS and want to integrate your user configuration into your syste
 sudo nixos-rebuild switch --flake .#your-hostname
 ```
 
+#### Contributing config from the system layer
+
+Some per-user configuration depends on data this repo cannot see — the
+Kerberos realms behind a `.k5login`, say. Put it in `extraUserModules`, keyed
+by username, rather than defining `home-manager.users` directly:
+
+```nix
+fudo.home-manager.extraUserModules.niten = [
+  { home.file.".k5login".text = "niten@FUDO.ORG"; }
+];
+```
+
+Keys need not correspond to a `users/<name>.nix` here; `root` and local users
+without a config file are both fine.
+
+`home-manager.users` looks like it would work and mostly does, but it is
+reachable only in the `"system"` deploy mode below — a module written there is
+silently kept alive on a host that has moved to `"profile"` mode.
+
+#### Deploy modes
+
+`deployMode` controls how the generation reaches the host:
+
+| | |
+|---|---|
+| `"system"` (default) | built into the system closure, activated by `switch-to-configuration` |
+| `"profile"` | deployed separately, as its own deploy-rs profile |
+
+In `"profile"` mode the options here still resolve — the deploy flake reads
+them off the host's evaluation to decide what to build — but this module writes
+no `home-manager.users`, and it is an assertion failure for anything else to.
+That guard is the point: without it a half-converted host quietly activates two
+competing generations against the same lineage.
+
+Note `deployMode = "profile"` is *not* `enable = false`. The latter means the
+host has no Home Manager at all and should get no profile; only the option
+distinguishes the two.
+
+See `HOME-PROFILE-SPLIT.md` in `nixos-config` for the full design.
+
 ### Option 2: Standalone Home Manager (Non-NixOS or Limited Access)
 
 Use this if you're on a non-NixOS system or don't have root access.
