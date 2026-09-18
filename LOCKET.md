@@ -2,15 +2,10 @@
 
 Profile-based secrets management for NixOS Home Manager.
 
-> **Status: the CLI works, the Nix module does not deploy anything yet.**
->
-> `locket add` encrypts correctly and writes the `.age` and `.json` files, but
-> nothing reads `secrets/<user>/` into `locket.secrets`, so the generated
-> decrypt script contains no secrets. Declaring entries in `locket.secrets` by
-> hand does work. See [TODO.md](./TODO.md) for what is missing.
->
-> Nothing is configured yet either: no profile has been created, `secrets/`
-> holds only `profiles/.gitkeep`, and no host sets `locket.enable`.
+> **Status: wired up, with nothing in it.** The module reads
+> `secrets/<user>/` and deploys what it finds, and `locket.enable` is on for
+> `niten`. No profile has been created yet, so there is nothing to deploy --
+> start at [Quick Start](#quick-start).
 
 Locket encrypts secrets to profile-specific keys, allowing fine-grained control over which secrets are available on which hosts. Secrets are decrypted on-demand when profile keys are present, and automatically cleaned up on logout/reboot.
 
@@ -46,7 +41,7 @@ Each secret is encrypted to one or more profile public keys. A host can decrypt 
 │    → Creates .age (encrypted) and .json (metadata) files    │
 │    → Committed to repository                                │
 │                                                             │
-│  DEPLOYMENT (deploy-rs):          [NOT WIRED UP -- TODO.md] │
+│  DEPLOYMENT (deploy-rs):                                    │
 │    → Encrypted .age files copied to target                  │
 │    → Home Manager activation sets up systemd units          │
 │    → Secrets remain encrypted (no keys present yet)         │
@@ -147,27 +142,28 @@ In your NixOS/Home Manager configuration:
     enable = true;
     profiles = [ "default" "desktop" ];
 
-    # Required today: there is no scan of secrets/<user>/, so every secret
-    # must be declared. The values mirror the .json file `locket add` wrote.
-    secrets.ssh-github = {
-      source = ./secrets/niten/ssh-github.age;
-      target = ".ssh/id_github";
-      profiles = [ "default" "desktop" ];
-      mode = "0600";
-      method = "copy";
-    };
-    
     # Optional: customize key directory
     # keyDirectory = ".config/locket/keys";
-    
+
     # Optional: use copy instead of symlink by default
     # defaultMethod = "copy";
-    
+
     # Optional: for work laptops with a single hardcoded key
     # identityKeyPath = "/persistent/secrets/my-key";
   };
 }
 ```
+
+That is the whole configuration. `secrets/<user>/` is scanned and every secret
+naming one of this host's profiles is deployed; the `.json` beside each `.age`
+already says where it goes, with what permissions, by which method.
+
+Secrets naming no profile in this list are left out of the closure entirely,
+rather than shipped as ciphertext the host could never open.
+
+`identityKeyPath` changes where the key comes from, not whether profiles are
+checked. A work machine wanting only work secrets sets
+`profiles = [ "work" ]` and points `identityKeyPath` at its provisioned key.
 
 ### 5. Deploy
 
@@ -376,19 +372,30 @@ Each `.age` file has a companion `.json` file:
       default = "symlink";
     };
 
-    # The secrets themselves. Declared by hand -- see the status note above.
+    # Whose directory under secrets/ to read
+    user = mkOption {
+      type = types.str;
+      default = config.home.username;
+    };
+
+    # The repository's secrets directory
+    secretsDirectory = mkOption {
+      type = types.path;
+      default = ../../secrets;
+    };
+
+    # Read secrets/<user>/ and populate `secrets` from it
+    scanSecrets = mkOption {
+      type = types.bool;
+      default = true;
+    };
+
+    # Extra secrets, declared by hand. Usually empty -- the scan finds
+    # everything `locket add` wrote. Merged over the scan, so it doubles as
+    # the way to override one scanned entry.
     secrets = mkOption {
       type = types.attrsOf (types.submodule { ... });
       default = { };
-      example = {
-        "ssh-github" = {
-          source = ./secrets/niten/ssh-github.age;
-          target = ".ssh/id_github";
-          profiles = [ "default" "desktop" ];
-          mode = "0600";
-          method = "copy";
-        };
-      };
     };
 
     # Per-secret overrides
@@ -424,13 +431,32 @@ Decrypts secrets to `$XDG_RUNTIME_DIR/locket/` (tmpfs) and creates symlinks/copi
 
 Cleans up decrypted secrets on logout. Triggered by `exit.target`.
 
+### What gets cleaned up, and when
+
+Every placement is recorded in `$XDG_STATE_HOME/locket/placed` — method and
+path, one per line. Cleanup removes exactly those, and `locket-decrypt` does
+the same at the start of every run before placing anything new.
+
+The record exists because of `copy`. A symlink can be verified before removal
+(does it point into the runtime directory?), and it dies with the tmpfs at
+reboot anyway. A copy is an ordinary file in your home directory: it cannot be
+told apart from one you put there yourself, and it survives the reboot that
+clears everything else. Deleting it needs proof that locket wrote it, and the
+record is that proof.
+
+`exit.target` is reached when your systemd user instance stops, which does not
+happen on a host where you linger (`loginctl enable-linger`). There, cleanup
+never runs and the next decrypt does the removing instead — the window is
+"until the next decrypt" rather than "until the next reboot". Prefer
+`symlink` on those hosts.
+
 ## Security Notes
 
 1. **Private keys are never committed** - The `.gitignore` blocks `*.key` files and the pre-commit hook validates this.
 
 2. **Secrets are encrypted at rest** - In the repository and on target hosts until keys are provided.
 
-3. **Secrets are cleaned up automatically** - Stored in tmpfs, cleared on logout/reboot.
+3. **Secrets are cleaned up automatically** - Stored in tmpfs, cleared on logout/reboot. This is exact for `method = "symlink"`. A `copy` writes plaintext into your home directory, where it survives a reboot until something removes it — see [What gets cleaned up, and when](#what-gets-cleaned-up-and-when).
 
 4. **Profile isolation** - Work hosts can exclude personal profiles entirely.
 

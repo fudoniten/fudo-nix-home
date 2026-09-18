@@ -96,11 +96,10 @@ or more *profiles* (`default`, `desktop`, `server`, …), and a host decrypts on
 the profiles whose keys it holds. Decrypted secrets live in tmpfs and are cleaned
 up on logout/reboot. See `LOCKET.md` for the full model.
 
-**It does not deploy anything yet.** The CLI encrypts correctly and the module
-generates its units, but nothing reads `secrets/<user>/` into `locket.secrets`,
-so the decrypt script is generated empty. Nothing is configured either: no
-profile exists and no host sets `locket.enable`. See `TODO.md` before assuming a
-locket change has any effect.
+The module scans `secrets/<user>/` at evaluation time and deploys every secret
+naming a profile the host holds; `locket.secrets` is for hand-declared extras
+and overrides. `locket.enable` is on for `niten`. **No profile has been created
+yet**, so in practice nothing is deployed — see `TODO.md`.
 
 Working with it:
 - CLI lives in `bin/` (`./bin/locket …`). Structure is validated by
