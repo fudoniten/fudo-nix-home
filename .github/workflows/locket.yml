@@ -86,10 +86,14 @@ jobs:
         run: |
           echo "Checking for embedded private keys in file contents..."
           
-          # Search for age secret keys in file contents
-          if grep -r "AGE-SECRET-KEY-" --include="*" --exclude-dir=".git" . 2>/dev/null; then
+          # Match a real age secret key -- the bech32 body, not the bare
+          # prefix. The prefix alone appears legitimately in this workflow, in
+          # LOCKET.md's setup instructions, and in bin/locket-profile-create,
+          # which greps age-keygen's output for it; scanning for the prefix
+          # failed this job on every push that touched any of them.
+          if grep -rE "AGE-SECRET-KEY-1[0-9A-Z]{20,}" --exclude-dir=".git" . 2>/dev/null; then
             echo ""
-            echo "::error::Found AGE-SECRET-KEY in repository files!"
+            echo "::error::Found an age secret key in repository files!"
             echo "Private keys should never be committed to the repository."
             exit 1
           fi

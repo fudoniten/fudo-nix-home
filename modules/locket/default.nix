@@ -10,6 +10,10 @@
 # are stored in tmpfs (XDG_RUNTIME_DIR) for automatic cleanup.
 #
 # See LOCKET.md for full documentation and usage instructions.
+#
+# NOT YET WORKING END TO END. `locket.secrets` is never populated from
+# `secrets/<user>/`, so the script below is generated with no secrets in it and
+# the `locket` CLI's output reaches no host. See TODO.md.
 
 { config, lib, pkgs, ... }:
 
@@ -134,12 +138,12 @@ let
         if can_decrypt_profiles "''${SECRET_PROFILES[@]}"; then
           echo "Locket: Decrypting ${name}..."
           RUNTIME_PATH="$RUNTIME_DIR/${name}"
-          if ${pkgs.age}/bin/age -d $IDENTITY_ARGS -o "$RUNTIME_PATH" "${secret.source}" 2>/dev/null; then
+          if ${pkgs.age}/bin/age -d $IDENTITY_ARGS -o "$RUNTIME_PATH" "${secret.source}"; then
             chmod ${mode} "$RUNTIME_PATH"
             place_secret "$RUNTIME_PATH" "${target}" "${method}" "${mode}"
             echo "Locket: ${name} -> ~/${target}"
           else
-            echo "Locket: Failed to decrypt ${name} (missing key or corrupt file)"
+            echo "Locket: Failed to decrypt ${name} (see age's error above)"
           fi
         else
           echo "Locket: Skipping ${name} (no matching profile key)"
@@ -176,6 +180,10 @@ let
             echo "Locket: Removed symlink ${target}"
           fi
         elif [[ "${method}" == "copy" ]] && [[ -f "$TARGET" ]]; then
+          # TODO(locket): this deletes ~/${target} whether or not locket put it
+          # there. The symlink branch above checks that it points into
+          # RUNTIME_DIR before removing it; the copy branch has no equivalent
+          # and needs one -- record a checksum or a sidecar at placement time.
           rm -f "$TARGET"
           echo "Locket: Removed copy ${target}"
         fi
@@ -209,6 +217,11 @@ in {
     };
 
     # Systemd user units for automatic decryption
+    # TODO(locket): nothing re-runs the decrypt after a config change. The path
+    # unit fires when a key *appears*; with the keys already in place, a secret
+    # added or retargeted since the last login does not deploy until the next
+    # one. Either set `systemd.user.startServices` or start the service from an
+    # activation entry.
     systemd.user.paths.locket-secrets = {
       Unit.Description = "Watch for Locket profile keys";
       Path = {
@@ -230,6 +243,12 @@ in {
     };
 
     # Cleanup service - runs when user session ends
+    #
+    # TODO(locket): `exit.target` is reached when the user's systemd instance
+    # shuts down, which does not happen for a lingering user. On a host with
+    # `loginctl enable-linger` the secrets outlive the session they were
+    # decrypted for. Confirm which Fudo hosts linger and, where they do, hang
+    # cleanup off session teardown instead.
     systemd.user.services.locket-cleanup = {
       Unit = {
         Description = "Cleanup Locket secrets on logout";

@@ -2,6 +2,16 @@
 
 Profile-based secrets management for NixOS Home Manager.
 
+> **Status: the CLI works, the Nix module does not deploy anything yet.**
+>
+> `locket add` encrypts correctly and writes the `.age` and `.json` files, but
+> nothing reads `secrets/<user>/` into `locket.secrets`, so the generated
+> decrypt script contains no secrets. Declaring entries in `locket.secrets` by
+> hand does work. See [TODO.md](./TODO.md) for what is missing.
+>
+> Nothing is configured yet either: no profile has been created, `secrets/`
+> holds only `profiles/.gitkeep`, and no host sets `locket.enable`.
+
 Locket encrypts secrets to profile-specific keys, allowing fine-grained control over which secrets are available on which hosts. Secrets are decrypted on-demand when profile keys are present, and automatically cleaned up on logout/reboot.
 
 ## Concepts
@@ -36,7 +46,7 @@ Each secret is encrypted to one or more profile public keys. A host can decrypt 
 │    → Creates .age (encrypted) and .json (metadata) files    │
 │    → Committed to repository                                │
 │                                                             │
-│  DEPLOYMENT (deploy-rs):                                    │
+│  DEPLOYMENT (deploy-rs):          [NOT WIRED UP -- TODO.md] │
 │    → Encrypted .age files copied to target                  │
 │    → Home Manager activation sets up systemd units          │
 │    → Secrets remain encrypted (no keys present yet)         │
@@ -136,6 +146,16 @@ In your NixOS/Home Manager configuration:
   locket = {
     enable = true;
     profiles = [ "default" "desktop" ];
+
+    # Required today: there is no scan of secrets/<user>/, so every secret
+    # must be declared. The values mirror the .json file `locket add` wrote.
+    secrets.ssh-github = {
+      source = ./secrets/niten/ssh-github.age;
+      target = ".ssh/id_github";
+      profiles = [ "default" "desktop" ];
+      mode = "0600";
+      method = "copy";
+    };
     
     # Optional: customize key directory
     # keyDirectory = ".config/locket/keys";
@@ -354,6 +374,21 @@ Each `.age` file has a companion `.json` file:
     defaultMethod = mkOption {
       type = types.enum [ "symlink" "copy" ];
       default = "symlink";
+    };
+
+    # The secrets themselves. Declared by hand -- see the status note above.
+    secrets = mkOption {
+      type = types.attrsOf (types.submodule { ... });
+      default = { };
+      example = {
+        "ssh-github" = {
+          source = ./secrets/niten/ssh-github.age;
+          target = ".ssh/id_github";
+          profiles = [ "default" "desktop" ];
+          mode = "0600";
+          method = "copy";
+        };
+      };
     };
 
     # Per-secret overrides

@@ -111,7 +111,14 @@ with lib;
       }));
       default = { };
       description = ''
-        Secrets to manage. Usually populated automatically from secrets/<user>/ directory.
+        Secrets to manage.
+
+        Every entry must be declared by hand. There is no scan of
+        <literal>secrets/&lt;user&gt;/</literal>, despite what LOCKET.md used to
+        say and what the <literal>locket</literal> CLI's output implies -- see
+        TODO.md. Until that exists, adding a secret with
+        <literal>locket add</literal> writes the ciphertext and metadata but
+        deploys nothing.
       '';
     };
 

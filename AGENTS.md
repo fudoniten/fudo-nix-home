@@ -74,7 +74,8 @@ NixOS path auto-loads `users/<username>.nix` (overridable via `config-user`).
 flake.nix          # inputs + outputs (nixosModules.default, mkModule.<user>)
 module.nix         # NixOS module: the fudo.home-manager.* option namespace
 modules/           # custom Home Manager modules (imported by every user)
-├── default.nix / modules.nix   # aggregators
+├── default.nix    # aggregator: modules needing no extra args (services, locket)
+├── modules.nix    # aggregator: default.nix + the ones needing inputs/settings
 ├── locket/        # profile-based secrets (default.nix + options.nix)
 ├── programs/      # doom-emacs, hyprland, quickshell, stumpwm, vr
 ├── services/      # supercollider
@@ -95,6 +96,12 @@ or more *profiles* (`default`, `desktop`, `server`, …), and a host decrypts on
 the profiles whose keys it holds. Decrypted secrets live in tmpfs and are cleaned
 up on logout/reboot. See `LOCKET.md` for the full model.
 
+**It does not deploy anything yet.** The CLI encrypts correctly and the module
+generates its units, but nothing reads `secrets/<user>/` into `locket.secrets`,
+so the decrypt script is generated empty. Nothing is configured either: no
+profile exists and no host sets `locket.enable`. See `TODO.md` before assuming a
+locket change has any effect.
+
 Working with it:
 - CLI lives in `bin/` (`./bin/locket …`). Structure is validated by
   `./bin/locket check` and by CI.
@@ -102,6 +109,10 @@ Working with it:
   `git config core.hooksPath .githooks`. It blocks committing private keys.
 - The Nix side is the `locket` HM module (`modules/locket/`); enable per user
   with `locket = { enable = true; profiles = [ … ]; }`.
+- Keep both aggregators in mind. `modules/default.nix` is the single list of
+  argument-free modules and `modules.nix` imports it; they used to be
+  independent, which is how locket sat unreachable on every NixOS host while
+  looking wired up.
 
 ## Desktop sessions: the per-host / per-user split
 
