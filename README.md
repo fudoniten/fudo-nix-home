@@ -18,8 +18,8 @@ Internal repository for managing [Home Manager](https://github.com/nix-community
 ├── flake.nix              # Main flake with inputs and outputs
 ├── module.nix             # NixOS module for system-wide integration
 ├── modules/               # Custom Home Manager modules
-│   ├── default.nix        # Aggregator (services + locket)
-│   ├── modules.nix        # Aggregator (services + programs + styling)
+│   ├── default.nix        # Aggregator: argument-free modules (services, locket)
+│   ├── modules.nix        # Aggregator: default.nix + programs + styling
 │   ├── locket/            # Profile-based secrets management
 │   │   ├── default.nix
 │   │   └── options.nix

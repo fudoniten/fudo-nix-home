@@ -470,6 +470,23 @@ in {
   imports = [ inputs.zen-browser.homeModules.beta ];
 
   config = {
+    # Secrets that belong to me rather than to a host: tokens, passwords, the
+    # occasional credentials file. Encrypted to profile keys, decrypted only
+    # while I am logged in, and gone with the tmpfs afterwards.
+    #
+    # `default` is the profile that follows me everywhere, work machines
+    # included -- which is the reason this lives here and not in nixos-config.
+    # A host that should see more adds to this list; a work machine that
+    # should see less overrides it, along with locket.identityKeyPath.
+    #
+    # Nothing is deployed until `locket profile-create default` has been run
+    # and the key placed in ~/.config/locket/keys/default.key. Until then this
+    # creates the key directory and two idle units.
+    locket = {
+      enable = true;
+      profiles = [ "default" ];
+    };
+
     # Doom Emacs configuration
     programs.doom-emacs = {
       enable = true;

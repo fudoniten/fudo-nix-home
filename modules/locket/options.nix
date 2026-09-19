@@ -12,13 +12,50 @@
 # in the keyDirectory. Decrypted secrets are stored in tmpfs and cleaned
 # up automatically on logout/reboot.
 
-{ lib, ... }:
+{ config, lib, ... }:
 
 with lib;
 
 {
   options.locket = {
     enable = mkEnableOption "Locket secrets management";
+
+    user = mkOption {
+      type = types.str;
+      default = config.home.username;
+      description = ''
+        Whose directory under <literal>secretsDirectory</literal> to read.
+
+        Defaults to the Home Manager username, which is right unless
+        <literal>config-user</literal> in the parent NixOS module points a user
+        at someone else's configuration -- in which case this is the one thing
+        that must not follow it.
+      '';
+    };
+
+    secretsDirectory = mkOption {
+      type = types.path;
+      default = ../../secrets;
+      description = ''
+        The repository's secrets directory: profile public keys in
+        <literal>profiles/</literal>, one directory of secrets per user.
+      '';
+    };
+
+    scanSecrets = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Read <literal>secretsDirectory/&lt;user&gt;/</literal> and populate
+        <option>locket.secrets</option> from the <literal>.age</literal> and
+        <literal>.json</literal> pairs that <literal>locket add</literal>
+        writes there.
+
+        Only secrets naming a profile this host holds are included, so a work
+        machine's closure does not carry personal ciphertext it could never
+        decrypt.
+      '';
+    };
 
     keyDirectory = mkOption {
       type = types.str;
@@ -111,7 +148,11 @@ with lib;
       }));
       default = { };
       description = ''
-        Secrets to manage. Usually populated automatically from secrets/<user>/ directory.
+        Extra secrets, declared by hand.
+
+        Usually empty: <option>scanSecrets</option> finds everything
+        <literal>locket add</literal> wrote. Anything named here is merged over
+        the scan, so it is also how to override one scanned entry wholesale.
       '';
     };
 
