@@ -1,10 +1,11 @@
 { inputs, userOpts, systemOpts, ... }@settings:
 
-{ config, lib, pkgs, ... }:
+{ ... }:
 
 {
   imports = [
-    ./services
+    # Argument-free modules (services, locket).
+    ./default.nix
     (import ./programs { inherit inputs; })
     (import ./styling.nix settings)
   ];

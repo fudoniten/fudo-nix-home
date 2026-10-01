@@ -1,155 +1,80 @@
 # TODO
 
-This document tracks unimplemented but recommended future work for the fudo-nix-home repository.
+Unimplemented work in this repository.
 
-## Locket Improvements
+## Locket
 
-### Phase 2: Proper Nix Package
+Working: `secrets/<user>/` is scanned into `locket.secrets`, entitlement is by
+profile, placements are recorded so cleanup is exact, and the decrypt re-runs
+on a switch as well as at login. `locket.enable` is on for `niten`.
 
-Convert locket from bash scripts with nix-shell shebangs to a proper Nix package.
+Nothing is deployed yet, because nothing has been created. That is a sequence
+of commands, not a code change:
 
-**Current State:**
-- Scripts use `#!/usr/bin/env nix-shell` with explicit dependencies
-- Works well but has ~1-2 second startup time on first run
-- Each script independently fetches dependencies
-
-**Proposed Enhancement:**
-Create `pkgs/locket/default.nix` that:
-- Packages all locket scripts together
-- Properly declares dependencies
-- Can be installed via `home.packages = [ pkgs.locket ];`
-- Provides faster startup times
-- Enables easier distribution
-
-**Benefits:**
-- Faster startup (no nix-shell overhead)
-- Single package to install
-- Better integration with NixOS/Home Manager
-- Can be published to nixpkgs if desired
-
-**Implementation Notes:**
-```nix
-# Example structure
-pkgs.locket = pkgs.stdenv.mkDerivation {
-  name = "locket";
-  src = ./bin;
-  buildInputs = [ age jq bash coreutils findutils gnugrep gnused openssh ];
-  installPhase = ''
-    mkdir -p $out/bin
-    cp locket* $out/bin/
-    # Patch shebangs and wrap with proper PATH
-  '';
-};
-```
-
-### Phase 3: System-Wide Remote Operations
-
-Add `locket-remote` commands that can modify secrets directly from GitHub.
-
-**Current State:**
-- Locket scripts work on locally cloned repositories
-- Requires manual clone, modify, commit, push workflow
-- No way to modify secrets from systems without the full repo
-
-**Proposed Enhancement:**
-Create system-wide scripts that:
-1. Clone the fudo-nix-home repo to `/tmp`
-2. Make secret modifications (add, edit, remove)
-3. Create a branch and push changes
-4. Create a PR via GitHub CLI for review
-5. Clean up temporary clone
-
-**Configuration:**
-```nix
-# In user profiles (niten.nix, jasper.nix, etc.)
-programs.locket-remote = {
-  enable = true;
-  repository = "git@github.com:fudoniten/fudo-nix-home.git";
-  # or: repository = builtins.getEnv "LOCKET_REPO";
-};
-```
-
-**Commands to Add:**
-- `locket-remote add <user> <name> [options]` - Add secret via GitHub
-- `locket-remote edit <user> <name>` - Edit secret via GitHub
-- `locket-remote remove <user> <name>` - Remove secret via GitHub
-- `locket-remote sync` - Pull latest secrets to local system
-
-**Benefits:**
-- Modify secrets from any system
-- Don't need full repo clone
-- Automatic PR creation for safety
-- Reviewable changes before merge
-
-**Security Considerations:**
-- Requires GitHub authentication (SSH keys or `gh` CLI)
-- Profile private keys still needed for decryption/editing
-- PR-based workflow maintains audit trail
-- Could support optional direct push for trusted systems
-
-**Implementation Architecture:**
-```
-┌─────────────────────────────────────────────────────┐
-│ User runs: locket-remote add niten my-secret        │
-│   → Clone repo to /tmp/locket-XXXXX/                │
-│   → Run local locket add with modifications          │
-│   → Create feature branch                            │
-│   → Push branch to GitHub                            │
-│   → Create PR via gh CLI                             │
-│   → Clean up /tmp/locket-XXXXX/                      │
-└─────────────────────────────────────────────────────┘
-```
-
-**Authentication Options:**
-1. **SSH Keys** (most secure, requires setup per host)
-2. **GitHub CLI** (`gh auth login` - cached credentials)
-3. **Environment Variables** (`GITHUB_TOKEN` - for automation)
-
-**Workflow Modes:**
-- `--pr` (default): Create PR for review
-- `--direct`: Push directly to default branch (trusted systems only)
-- `--draft`: Create draft PR
-
-**Example Usage:**
 ```bash
-# Add a secret from any system
-locket-remote add niten api-key \
-  --target ".config/myapp/key" \
-  --profiles default \
-  --file /path/to/key
-
-# Edit existing secret
-locket-remote edit niten ssh-github
-
-# Remove secret
-locket-remote remove niten old-token --force
-
-# Sync latest secrets to current system
-locket-remote sync
+git config core.hooksPath .githooks       # once per clone
+./bin/locket profile-create default       # save the printed private key!
+./bin/locket add niten <name> --target ".config/…" --profiles default
 ```
 
-**Related Configuration:**
-User profiles should set repository location:
-```nix
-# In niten.nix, jasper.nix, etc.
-home.sessionVariables = {
-  LOCKET_REPO = "git@github.com:fudoniten/fudo-nix-home.git";
-  # or alternative: LOCKET_REPO_URL for HTTPS
-};
+and on each host that should hold the profile:
+
+```bash
+./bin/locket-copy-keys <host> default
 ```
 
-## Other Future Work
+The profile set is the part that is awkward to change later, since it decides
+what every secret is encrypted to. `default` -- everything, everywhere,
+including work -- is enough to start; add `work`, `server` or per-host
+profiles when something actually needs to be excluded.
 
-### Home Manager Module Improvements
+### Open items
 
-*Add other unimplemented improvements here as they are identified.*
+- **No test coverage.** The scan, the entitlement filter and the placement
+  record are all untested. `nix flake check` only evaluates the modules. A
+  Home Manager VM test that creates a profile, adds a secret and checks it
+  lands (and is removed on cleanup) would be the first real test in this repo.
+- **Rotation changes the closure.** `source` is a `types.path`, so every
+  `.age` a host is entitled to is copied into the store. Rotating one secret
+  changes that host's closure and needs a deploy. Aegis solved the same
+  problem with `runtimePath`; whether it is worth solving here depends on how
+  many secrets there end up being.
+- **`locket rekey` is unverified.** It exists, and nothing has ever needed it,
+  since there are no profiles to rotate. Exercise it before relying on it.
+- **Disaster recovery is undocumented and unimplemented.** A profile's private
+  key is the only copy. Losing it loses every secret encrypted to it, with no
+  recovery path. At minimum, decide whether an escrow recipient (an offline
+  key added to every profile) is wanted -- that decision has to be made
+  *before* secrets exist, not after.
 
-### Build System Optimizations
+## Aegis overlap
 
-*Add build-related TODOs here.*
+Aegis has a user-secrets path of its own; it now works, and the two are
+complementary. Aegis is admin-mediated, host-keyed, available at boot, and
+reaches only Fudo hosts. Locket is user-keyed, available only while you are
+logged in, and reaches work and non-NixOS machines.
 
-### Documentation
+The rule, until something forces a better one:
 
-- [ ] Add video tutorial for locket setup
-- [ ] Create migration guide from agenix/sops-nix
-- [ ] Document disaster recovery procedures
+- A secret a **service** needs, or that must exist before you log in → aegis.
+- A secret **you** need, and that you want on a work machine too → locket.
+- Both systems can place a file in `$HOME`. If they ever name the same path,
+  locket wins, because it runs at login and aegis runs at boot. Don't rely on
+  that -- pick one owner per secret.
+
+Neither CLI knows about the other. A single front end (`fudo-secret add
+--scope fudo|global`) would remove most of the cost of having two, and is
+worth doing once both have been used in anger for a while.
+
+## Backlog
+
+- **Package the CLI.** `bin/locket*` uses `nix-shell` shebangs, ~1-2s on first
+  run. A `pkgs.locket` derivation would remove that and make the tools
+  installable via `home.packages`.
+- **`locket-remote`.** Clone the repo, edit a secret, push a branch, open a
+  PR, so secrets can be changed from a host without a full checkout.
+- **Documentation.** A migration guide from agenix/sops-nix.
+
+## Other future work
+
+*Add non-locket TODOs here as they are identified.*
