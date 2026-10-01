@@ -136,6 +136,11 @@ let
       color = "blue";
       id = 16;
     };
+    Jarvis = {
+      icon = "pet";
+      color = "white";
+      id = 17;
+    };
   };
 
   mkZenSearchEngine = template: alias: name: {
