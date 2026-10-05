@@ -37,8 +37,10 @@ From `flake.nix`:
   `home-manager.nixosModules.home-manager` plus `module.nix`. This exposes the
   `fudo.home-manager` option namespace for **NixOS system integration**.
 - `mkModule.<user>` (e.g. `mkModule.niten`) — a **standalone** Home Manager
-  module for use outside NixOS (macOS, non-NixOS Linux). It imports `./modules`
-  and the user's `users/<user>.nix`.
+  module for use outside NixOS (macOS, non-NixOS Linux). It mirrors what
+  `module.nix` wires up per user (Stylix, `modules/modules.nix`,
+  `home.stateVersion`) plus `modules/locket`, then the user's
+  `users/<user>.nix`. Keep the two in step when adding modules.
 
 So: on NixOS, hosts set `fudo.home-manager.users = [ … ]`; off NixOS, a personal
 flake calls `fudo-nix-home.mkModule.<user> { … }`.

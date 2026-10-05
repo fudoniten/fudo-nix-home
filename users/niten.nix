@@ -257,7 +257,6 @@ let
     git # Version control system
     gnupg # GNU Privacy Guard (encryption)
     lsof # List open files
-    pciutils # PCI utilities (lspci)
     tmux # Terminal multiplexer
     fzf # Fuzzy finder
     pwgen # Password generator
@@ -287,14 +286,11 @@ let
 
     # Media
     yt-dlp # Video downloader (youtube-dl fork)
-    pipewire # Audio/video routing
-    pipewire.jack # JACK compatibility
 
     # Security and privacy
     openssl # SSL/TLS toolkit
     openssl.out # OpenSSL outputs
     proton-pass-cli # Proton CLI UI
-    tor-browser # Anonymous web browser
 
     # Specialized tools
     kubo # IPFS implementation
@@ -308,7 +304,12 @@ let
     ];
 
   # Linux-specific packages (no GUI required)
-  linuxPackages = with pkgs; [ ];
+  linuxPackages = with pkgs; [
+    pipewire # Audio/video routing
+    pipewire.jack # JACK compatibility
+    pciutils # PCI utilities (lspci)
+    tor-browser # Anonymous web browser
+  ];
 
   # Linux GUI applications
   linuxGuiPackages = with pkgs; [
@@ -705,9 +706,15 @@ in {
         };
       };
 
-      zsh.profileExtra = ''
-        [[ -f $HOME/.profile_local ]] && . $HOME/.profile_local
-      '';
+      # zsh is the login shell macOS gives you (and changing it on a
+      # managed machine isn't always an option), so manage it there too --
+      # otherwise starship, direnv, fzf and the session variables never load.
+      zsh = {
+        enable = mkDefault (systemCfg.desktop.type == "darwin");
+        profileExtra = ''
+          [[ -f $HOME/.profile_local ]] && . $HOME/.profile_local
+        '';
+      };
     };
 
     xresources.properties = mkIf isX {
@@ -780,11 +787,11 @@ in {
 
       packages = commonPackages ++ (optionals isGui commonGuiPackages)
         ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages))
-        ++ (optionals isLinux linuxPackages) ++ (with pkgs; [
+        ++ (optionals isLinux (linuxPackages ++ (with pkgs; [
           graphite-cursors
           graphite-gtk-theme
           papirus-icon-theme
-        ]);
+        ])));
 
       file = {
         ".xprofile" = mkIf isX {

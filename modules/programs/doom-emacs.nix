@@ -62,7 +62,6 @@ let
       curl # HTTP client
       delta
       diffutils # Diff tools (for version control)
-      doas # Sudo alternative
       editorconfig-core-c # EditorConfig support
       fd # Fast file finder (used by Doom's fuzzy finder)
       findutils
@@ -91,8 +90,6 @@ let
       shellcheck
       shfmt
       sqlite # Database (used by org-roam and other packages)
-      supercollider # Audio synthesis for music composition
-      xclip # X11 clipboard integration
       zstd # Compression (for package caching)
     ] ++ (with pkgsUnstable; [ opencode aider-chat ]);
 
@@ -151,6 +148,9 @@ let
   defaultLinuxDeps = with pkgs;
     [
       sbcl # Steel Bank Common Lisp (for some Emacs packages)
+      doas # Sudo alternative
+      supercollider # Audio synthesis for music composition
+      xclip # X11 clipboard integration
     ];
 
   # Build emacs with packages using custom overlay
@@ -208,7 +208,7 @@ let
     basePackage = if cfg.package != null then
       cfg.package
     else if pkgs.stdenv.isDarwin then
-      pkgs.emacs29
+      pkgs.emacs
     else if cfg.desktopType == "none" then
       pkgs.emacs-nox
     else if cfg.desktopType == "wayland" then
@@ -410,9 +410,6 @@ in {
 
     # macOS-specific configuration
     (mkIf pkgs.stdenv.isDarwin {
-      home.packages = [ emacsPackage ] ++ defaultEmacsDeps
-        ++ cfg.extraDependencies ++ cfg.extraPackages;
-
       launchd = mkIf cfg.enableDaemon {
         enable = true;
         agents.emacs = {

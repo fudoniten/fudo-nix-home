@@ -82,15 +82,25 @@
     };
 
     mkModule.niten = { username, email, home-directory, stateVersion
-      , desktopType ? "none", hostname ? "", ... }: {
+      , desktopType ? "none", hostname ? "", ... }:
+      let
+        userOpts = { inherit username email home-directory; };
+        systemOpts = {
+          inherit stateVersion hostname;
+          desktop.type = desktopType;
+        };
+      in {
+        # Mirror what module.nix wires up on NixOS, so both paths load the
+        # same modules. It also sets home.stateVersion from the host;
+        # standalone there's nothing else to do it.
+        home.stateVersion = stateVersion;
         imports = [
-          ./modules
-          (import ./users/niten.nix inputs {
-            inherit username email home-directory;
-          } {
-            inherit stateVersion hostname;
-            desktop.type = desktopType;
+          inputs.stylix.homeModules.stylix
+          (import ./modules/modules.nix {
+            inherit inputs userOpts systemOpts;
           })
+          ./modules/locket
+          (import ./users/niten.nix inputs userOpts systemOpts)
         ];
       };
   };
