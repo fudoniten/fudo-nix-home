@@ -153,7 +153,11 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
   outputs = { nixpkgs, home-manager, fudo-nix-home, ... }:
   let
     system = "x86_64-linux";  # or "aarch64-darwin" for macOS
-    pkgs = nixpkgs.legacyPackages.${system};
+    # allowUnfree: user configs include unfree packages (claude-code, ...)
+    pkgs = import nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+    };
   in {
     homeConfigurations."niten" = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
@@ -175,12 +179,25 @@ echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
 **3. Activate:**
 
 ```bash
-# First time
-nix run home-manager/release-26.05 -- switch --flake .#niten
+# First time (-b backs up dotfiles Home Manager would otherwise refuse to
+# overwrite, e.g. an existing ~/.zshrc, as ~/.zshrc.backup)
+nix run home-manager/release-26.05 -- switch -b backup --flake .#niten
 
 # After that
 home-manager switch --flake .#niten
 ```
+
+**macOS notes:**
+
+- Use `system = "aarch64-darwin"` (Apple Silicon), `desktopType = "darwin"`
+  and `home-directory = "/Users/<you>"`. `username` must match `whoami`.
+- Home Manager takes over zsh there (macOS's default login shell), so open a
+  new terminal after the first switch.
+- Doom isn't synced automatically on macOS (that's a systemd service on
+  Linux). After the first switch, run `doom sync` once; the Emacs daemon is a
+  launchd agent, restart it with
+  `launchctl kickstart -k gui/$(id -u)/org.nix-community.home.emacs`.
+- Nothing here needs admin rights beyond installing Nix itself.
 
 ## Available Modules
 
@@ -488,9 +505,9 @@ GitHub Actions automatically runs tests on every push and pull request:
 - **Flake validation**: Ensures the flake structure is correct
 - **Static analysis**: Checks for Nix code quality issues with [statix](https://github.com/nerdypepper/statix)
 - **Dead code detection**: Finds unused code with [deadnix](https://github.com/astro/deadnix)
-- **Format checking**: Validates code formatting with [nixpkgs-fmt](https://github.com/nix-community/nixpkgs-fmt)
+- **Format checking**: Validates code formatting with [nixfmt](https://github.com/NixOS/nixfmt) (`nix fmt`)
 - **Module validation**: Verifies NixOS modules and mkModule function exports are correct
-- **Configuration tests**: Validates all user configuration files can be loaded
+- **Configuration tests**: Evaluates every user config through the NixOS module, and `mkModule.niten` standalone on Linux and aarch64-darwin (`tests/eval.nix`)
 - **Locket validation**: Checks secrets structure, prevents private key commits
 
 ### Local Testing
@@ -515,17 +532,21 @@ nix flake check
 nix run nixpkgs#statix -- check .
 
 # Find dead/unused code
-nix run nixpkgs#deadnix -- --fail .
+nix run nixpkgs#deadnix -- --fail --no-lambda-arg --no-lambda-pattern-names .
 
 # Check code formatting
-nix run nixpkgs#nixpkgs-fmt -- --check .
+nix fmt -- --ci
 
 # Auto-fix formatting issues
-nix run nixpkgs#nixpkgs-fmt .
+nix fmt
 
 # Validate module exports
 nix eval .#nixosModules.default
 nix eval .#mkModule.niten --apply 'x: builtins.isFunction x'
+
+# Evaluate every user config (both paths, incl. macOS)
+nix eval --impure --json --expr \
+  'import ./tests/eval.nix { flake = builtins.getFlake (toString ./.); }'
 
 # Check syntax of user configurations
 nix-instantiate --parse users/niten.nix

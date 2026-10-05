@@ -70,28 +70,56 @@
     };
   };
 
-  outputs = { home-manager, ... }@inputs: {
-    nixosModules = rec {
-      default = home-configuration;
-      home-configuration = {
-        imports = [
-          home-manager.nixosModules.home-manager
-          (import ./module.nix inputs)
-        ];
-      };
-    };
+  outputs =
+    { nixpkgs, home-manager, ... }@inputs:
+    {
+      # `nix fmt`: nixfmt (the official RFC 166 style) over the whole tree.
+      # `nix fmt -- --ci` checks without writing.
+      formatter = nixpkgs.lib.genAttrs [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ] (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
 
-    mkModule.niten = { username, email, home-directory, stateVersion
-      , desktopType ? "none", hostname ? "", ... }: {
-        imports = [
-          ./modules
-          (import ./users/niten.nix inputs {
-            inherit username email home-directory;
-          } {
+      nixosModules = rec {
+        default = home-configuration;
+        home-configuration = {
+          imports = [
+            home-manager.nixosModules.home-manager
+            (import ./module.nix inputs)
+          ];
+        };
+      };
+
+      mkModule.niten =
+        {
+          username,
+          email,
+          home-directory,
+          stateVersion,
+          desktopType ? "none",
+          hostname ? "",
+          ...
+        }:
+        let
+          userOpts = { inherit username email home-directory; };
+          systemOpts = {
             inherit stateVersion hostname;
             desktop.type = desktopType;
-          })
-        ];
-      };
-  };
+          };
+        in
+        {
+          # Mirror what module.nix wires up on NixOS, so both paths load the
+          # same modules. It also sets home.stateVersion from the host;
+          # standalone there's nothing else to do it.
+          home.stateVersion = stateVersion;
+          imports = [
+            inputs.stylix.homeModules.stylix
+            (import ./modules/modules.nix { inherit inputs userOpts systemOpts; })
+            ./modules/locket
+            (import ./users/niten.nix inputs userOpts systemOpts)
+          ];
+        };
+    };
 }

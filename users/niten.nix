@@ -1,21 +1,35 @@
 inputs:
 
-{ username, email, home-directory, ... }:
+{
+  username,
+  email,
+  home-directory,
+  ...
+}:
 
 systemCfg:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
   # Validate required arguments
-  _ = assert assertMsg (username != null && username != "")
-    "username is required";
-    assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
-      "systemCfg.desktop.type is required";
-    assert assertMsg
-      (builtins.elem systemCfg.desktop.type [ "x" "wayland" "darwin" "none" ])
-      "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
+  checkArgs =
+    assert assertMsg (username != null && username != "") "username is required";
+    assert assertMsg (
+      systemCfg ? desktop && systemCfg.desktop ? type
+    ) "systemCfg.desktop.type is required";
+    assert assertMsg (builtins.elem systemCfg.desktop.type [
+      "x"
+      "wayland"
+      "darwin"
+      "none"
+    ]) "systemCfg.desktop.type must be one of: x, wayland, darwin, none";
     null;
 
   inherit (pkgs.stdenv) isLinux isDarwin;
@@ -23,8 +37,7 @@ let
   mkExt = shortId: guid: {
     name = guid;
     value = {
-      install_url =
-        "https://addons.mozilla.org/en-US/firefox/downloads/latest/${shortId}/latest.xpi";
+      install_url = "https://addons.mozilla.org/en-US/firefox/downloads/latest/${shortId}/latest.xpi";
       installation_mode = "normal_installed";
     };
   };
@@ -36,8 +49,7 @@ let
     # Proton Pass
     (mkExt "proton-pass" "78272b6fa58f4a1abaac99321d503a20@proton.me")
     # Bitwarden
-    (mkExt "bitwarden-password-manager"
-      "{446900e4-71c2-419f-a6a7-df9c091e268b}")
+    (mkExt "bitwarden-password-manager" "{446900e4-71c2-419f-a6a7-df9c091e268b}")
     # Karakeep self-hosted smart bookmarks
     (mkExt "karakeep" "addon@karakeep.app")
     # UBlock Origin
@@ -138,46 +150,50 @@ let
     };
     Jarvis = {
       icon = "pet";
-      color = "white";
+      color = "toolbar"; # neutral; Zen has no "white"
       id = 17;
     };
   };
 
   mkZenSearchEngine = template: alias: name: {
     inherit name;
-    urls = [{ inherit template; }];
+    urls = [ { inherit template; } ];
     definedAliases = [ alias ];
   };
 
   zenSearchEngines = {
     nixpkgs-packages =
-      mkZenSearchEngine "https://search.nixos.org/packages?query={searchTerms}"
-      "@np" "nixpkgs packages";
+      mkZenSearchEngine "https://search.nixos.org/packages?query={searchTerms}" "@np"
+        "nixpkgs packages";
     nixos-options =
-      mkZenSearchEngine "https://search.nixos.org/options?query={searchTerms}"
-      "@no" "NixOS options";
-    nixos-wiki = mkZenSearchEngine
-      "https://wiki.nixos.org/w/index.php?search={searchTerms}" "@nw"
-      "NixOS Wiki";
-    amazon = mkZenSearchEngine "https://www.amazon.com/s?k={searchTerms}" "@a"
-      "Amazon";
-    wikipedia-en = mkZenSearchEngine
-      "https://en.wikipedia.org/w/index.php?search={searchTerms}" "@w"
-      "Wikipedia";
-    wiktionary-en = mkZenSearchEngine
-      "https://en.wiktionary.org/w/index.php?search={searchTerms}" "@wik"
-      "Wiktionary";
-    searxng = mkZenSearchEngine
-      "https://search.kube.sea.fudo.link/search?q={searchTerms}" "@s" "SearXNG";
+      mkZenSearchEngine "https://search.nixos.org/options?query={searchTerms}" "@no"
+        "NixOS options";
+    nixos-wiki =
+      mkZenSearchEngine "https://wiki.nixos.org/w/index.php?search={searchTerms}" "@nw"
+        "NixOS Wiki";
+    amazon = mkZenSearchEngine "https://www.amazon.com/s?k={searchTerms}" "@a" "Amazon";
+    wikipedia-en =
+      mkZenSearchEngine "https://en.wikipedia.org/w/index.php?search={searchTerms}" "@w"
+        "Wikipedia";
+    wiktionary-en =
+      mkZenSearchEngine "https://en.wiktionary.org/w/index.php?search={searchTerms}" "@wik"
+        "Wiktionary";
+    searxng =
+      mkZenSearchEngine "https://search.kube.sea.fudo.link/search?q={searchTerms}" "@s"
+        "SearXNG";
     # NB: the old policies.json config had this one pointed at Yahoo, which
     # looks like a copy/paste bug--fixed to actually search YouTube.
-    youtube = mkZenSearchEngine
-      "https://www.youtube.com/results?search_query={searchTerms}" "@y"
-      "YouTube";
+    youtube =
+      mkZenSearchEngine "https://www.youtube.com/results?search_query={searchTerms}" "@y"
+        "YouTube";
   };
 
   # Access unstable packages for bleeding-edge tools
   pkgsUnstable = inputs.nixpkgsUnstable.legacyPackages."${pkgs.system}";
+
+  # Taken from the input directly rather than relying on the fudo-pkgs
+  # overlay, which NixOS hosts apply but standalone Home Manager doesn't.
+  fudoPkgs = inputs.fudo-pkgs.packages."${pkgs.system}";
 
   sessionEnvVariables = {
     ALTERNATE_EDITOR = "";
@@ -200,7 +216,10 @@ let
   # machine I have no intention of changing yet.
   hyprlandHosts = [ "system7" ];
 
-  useHyprland = isGui && isLinux && systemCfg.desktop.type == "wayland"
+  useHyprland =
+    isGui
+    && isLinux
+    && systemCfg.desktop.type == "wayland"
     && elem (systemCfg.hostname or "") hyprlandHosts;
 
   # Common packages available on all systems (both GUI and headless)
@@ -234,7 +253,7 @@ let
 
     # Development tools - Nix ecosystem
     nil # Nix language server for IDE integration
-    nixfmt-classic # Nix code formatter
+    nixfmt # Nix code formatter
     nix-index # Search for packages by executable name
     nix-init # Attempt to generate full Nix package from URL
     nix-prefetch-git # Fetch git repositories for Nix
@@ -257,7 +276,6 @@ let
     git # Version control system
     gnupg # GNU Privacy Guard (encryption)
     lsof # List open files
-    pciutils # PCI utilities (lspci)
     tmux # Terminal multiplexer
     fzf # Fuzzy finder
     pwgen # Password generator
@@ -287,14 +305,11 @@ let
 
     # Media
     yt-dlp # Video downloader (youtube-dl fork)
-    pipewire # Audio/video routing
-    pipewire.jack # JACK compatibility
 
     # Security and privacy
     openssl # SSL/TLS toolkit
     openssl.out # OpenSSL outputs
     proton-pass-cli # Proton CLI UI
-    tor-browser # Anonymous web browser
 
     # Specialized tools
     kubo # IPFS implementation
@@ -302,13 +317,17 @@ let
   ];
 
   # GUI packages for all desktop environments
-  commonGuiPackages = with pkgs;
-    [
-      spotify # Music streaming service
-    ];
+  commonGuiPackages = with pkgs; [
+    spotify # Music streaming service
+  ];
 
   # Linux-specific packages (no GUI required)
-  linuxPackages = with pkgs; [ ];
+  linuxPackages = with pkgs; [
+    pipewire # Audio/video routing
+    pipewire.jack # JACK compatibility
+    pciutils # PCI utilities (lspci)
+    tor-browser # Anonymous web browser
+  ];
 
   # Linux GUI applications
   linuxGuiPackages = with pkgs; [
@@ -367,7 +386,7 @@ let
     prismlauncher # Minecraft launcher
     gogdl # GOG downloader
     mcpelauncher-client # Minecraft launcher
-    waylandcraft
+    fudoPkgs.waylandcraft # Native Wayland for Minecraft
 
     gnome-mines # Minesweeper
     gnome-mahjongg # Mahjong solitaire
@@ -387,91 +406,95 @@ let
   ];
 
   # Font packages for Linux GUI systems
-  fontPackages = optionals isLinux ((with pkgs; [
-    cantarell-fonts # GNOME default font
-    dejavu_fonts # High-quality general-purpose fonts
-    fira-code # Monospace font with programming ligatures
-    fira-code-symbols # Additional symbols for Fira Code
-    liberation_ttf # Metric-compatible with Arial/Times New Roman
-    proggyfonts # Small bitmap programming fonts
-    terminus_font # Monospace bitmap font
-    ubuntu-classic # Ubuntu's font family
-    ultimate-oldschool-pc-font-pack # Retro computer fonts
-    unifont # Unicode bitmap font
-  ]) ++ (with pkgs.nerd-fonts; [
-    pkgs.nerd-fonts."_0xproto"
-    pkgs.nerd-fonts."_3270"
-    adwaita-mono
-    agave
-    anonymice
-    arimo
-    atkynson-mono
-    aurulent-sans-mono
-    bigblue-terminal
-    bitstream-vera-sans-mono
-    blex-mono
-    caskaydia-cove
-    caskaydia-mono
-    code-new-roman
-    comic-shanns-mono
-    commit-mono
-    cousine
-    d2coding
-    daddy-time-mono
-    dejavu-sans-mono
-    departure-mono
-    droid-sans-mono
-    envy-code-r
-    fantasque-sans-mono
-    fira-code
-    fira-mono
-    geist-mono
-    go-mono
-    gohufont
-    hack
-    hasklug
-    heavy-data
-    hurmit
-    im-writing
-    inconsolata
-    inconsolata-go
-    inconsolata-lgc
-    intone-mono
-    iosevka
-    iosevka-term
-    iosevka-term-slab
-    jetbrains-mono
-    lekton
-    liberation
-    lilex
-    martian-mono
-    meslo-lg
-    monaspace
-    monofur
-    monoid
-    mononoki
-    pkgs.nerd-fonts."m+"
-    noto
-    open-dyslexic
-    overpass
-    profont
-    proggy-clean-tt
-    recursive-mono
-    roboto-mono
-    shure-tech-mono
-    sauce-code-pro
-    space-mono
-    symbols-only
-    terminess-ttf
-    tinos
-    ubuntu
-    ubuntu-mono
-    ubuntu-sans
-    victor-mono
-    zed-mono
-  ]));
+  fontPackages = optionals isLinux (
+    (with pkgs; [
+      cantarell-fonts # GNOME default font
+      dejavu_fonts # High-quality general-purpose fonts
+      fira-code # Monospace font with programming ligatures
+      fira-code-symbols # Additional symbols for Fira Code
+      liberation_ttf # Metric-compatible with Arial/Times New Roman
+      proggyfonts # Small bitmap programming fonts
+      terminus_font # Monospace bitmap font
+      ubuntu-classic # Ubuntu's font family
+      ultimate-oldschool-pc-font-pack # Retro computer fonts
+      unifont # Unicode bitmap font
+    ])
+    ++ (with pkgs.nerd-fonts; [
+      pkgs.nerd-fonts."_0xproto"
+      pkgs.nerd-fonts."_3270"
+      adwaita-mono
+      agave
+      anonymice
+      arimo
+      atkynson-mono
+      aurulent-sans-mono
+      bigblue-terminal
+      bitstream-vera-sans-mono
+      blex-mono
+      caskaydia-cove
+      caskaydia-mono
+      code-new-roman
+      comic-shanns-mono
+      commit-mono
+      cousine
+      d2coding
+      daddy-time-mono
+      dejavu-sans-mono
+      departure-mono
+      droid-sans-mono
+      envy-code-r
+      fantasque-sans-mono
+      fira-code
+      fira-mono
+      geist-mono
+      go-mono
+      gohufont
+      hack
+      hasklug
+      heavy-data
+      hurmit
+      im-writing
+      inconsolata
+      inconsolata-go
+      inconsolata-lgc
+      intone-mono
+      iosevka
+      iosevka-term
+      iosevka-term-slab
+      jetbrains-mono
+      lekton
+      liberation
+      lilex
+      martian-mono
+      meslo-lg
+      monaspace
+      monofur
+      monoid
+      mononoki
+      pkgs.nerd-fonts."m+"
+      noto
+      open-dyslexic
+      overpass
+      profont
+      proggy-clean-tt
+      recursive-mono
+      roboto-mono
+      shure-tech-mono
+      sauce-code-pro
+      space-mono
+      symbols-only
+      terminess-ttf
+      tinos
+      ubuntu
+      ubuntu-mono
+      ubuntu-sans
+      victor-mono
+      zed-mono
+    ])
+  );
 
-in {
+in
+builtins.seq checkArgs {
   imports = [ inputs.zen-browser.homeModules.beta ];
 
   config = {
@@ -589,11 +612,14 @@ in {
         settings = {
           user = {
             name = username;
-            email = email;
+            inherit email;
           };
           pull.rebase = true;
         };
-        ignores = [ "*~" ".DS_Store" ];
+        ignores = [
+          "*~"
+          ".DS_Store"
+        ];
       };
 
       gh = {
@@ -620,28 +646,34 @@ in {
           enable_audio_bell = false;
           scrollback_lines = 10000;
         };
-        keybindings = let lead = "ctrl+super";
-        in {
-          "ctrl+shift+plus" = "no_op";
-          "ctrl+shift+minus" = "no_op";
-          "ctrl+shift+backspace" = "no_op";
+        keybindings =
+          let
+            lead = "ctrl+super";
+          in
+          {
+            "ctrl+shift+plus" = "no_op";
+            "ctrl+shift+minus" = "no_op";
+            "ctrl+shift+backspace" = "no_op";
 
-          "${lead}+plus" = "change_font_size all +2.0";
-          "${lead}+minus" = "change_font_size all -2.0";
-          "${lead}+backspace" = "change_font_size all 0";
+            "${lead}+plus" = "change_font_size all +2.0";
+            "${lead}+minus" = "change_font_size all -2.0";
+            "${lead}+backspace" = "change_font_size all 0";
 
-          "${lead}+left" = "previous_tab";
-          "${lead}+right" = "next_tab";
-          "${lead}+t" = "new_tab";
-          "${lead}+alt+t" = "set_tab_title";
-          "${lead}+x" = "detach_tab";
-        };
+            "${lead}+left" = "previous_tab";
+            "${lead}+right" = "next_tab";
+            "${lead}+t" = "new_tab";
+            "${lead}+alt+t" = "set_tab_title";
+            "${lead}+x" = "detach_tab";
+          };
       };
 
       firefox = mkIf isLinux {
         enable = systemCfg.desktop.type != "none";
-        package =
-          (pkgs.firefox.override { cfg = { enableGnomeExtensions = true; }; });
+        package = pkgs.firefox.override {
+          cfg = {
+            enableGnomeExtensions = true;
+          };
+        };
       };
 
       # NB: containers, workspaces, pins, and keyboard shortcuts below are
@@ -664,20 +696,23 @@ in {
 
           ExtensionSettings = builtins.listToAttrs zenExtensions;
 
-          Preferences = mapAttrs (_: value: {
-            Value = value;
-            Status = "locked";
-          }) {
-            "browser.urlbar.suggest.quicksuggest.sponsored" = false;
-            "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
-            "browser.urlbar.suggest.trending" = false;
-            "browser.urlbar.suggest.yelp" = false;
-            "browser.urlbar.quicksuggest.enabled" = false;
-            "browser.ml.chat.enabled" = false;
-            # Firefox Containers--Zen's native container UI depends on this.
-            "privacy.userContext.enabled" = true;
-            "privacy.userContext.ui.enabled" = true;
-          };
+          Preferences =
+            mapAttrs
+              (_: value: {
+                Value = value;
+                Status = "locked";
+              })
+              {
+                "browser.urlbar.suggest.quicksuggest.sponsored" = false;
+                "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
+                "browser.urlbar.suggest.trending" = false;
+                "browser.urlbar.suggest.yelp" = false;
+                "browser.urlbar.quicksuggest.enabled" = false;
+                "browser.ml.chat.enabled" = false;
+                # Firefox Containers--Zen's native container UI depends on this.
+                "privacy.userContext.enabled" = true;
+                "privacy.userContext.ui.enabled" = true;
+              };
         };
 
         profiles.default = {
@@ -705,9 +740,15 @@ in {
         };
       };
 
-      zsh.profileExtra = ''
-        [[ -f $HOME/.profile_local ]] && . $HOME/.profile_local
-      '';
+      # zsh is the login shell macOS gives you (and changing it on a
+      # managed machine isn't always an option), so manage it there too --
+      # otherwise starship, direnv, fzf and the session variables never load.
+      zsh = {
+        enable = mkDefault (systemCfg.desktop.type == "darwin");
+        profileExtra = ''
+          [[ -f $HOME/.profile_local ]] && . $HOME/.profile_local
+        '';
+      };
     };
 
     xresources.properties = mkIf isX {
@@ -764,7 +805,10 @@ in {
       # SSH agent component disabled - using dedicated SSH agent instead
       gnome-keyring = {
         enable = isGui;
-        components = mkIf isGui [ "pkcs11" "secrets" ];
+        components = mkIf isGui [
+          "pkcs11"
+          "secrets"
+        ];
       };
 
       # Syncthing continuous file synchronization
@@ -778,13 +822,27 @@ in {
       inherit username;
       homeDirectory = home-directory;
 
-      packages = commonPackages ++ (optionals isGui commonGuiPackages)
+      packages =
+        commonPackages
+        ++ (optionals isGui commonGuiPackages)
         ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages))
-        ++ (optionals isLinux linuxPackages) ++ (with pkgs; [
-          graphite-cursors
-          graphite-gtk-theme
-          papirus-icon-theme
-        ]);
+        # The full fontPackages set is Linux-only; on macOS just the fonts the
+        # prompt and Doom need.
+        ++ (optionals isDarwin (
+          with pkgs.nerd-fonts;
+          [
+            iosevka
+            symbols-only
+          ]
+        ))
+        ++ (optionals isLinux (
+          linuxPackages
+          ++ (with pkgs; [
+            graphite-cursors
+            graphite-gtk-theme
+            papirus-icon-theme
+          ])
+        ));
 
       file = {
         ".xprofile" = mkIf isX {
@@ -802,22 +860,25 @@ in {
         };
       };
 
-      sessionVariables = sessionEnvVariables // {
-        GTK_THEME = "Graphite-Dark-Rimless";
-      } // (optionalAttrs isLinux {
-        # Override GNOME Keyring's SSH_AUTH_SOCK to use our SSH agent
-        SSH_AUTH_SOCK = "$XDG_RUNTIME_DIR/ssh-agent";
-        # Disable GNOME Keyring's SSH agent component
-        # This prevents COSMIC, GNOME, and other DEs from starting keyring's SSH agent
-        GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
-      });
+      sessionVariables =
+        sessionEnvVariables
+        // {
+          GTK_THEME = "Graphite-Dark-Rimless";
+        }
+        // (optionalAttrs isLinux {
+          # Override GNOME Keyring's SSH_AUTH_SOCK to use our SSH agent
+          SSH_AUTH_SOCK = "$XDG_RUNTIME_DIR/ssh-agent";
+          # Disable GNOME Keyring's SSH agent component
+          # This prevents COSMIC, GNOME, and other DEs from starting keyring's SSH agent
+          GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
+        });
     };
 
     systemd.user = mkIf isLinux {
       sessionVariables = sessionEnvVariables // {
         # Override GNOME Keyring's SSH_AUTH_SOCK to use our SSH agent
         SSH_AUTH_SOCK = "%t/ssh-agent";
-        # Disable GNOME Keyring's SSH agent component  
+        # Disable GNOME Keyring's SSH agent component
         GSM_SKIP_SSH_AGENT_WORKAROUND = "1";
       };
 
@@ -843,8 +904,7 @@ in {
               ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd SSH_AUTH_SOCK; \
             fi'
           '';
-          ExecStop =
-            "${pkgs.systemd}/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
+          ExecStop = "${pkgs.systemd}/bin/systemctl --user unset-environment SSH_AUTH_SOCK";
         };
 
         Install = {

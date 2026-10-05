@@ -1,22 +1,32 @@
 inputs:
 
-{ username, email, home-directory, ... }:
+{
+  username,
+  email,
+  home-directory,
+  ...
+}:
 
 systemCfg:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
   # Validate required arguments
-  _ = assert assertMsg (username != null && username != "")
-    "username is required";
+  checkArgs =
+    assert assertMsg (username != null && username != "") "username is required";
     assert assertMsg (email != null && email != "") "email is required";
-    assert assertMsg (home-directory != null && home-directory != "")
-      "home-directory is required";
+    assert assertMsg (home-directory != null && home-directory != "") "home-directory is required";
     null;
 
-in {
+in
+builtins.seq checkArgs {
   config = {
     home = {
       inherit username;
@@ -83,6 +93,8 @@ in {
 
     services.ssh-agent.enable = true;
 
-    programs = { bash.enable = true; };
+    programs = {
+      bash.enable = true;
+    };
   };
 }

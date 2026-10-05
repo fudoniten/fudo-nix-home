@@ -38,31 +38,17 @@ run_test "Flake structure validation" \
     nix flake check --show-trace || true
 
 # Test 2: Static analysis
-echo -e "${YELLOW}▶${NC} Running: Static analysis (statix)"
-if nix run nixpkgs#statix -- check .; then
-    echo -e "${GREEN}✓${NC} Static analysis passed (no issues found)"
-else
-    echo -e "${YELLOW}⚠${NC} Static analysis found suggestions (not blocking)"
-fi
-echo ""
+run_test "Static analysis (statix)" \
+    nix run nixpkgs#statix -- check . || true
 
-# Test 3: Dead code detection
-echo -e "${YELLOW}▶${NC} Running: Dead code detection (deadnix)"
-if nix run nixpkgs#deadnix -- --fail .; then
-    echo -e "${GREEN}✓${NC} No dead code found"
-else
-    echo -e "${YELLOW}⚠${NC} Dead code detected (not blocking)"
-fi
-echo ""
+# Test 3: Dead code detection. Unused function arguments are allowed: the
+# curried user-file convention passes every file the same arguments.
+run_test "Dead code detection (deadnix)" \
+    nix run nixpkgs#deadnix -- --fail --no-lambda-arg --no-lambda-pattern-names . || true
 
 # Test 4: Format checking
-echo -e "${YELLOW}▶${NC} Running: Format check (nixpkgs-fmt)"
-if nix run nixpkgs#nixpkgs-fmt -- --check .; then
-    echo -e "${GREEN}✓${NC} Code formatting is correct"
-else
-    echo -e "${YELLOW}⚠${NC} Formatting issues found (run 'nix run nixpkgs#nixpkgs-fmt .' to fix)"
-fi
-echo ""
+run_test "Format check (nixfmt; 'nix fmt' to fix)" \
+    nix fmt -- --ci || true
 
 # Test 5: Module validation
 run_test "NixOS module structure (default)" \
@@ -78,10 +64,16 @@ run_test "mkModule.niten function exists" \
 run_test "Flake outputs validation" \
     nix flake show --show-trace || true
 
-# Test 7: User configuration syntax check
+# Test 7: Evaluate every user config through both consumption paths,
+# including standalone on aarch64-darwin (evaluation only, no builds)
+run_test "User configurations evaluate" \
+    nix eval --impure --json --expr \
+    'import ./tests/eval.nix { flake = builtins.getFlake (toString ./.); }' || true
+
+# Test 8: User configuration syntax check
 # Just verify the Nix files are syntactically valid
 echo -e "${YELLOW}▶${NC} Running: User configuration syntax checks"
-USERS=(niten ken jasper xiaoxuan root reaper)
+USERS=(hermes jasper ken niten openclaw reaper root xiaoxuan)
 for user in "${USERS[@]}"; do
     if nix-instantiate --parse "users/${user}.nix" > /dev/null 2>&1; then
         echo -e "${GREEN}✓${NC} users/${user}.nix syntax is valid"
@@ -92,7 +84,7 @@ for user in "${USERS[@]}"; do
 done
 echo ""
 
-# Test 8: Custom modules syntax check
+# Test 9: Custom modules syntax check
 echo -e "${YELLOW}▶${NC} Running: Custom modules syntax checks"
 for module in modules/programs/*.nix modules/services/*.nix modules/default.nix; do
     if [ -f "$module" ]; then

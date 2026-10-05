@@ -20,12 +20,19 @@
 #   SUPERCOLLIDER_HOST - The listen address
 #   SUPERCOLLIDER_PORT - The server port
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.services.supercollider;
+let
+  cfg = config.services.supercollider;
 
-in {
+in
+{
   options.services.supercollider = with types; {
     enable = mkEnableOption "Enable SuperCollider audio synthesis server.";
 
@@ -36,8 +43,7 @@ in {
 
     listen-address = mkOption {
       type = str;
-      description =
-        "IP address on which to listen for connections. 0.0.0.0 for all addresses.";
+      description = "IP address on which to listen for connections. 0.0.0.0 for all addresses.";
       default = "127.0.0.1";
     };
 
@@ -66,15 +72,17 @@ in {
             "-B ${cfg.listen-address}"
             "-m ${toString cfg.memory}"
           ];
-          ExecStartPre = let
-            pre-script = pkgs.writeShellScript "supercollider-prep.sh" ''
-              SYNTHDIR=$HOME/.local/share/SuperCollider/synthdefs
-              if [[ ! -d $SYNTHDIR ]]; then
-                ${pkgs.coreutils}/bin/mkdir -p $SYNTHDIR
-                ${pkgs.coreutils}/bin/chown $USER $SYNTHDIR
-              fi
-            '';
-          in "${pre-script}";
+          ExecStartPre =
+            let
+              pre-script = pkgs.writeShellScript "supercollider-prep.sh" ''
+                SYNTHDIR=$HOME/.local/share/SuperCollider/synthdefs
+                if [[ ! -d $SYNTHDIR ]]; then
+                  ${pkgs.coreutils}/bin/mkdir -p $SYNTHDIR
+                  ${pkgs.coreutils}/bin/chown $USER $SYNTHDIR
+                fi
+              '';
+            in
+            "${pre-script}";
           Restart = "on-failure";
         };
       };
