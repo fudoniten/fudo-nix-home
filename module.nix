@@ -46,36 +46,33 @@ let
   getConfigUser = { username, config-user, ... }:
     if isNull config-user then username else config-user;
 
-  versionSetModule = usernames: stateVersion:
-    { ... }: {
-      config = mkIf cfg.enable {
-        home-manager.users =
-          genAttrs usernames (username: { home = { inherit stateVersion; }; });
-      };
+  versionSetModule = usernames: stateVersion: _: {
+    config = mkIf cfg.enable {
+      home-manager.users =
+        genAttrs usernames (username: { home = { inherit stateVersion; }; });
     };
+  };
 
-  hmModulesModule = usernames:
-    { ... }: {
-      config = mkIf cfg.enable {
-        home-manager.users = listToAttrs (map ({ username, ... }@userOpts:
-          nameValuePair username {
-            imports = [
-              (import ./modules/modules.nix {
-                inherit inputs userOpts;
-                systemOpts = config.fudo.home-manager.system;
-              })
-            ];
-          }) existingUsers);
-      };
+  hmModulesModule = usernames: _: {
+    config = mkIf cfg.enable {
+      home-manager.users = listToAttrs (map ({ username, ... }@userOpts:
+        nameValuePair username {
+          imports = [
+            (import ./modules/modules.nix {
+              inherit inputs userOpts;
+              systemOpts = config.fudo.home-manager.system;
+            })
+          ];
+        }) existingUsers);
     };
+  };
 
-  commonModule = usernames:
-    { ... }: {
-      config = mkIf cfg.enable {
-        home-manager.users = genAttrs usernames
-          (username: { imports = [ stylix.homeModules.stylix ]; });
-      };
+  commonModule = usernames: _: {
+    config = mkIf cfg.enable {
+      home-manager.users = genAttrs usernames
+        (username: { imports = [ stylix.homeModules.stylix ]; });
     };
+  };
 
   homeFileExists = userOpts: pathExists ./users/${getConfigUser userOpts}.nix;
 
@@ -116,7 +113,7 @@ in {
     };
   };
 
-  imports = let usernames = (map (opts: opts.username) existingUsers);
+  imports = let usernames = map (opts: opts.username) existingUsers;
   in [
     (versionSetModule usernames cfg.system.stateVersion)
     (hmModulesModule usernames)

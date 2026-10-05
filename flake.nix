@@ -70,7 +70,16 @@
     };
   };
 
-  outputs = { home-manager, ... }@inputs: {
+  outputs = { nixpkgs, home-manager, ... }@inputs: {
+    # `nix fmt` -- the repo's house style. nixfmt-classic is gone from
+    # nixpkgs-unstable, so it has to come from the pinned release.
+    formatter = nixpkgs.lib.genAttrs [
+      "x86_64-linux"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ] (system: nixpkgs.legacyPackages.${system}.nixfmt-classic);
+
     nixosModules = rec {
       default = home-configuration;
       home-configuration = {
@@ -96,9 +105,7 @@
         home.stateVersion = stateVersion;
         imports = [
           inputs.stylix.homeModules.stylix
-          (import ./modules/modules.nix {
-            inherit inputs userOpts systemOpts;
-          })
+          (import ./modules/modules.nix { inherit inputs userOpts systemOpts; })
           ./modules/locket
           (import ./users/niten.nix inputs userOpts systemOpts)
         ];

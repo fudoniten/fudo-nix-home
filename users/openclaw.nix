@@ -9,14 +9,14 @@ systemCfg:
 with lib;
 let
   # Validate required arguments
-  _ = assert assertMsg (username != null && username != "")
+  checkArgs = assert assertMsg (username != null && username != "")
     "username is required";
     assert assertMsg (email != null && email != "") "email is required";
     assert assertMsg (home-directory != null && home-directory != "")
       "home-directory is required";
     null;
 
-in {
+in builtins.seq checkArgs {
   config = {
     home = {
       inherit username;

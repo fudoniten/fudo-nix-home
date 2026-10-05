@@ -87,6 +87,7 @@ secrets/           # Locket-encrypted secrets + profiles/ public keys
 docs/              # WM cheatsheets (hyprland, stumpwm) + quickshell.md
 .githooks/         # pre-commit hook (prevents committing private keys)
 run-tests.sh       # local test runner (mirrors CI)
+tests/eval.nix     # evaluates every user config, both paths, incl. darwin
 LOCKET.md          # Locket documentation
 ```
 
@@ -152,17 +153,21 @@ Individual checks:
 ```bash
 nix flake check
 nix run nixpkgs#statix -- check .
-nix run nixpkgs#deadnix -- --fail .
-nix run nixpkgs#nixpkgs-fmt -- --check .     # add without --check to auto-fix
+nix run nixpkgs#deadnix -- --fail --no-lambda-arg --no-lambda-pattern-names .
+nix fmt -- --check .                          # nixfmt-classic; `nix fmt .` to fix
 nix eval .#nixosModules.default
 nix eval .#mkModule.<user> --apply 'x: builtins.isFunction x'
+nix eval --impure --json --expr \
+  'import ./tests/eval.nix { flake = builtins.getFlake (toString ./.); }'
 nix-instantiate --parse users/<user>.nix
 ./bin/locket check
 ```
 
 GitHub Actions runs flake validation, statix, deadnix, format checking, module
-+ `mkModule` export validation, user-config loading, and Locket structure
-validation on every push/PR. Match those locally to avoid round-trips.
++ `mkModule` export validation, and `tests/eval.nix` on every push/PR, all
+blocking. `tests/eval.nix` evaluates every user through the NixOS module and
+`mkModule.niten` standalone on Linux and aarch64-darwin; extend it when adding
+a user or an `mkModule` export. Match those locally to avoid round-trips.
 
 ## Branch & release convention
 

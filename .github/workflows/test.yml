@@ -24,16 +24,14 @@ jobs:
 
       - name: Static analysis with statix
         run: nix run nixpkgs#statix -- check .
-        continue-on-error: true  # Don't fail build on statix warnings initially
 
+      # Unused function arguments are allowed: the curried user-file
+      # convention (see AGENTS.md) passes every file the same arguments.
       - name: Check for dead code with deadnix
-        run: nix run nixpkgs#deadnix -- --fail .
-        continue-on-error: true  # Don't fail build on dead code initially
+        run: nix run nixpkgs#deadnix -- --fail --no-lambda-arg --no-lambda-pattern-names .
 
-      - name: Check formatting with nixpkgs-fmt
-        run: |
-          nix run nixpkgs#nixpkgs-fmt -- --check .
-        continue-on-error: true  # Don't fail build on formatting issues initially
+      - name: Check formatting with nixfmt-classic
+        run: nix fmt -- --check .
 
   module-validation:
     runs-on: ubuntu-latest
@@ -65,10 +63,6 @@ jobs:
 
   test-configurations:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        user: [niten, ken, jasper, xiaoxuan, root, reaper]
-      fail-fast: false  # Continue testing other users even if one fails
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -79,41 +73,9 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
-      - name: Test user configuration can be imported
+      # Every user through the NixOS module, plus standalone mkModule.niten on
+      # Linux and aarch64-darwin. Evaluation only, so darwin works here too.
+      - name: Evaluate user configurations
         run: |
-          echo "Testing user configuration: ${{ matrix.user }}"
-          # Create a test flake that uses this module
-          cat > test-flake.nix << 'EOF'
-          {
-            inputs = {
-              nixpkgs.url = "nixpkgs/nixos-25.05";
-              home-manager = {
-                url = "github:nix-community/home-manager/release-25.05";
-                inputs.nixpkgs.follows = "nixpkgs";
-              };
-              fudo-home.url = "path:.";
-            };
-            outputs = { nixpkgs, home-manager, fudo-home, ... }:
-            let
-              system = "x86_64-linux";
-              pkgs = nixpkgs.legacyPackages.${system};
-            in {
-              homeConfigurations.test = home-manager.lib.homeManagerConfiguration {
-                inherit pkgs;
-                modules = [
-                  fudo-home.mkModule.niten {
-                    username = "test";
-                    email = "test@example.com";
-                    home-directory = "/home/test";
-                    stateVersion = "25.05";
-                    desktopType = "none";
-                  }
-                ];
-              };
-            };
-          }
-          EOF
-
-          # Test that the configuration can be evaluated
-          nix eval --impure --expr 'builtins.getFlake (toString ./test-flake.nix)' --show-trace || true
-          echo "User configuration ${{ matrix.user }} import test completed"
+          nix eval --impure --json --show-trace --expr \
+            'import ./tests/eval.nix { flake = builtins.getFlake (toString ./.); }'

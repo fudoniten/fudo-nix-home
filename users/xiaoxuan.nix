@@ -9,7 +9,7 @@ systemCfg:
 with lib;
 let
   # Validate required arguments
-  _ = assert assertMsg (username != null && username != "")
+  checkArgs = assert assertMsg (username != null && username != "")
     "username is required";
     assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
       "systemCfg.desktop.type is required";
@@ -23,7 +23,7 @@ let
   isGui = systemCfg.desktop.type != "none";
   isX = systemCfg.desktop.type == "x";
 
-in {
+in builtins.seq checkArgs {
   config = mkIf isGui {
     home = {
       inherit username;

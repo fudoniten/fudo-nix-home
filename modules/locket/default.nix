@@ -27,7 +27,9 @@ let
     RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/${cfg.runtimeDirectory}"
     DEFAULT_METHOD="${cfg.defaultMethod}"
     PROFILES=(${concatStringsSep " " (map (p: ''"${p}"'') cfg.profiles)})
-    IDENTITY_KEY_PATH="${optionalString (cfg.identityKeyPath != null) cfg.identityKeyPath}"
+    IDENTITY_KEY_PATH="${
+      optionalString (cfg.identityKeyPath != null) cfg.identityKeyPath
+    }"
 
     # Ensure runtime directory exists
     mkdir -p "$RUNTIME_DIR"
@@ -122,12 +124,17 @@ let
       let
         override = cfg.overrides.${name} or { enable = true; };
         enabled = override.enable or true;
-        target = if override.target != null then override.target else secret.target;
-        method = if override.method != null then override.method 
-                 else if secret.method != null then secret.method 
-                 else cfg.defaultMethod;
+        target =
+          if override.target != null then override.target else secret.target;
+        method = if override.method != null then
+          override.method
+        else if secret.method != null then
+          secret.method
+        else
+          cfg.defaultMethod;
         mode = if override.mode != null then override.mode else secret.mode;
-        profilesStr = concatStringsSep " " (map (p: ''"${p}"'') secret.profiles);
+        profilesStr =
+          concatStringsSep " " (map (p: ''"${p}"'') secret.profiles);
       in optionalString enabled ''
         # Secret: ${name}
         SECRET_PROFILES=(${profilesStr})
@@ -162,10 +169,14 @@ let
       let
         override = cfg.overrides.${name} or { enable = true; };
         enabled = override.enable or true;
-        target = if override.target != null then override.target else secret.target;
-        method = if override.method != null then override.method 
-                 else if secret.method != null then secret.method 
-                 else cfg.defaultMethod;
+        target =
+          if override.target != null then override.target else secret.target;
+        method = if override.method != null then
+          override.method
+        else if secret.method != null then
+          secret.method
+        else
+          cfg.defaultMethod;
       in optionalString enabled ''
         # Cleanup: ${name}
         TARGET="$HOME/${target}"
@@ -219,9 +230,7 @@ in {
     };
 
     systemd.user.services.locket-decrypt = {
-      Unit = {
-        Description = "Decrypt Locket user secrets";
-      };
+      Unit = { Description = "Decrypt Locket user secrets"; };
       Service = {
         Type = "oneshot";
         ExecStart = "${decryptScript}";

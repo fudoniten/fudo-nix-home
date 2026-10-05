@@ -505,9 +505,9 @@ GitHub Actions automatically runs tests on every push and pull request:
 - **Flake validation**: Ensures the flake structure is correct
 - **Static analysis**: Checks for Nix code quality issues with [statix](https://github.com/nerdypepper/statix)
 - **Dead code detection**: Finds unused code with [deadnix](https://github.com/astro/deadnix)
-- **Format checking**: Validates code formatting with [nixpkgs-fmt](https://github.com/nix-community/nixpkgs-fmt)
+- **Format checking**: Validates code formatting with nixfmt-classic (`nix fmt`)
 - **Module validation**: Verifies NixOS modules and mkModule function exports are correct
-- **Configuration tests**: Validates all user configuration files can be loaded
+- **Configuration tests**: Evaluates every user config through the NixOS module, and `mkModule.niten` standalone on Linux and aarch64-darwin (`tests/eval.nix`)
 - **Locket validation**: Checks secrets structure, prevents private key commits
 
 ### Local Testing
@@ -532,17 +532,21 @@ nix flake check
 nix run nixpkgs#statix -- check .
 
 # Find dead/unused code
-nix run nixpkgs#deadnix -- --fail .
+nix run nixpkgs#deadnix -- --fail --no-lambda-arg --no-lambda-pattern-names .
 
 # Check code formatting
-nix run nixpkgs#nixpkgs-fmt -- --check .
+nix fmt -- --check .
 
 # Auto-fix formatting issues
-nix run nixpkgs#nixpkgs-fmt .
+nix fmt .
 
 # Validate module exports
 nix eval .#nixosModules.default
 nix eval .#mkModule.niten --apply 'x: builtins.isFunction x'
+
+# Evaluate every user config (both paths, incl. macOS)
+nix eval --impure --json --expr \
+  'import ./tests/eval.nix { flake = builtins.getFlake (toString ./.); }'
 
 # Check syntax of user configurations
 nix-instantiate --parse users/niten.nix

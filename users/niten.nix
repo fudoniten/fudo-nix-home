@@ -9,7 +9,7 @@ systemCfg:
 with lib;
 let
   # Validate required arguments
-  _ = assert assertMsg (username != null && username != "")
+  checkArgs = assert assertMsg (username != null && username != "")
     "username is required";
     assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
       "systemCfg.desktop.type is required";
@@ -138,7 +138,7 @@ let
     };
     Jarvis = {
       icon = "pet";
-      color = "white";
+      color = "toolbar"; # neutral; Zen has no "white"
       id = 17;
     };
   };
@@ -178,6 +178,10 @@ let
 
   # Access unstable packages for bleeding-edge tools
   pkgsUnstable = inputs.nixpkgsUnstable.legacyPackages."${pkgs.system}";
+
+  # Taken from the input directly rather than relying on the fudo-pkgs
+  # overlay, which NixOS hosts apply but standalone Home Manager doesn't.
+  fudoPkgs = inputs.fudo-pkgs.packages."${pkgs.system}";
 
   sessionEnvVariables = {
     ALTERNATE_EDITOR = "";
@@ -368,7 +372,7 @@ let
     prismlauncher # Minecraft launcher
     gogdl # GOG downloader
     mcpelauncher-client # Minecraft launcher
-    waylandcraft
+    fudoPkgs.waylandcraft # Native Wayland for Minecraft
 
     gnome-mines # Minesweeper
     gnome-mahjongg # Mahjong solitaire
@@ -472,7 +476,7 @@ let
     zed-mono
   ]));
 
-in {
+in builtins.seq checkArgs {
   imports = [ inputs.zen-browser.homeModules.beta ];
 
   config = {
@@ -590,7 +594,7 @@ in {
         settings = {
           user = {
             name = username;
-            email = email;
+            inherit email;
           };
           pull.rebase = true;
         };
@@ -642,7 +646,7 @@ in {
       firefox = mkIf isLinux {
         enable = systemCfg.desktop.type != "none";
         package =
-          (pkgs.firefox.override { cfg = { enableGnomeExtensions = true; }; });
+          pkgs.firefox.override { cfg = { enableGnomeExtensions = true; }; };
       };
 
       # NB: containers, workspaces, pins, and keyboard shortcuts below are
@@ -787,6 +791,9 @@ in {
 
       packages = commonPackages ++ (optionals isGui commonGuiPackages)
         ++ (optionals (isLinux && isGui) (linuxGuiPackages ++ fontPackages))
+        # The full fontPackages set is Linux-only; on macOS just the fonts the
+        # prompt and Doom need.
+        ++ (optionals isDarwin (with pkgs.nerd-fonts; [ iosevka symbols-only ]))
         ++ (optionals isLinux (linuxPackages ++ (with pkgs; [
           graphite-cursors
           graphite-gtk-theme

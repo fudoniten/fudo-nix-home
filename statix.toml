@@ -1,0 +1,3 @@
+# repeated_keys flags `home.packages = ...; home.file... = ...` style dotted
+# keys, which this repo uses on purpose.
+disabled = ["repeated_keys"]

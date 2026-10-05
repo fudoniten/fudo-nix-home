@@ -21,7 +21,7 @@
 #
 # Only active when enabled via fudo.quickshell.enable.
 
-{ ... }:
+_:
 
 { config, lib, pkgs, ... }:
 
@@ -76,8 +76,9 @@ let
     cp ${themeQml} $out/Theme.qml
   '';
 
-  qmlImportPath = concatMapStringsSep ":"
-    (p: "${p}/${pkgs.qt6.qtbase.qtQmlPrefix}") cfg.extraQmlPackages;
+  qmlImportPath =
+    concatMapStringsSep ":" (p: "${p}/${pkgs.qt6.qtbase.qtQmlPrefix}")
+    cfg.extraQmlPackages;
 
   # nixpkgs' quickshell only carries the QML modules it was built against.
   # Anything extra (Qt5Compat.GraphicalEffects for blur/shadow being the usual
@@ -244,8 +245,8 @@ in {
       path = mkOption {
         type = types.str;
         default = "${config.home.homeDirectory}/src/quickshell-config";
-        defaultText =
-          literalExpression ''"''${config.home.homeDirectory}/src/quickshell-config"'';
+        defaultText = literalExpression
+          ''"''${config.home.homeDirectory}/src/quickshell-config"'';
         description = "Directory holding the live-editable Quickshell config.";
       };
     };

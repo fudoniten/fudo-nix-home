@@ -145,13 +145,12 @@ let
     ];
 
   # Linux-specific dependencies
-  defaultLinuxDeps = with pkgs;
-    [
-      sbcl # Steel Bank Common Lisp (for some Emacs packages)
-      doas # Sudo alternative
-      supercollider # Audio synthesis for music composition
-      xclip # X11 clipboard integration
-    ];
+  defaultLinuxDeps = with pkgs; [
+    sbcl # Steel Bank Common Lisp (for some Emacs packages)
+    doas # Sudo alternative
+    supercollider # Audio synthesis for music composition
+    xclip # X11 clipboard integration
+  ];
 
   # Build emacs with packages using custom overlay
   myEmacsWithPackages = emacs:
@@ -403,7 +402,7 @@ in {
           arguments = [ "--create-frame" ];
         };
         extraOptions = [ "--init-directory=${config.xdg.configHome}/emacs" ];
-        defaultEditor = cfg.defaultEditor;
+        inherit (cfg) defaultEditor;
         startWithUserSession = true;
       };
     })

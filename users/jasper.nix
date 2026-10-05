@@ -1,6 +1,6 @@
 inputs:
 
-{ username, email, home-directory ? null, ... }@userOpts:
+{ username, email, home-directory ? null, ... }:
 
 systemCfg:
 
@@ -9,7 +9,7 @@ systemCfg:
 with lib;
 let
   # Validate required arguments
-  _ = assert assertMsg (username != null && username != "")
+  checkArgs = assert assertMsg (username != null && username != "")
     "username is required";
     assert assertMsg (systemCfg ? desktop && systemCfg.desktop ? type)
       "systemCfg.desktop.type is required";
@@ -26,7 +26,7 @@ let
 
   zen-browser = inputs.zen-browser.packages."${pkgs.system}".default;
 
-in {
+in builtins.seq checkArgs {
   config = mkIf isGui {
     home = {
       inherit username;

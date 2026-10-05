@@ -1,8 +1,5 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports = [
-    (import ./services)
-    (import ./locket)
-  ];
+  imports = [ (import ./services) (import ./locket) ];
 }

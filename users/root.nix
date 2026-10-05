@@ -9,67 +9,66 @@ systemCfg:
 with lib;
 let
   # Validate required arguments
-  _ = assert assertMsg (username != null && username != "")
+  checkArgs = assert assertMsg (username != null && username != "")
     "username is required";
-    assert assertMsg (email != null && email != "")
-    "email is required";
+    assert assertMsg (email != null && email != "") "email is required";
     assert assertMsg (home-directory != null && home-directory != "")
-    "home-directory is required";
+      "home-directory is required";
     null;
 
   # Common system administration packages
   commonPackages = with pkgs; [
     # System monitoring
-    atop                   # Advanced system monitor
+    atop # Advanced system monitor
 
     # File system tools
-    btrfs-progs            # Btrfs utilities
+    btrfs-progs # Btrfs utilities
 
     # CD/DVD utilities
-    cdrtools               # CD/DVD recording utilities
+    cdrtools # CD/DVD recording utilities
 
     # HTTP and network
-    curl                   # HTTP client
+    curl # HTTP client
 
     # Utilities
-    file                   # Determine file types
+    file # Determine file types
 
     # Version control
-    git                    # Version control system
+    git # Version control system
 
     # Security
-    gnutls                 # TLS library
-    gnupg                  # GNU Privacy Guard
+    gnutls # TLS library
+    gnupg # GNU Privacy Guard
 
     # Scripting
-    guile                  # GNU Guile Scheme
+    guile # GNU Guile Scheme
 
     # Firewall
-    iptables               # Firewall management
+    iptables # Firewall management
 
     # System info
-    lsof                   # List open files
-    lshw                   # Hardware lister
+    lsof # List open files
+    lshw # Hardware lister
 
     # Network diagnostics
-    mtr                    # Network diagnostic tool
-    nmap                   # Network scanner
+    mtr # Network diagnostic tool
+    nmap # Network scanner
 
     # Nix tools
-    nix-prefetch-git       # Fetch git repos for Nix
+    nix-prefetch-git # Fetch git repos for Nix
 
     # PCI utilities
-    pciutils               # PCI utilities (lspci)
+    pciutils # PCI utilities (lspci)
 
     # Password utilities
-    pwgen                  # Password generator
+    pwgen # Password generator
 
     # Terminal utilities
-    tmux                   # Terminal multiplexer
-    unzip                  # ZIP extraction
+    tmux # Terminal multiplexer
+    unzip # ZIP extraction
   ];
 
-in {
+in builtins.seq checkArgs {
   imports = [ ];
 
   config = {
