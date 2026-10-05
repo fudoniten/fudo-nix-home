@@ -213,6 +213,16 @@ let
           polymuse = polymusePkg;
           canon = canonPkg;
           typewrite = typewritePkg;
+
+          # GNU ELPA only serves the latest release of a package, and keeps
+          # just a handful of older ones (as .tar.lz). nixos-26.05 pins
+          # llm 0.30.1, which ELPA has since dropped entirely, so its fetch
+          # 404s. Build the stable derivation from unstable's (current)
+          # release instead; the dependencies (plz*, compat) are unchanged.
+          # Drop this once release-26.05 bumps llm. NixOS/nixpkgs#110796
+          llm = esuper.llm.overrideAttrs {
+            inherit (pkgsUnstable.emacsPackages.llm) version src;
+          };
         }
       );
 
