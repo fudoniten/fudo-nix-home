@@ -13,7 +13,12 @@
 
 { inputs, ... }:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -26,9 +31,19 @@ let
     height = 30;
     spacing = 4;
 
-    modules-left = [ "hyprland/workspaces" "hyprland/window" ];
+    modules-left = [
+      "hyprland/workspaces"
+      "hyprland/window"
+    ];
     modules-center = [ "clock" ];
-    modules-right = [ "tray" "pulseaudio" "network" "cpu" "memory" "battery" ];
+    modules-right = [
+      "tray"
+      "pulseaudio"
+      "network"
+      "cpu"
+      "memory"
+      "battery"
+    ];
 
     "hyprland/workspaces" = {
       format = "{id}";
@@ -66,7 +81,13 @@ let
       format = "{icon} {capacity}%";
       format-charging = " {capacity}%";
       format-plugged = " {capacity}%";
-      format-icons = [ "" "" "" "" "" ];
+      format-icons = [
+        ""
+        ""
+        ""
+        ""
+        ""
+      ];
     };
 
     network = {
@@ -86,13 +107,19 @@ let
         phone = "";
         portable = "";
         car = "";
-        default = [ "" "" "" ];
+        default = [
+          ""
+          ""
+          ""
+        ];
       };
       on-click = "pamixer -t";
       on-click-right = "pavucontrol";
     };
 
-    tray = { spacing = 10; };
+    tray = {
+      spacing = 10;
+    };
   };
 
   # Waybar styling
@@ -165,7 +192,8 @@ let
     }
   '';
 
-in {
+in
+{
   options.programs.hyprland = {
     enable = mkEnableOption "Hyprland window manager";
 
@@ -173,11 +201,17 @@ in {
       type = types.listOf types.str;
       default = [ ];
       description = "Additional commands to run on Hyprland startup";
-      example = [ "discord" "element-desktop" ];
+      example = [
+        "discord"
+        "element-desktop"
+      ];
     };
 
     statusBar = mkOption {
-      type = types.enum [ "waybar" "none" ];
+      type = types.enum [
+        "waybar"
+        "none"
+      ];
       default = "waybar";
       description = ''
         Status bar to autostart with the session. Set to "none" when
@@ -330,13 +364,16 @@ in {
         ];
 
         # Autostart applications
-        exec-once = (optional (cfg.statusBar == "waybar") "waybar") ++ [
-          "mako"
-          "wl-paste --watch cliphist store"
-          "dbus-update-activation-environment --systemd --all"
-          "hypridle"
-          "hyprpolkitagent"
-        ] ++ cfg.extraAutostart;
+        exec-once =
+          (optional (cfg.statusBar == "waybar") "waybar")
+          ++ [
+            "mako"
+            "wl-paste --watch cliphist store"
+            "dbus-update-activation-environment --systemd --all"
+            "hypridle"
+            "hyprpolkitagent"
+          ]
+          ++ cfg.extraAutostart;
 
         # Input configuration
         input = {
@@ -367,14 +404,18 @@ in {
         decoration = {
           rounding = 8;
 
-          shadow = if cfg.batteryFriendly then {
-            enabled = false;
-          } else {
-            enabled = true;
-            range = 4;
-            render_power = 3;
-            color = "rgba(1a1a1aee)";
-          };
+          shadow =
+            if cfg.batteryFriendly then
+              {
+                enabled = false;
+              }
+            else
+              {
+                enabled = true;
+                range = 4;
+                render_power = 3;
+                color = "rgba(1a1a1aee)";
+              };
 
           blur.enabled = false; # Disabled for performance
         };
@@ -402,10 +443,14 @@ in {
         # error. There's no replacement key; the per-window `pseudo`
         # dispatcher below ($mod, P) is a separate, still-valid feature and
         # is unaffected.
-        dwindle = { preserve_split = true; };
+        dwindle = {
+          preserve_split = true;
+        };
 
         # Master layout settings (alternative)
-        master = { new_status = "master"; };
+        master = {
+          new_status = "master";
+        };
 
         # Gestures
         #
@@ -509,8 +554,10 @@ in {
         ];
 
         # Mouse bindings
-        bindm =
-          [ "$mod, mouse:272, movewindow" "$mod, mouse:273, resizewindow" ];
+        bindm = [
+          "$mod, mouse:272, movewindow"
+          "$mod, mouse:273, resizewindow"
+        ];
 
         # Media keys
         bindl = [

@@ -23,17 +23,19 @@
 
 { inputs, ... }:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
   cfg = config.programs.doom-emacs;
 
   # Determine state directory for Doom Emacs local files
-  stateDir = if cfg.stateDirectory != null then
-    cfg.stateDirectory
-  else
-    "${config.xdg.dataHome}/doom";
+  stateDir = if cfg.stateDirectory != null then cfg.stateDirectory else "${config.xdg.dataHome}/doom";
 
   # Default Doom Emacs environment setup
   doomEmacsEnv = ''
@@ -46,10 +48,16 @@ let
 
   # Default Emacs dependencies
   # These packages are required for Doom Emacs to function properly
-  defaultEmacsDeps = with pkgs;
+  defaultEmacsDeps =
+    with pkgs;
     [
-      (aspellWithDicts
-        (ds: with ds; [ en en-computers en-science ])) # Spell checking
+      (aspellWithDicts (
+        ds: with ds; [
+          en
+          en-computers
+          en-science
+        ]
+      )) # Spell checking
       babashka # Clojure scripting
       basedpyright # Python language server
       bashInteractive # Shell integration
@@ -91,10 +99,14 @@ let
       shfmt
       sqlite # Database (used by org-roam and other packages)
       zstd # Compression (for package caching)
-    ] ++ (with pkgsUnstable; [ opencode aider-chat ]);
+    ]
+    ++ (with pkgsUnstable; [
+      opencode
+      aider-chat
+    ]);
 
-  defaultEmacsPkgs = epkgs:
-    with epkgs; [
+  defaultEmacsPkgs =
+    epkgs: with epkgs; [
       agent-shell
       aidermacs
       babashka
@@ -153,12 +165,14 @@ let
   ];
 
   # Build emacs with packages using custom overlay
-  myEmacsWithPackages = emacs:
+  myEmacsWithPackages =
+    emacs:
     let
       baseEmacsPkgs = pkgs.emacsPackagesFor emacs;
 
       # Override scope to add custom packages
-      updatedEmacsPkgs = baseEmacsPkgs.overrideScope (eself: esuper:
+      updatedEmacsPkgs = baseEmacsPkgs.overrideScope (
+        eself: esuper:
         let
           # Custom theme package
           doom-two-tone-themes = eself.trivialBuild {
@@ -178,8 +192,7 @@ let
             '';
 
             meta = {
-              homepage =
-                "https://github.com/eliraz-refael/doom-two-tone-themes";
+              homepage = "https://github.com/eliraz-refael/doom-two-tone-themes";
               description = "Two-toned themes for Doom Emacs.";
               license = pkgs.lib.licenses.gpl3Plus;
             };
@@ -190,7 +203,9 @@ let
           typewritePkg = inputs.typewrite.packages."${pkgs.system}".default;
           canonPkg = inputs.canon.packages."${pkgs.system}".default;
 
-        in esuper // {
+        in
+        esuper
+        // {
           inherit doom-two-tone-themes;
 
           # Polymuse packages for music composition
@@ -198,40 +213,49 @@ let
           polymuse = polymusePkg;
           canon = canonPkg;
           typewrite = typewritePkg;
-        });
+        }
+      );
 
-    in updatedEmacsPkgs.withPackages cfg.emacsPackages;
+    in
+    updatedEmacsPkgs.withPackages cfg.emacsPackages;
 
   # Determine the appropriate emacs package based on platform and desktop type
-  emacsPackage = let
-    basePackage = if cfg.package != null then
-      cfg.package
-    else if pkgs.stdenv.isDarwin then
-      pkgs.emacs
-    else if cfg.desktopType == "none" then
-      pkgs.emacs-nox
-    else if cfg.desktopType == "wayland" then
-      pkgs.emacs-pgtk
-    else
-      pkgs.emacs-gtk;
-  in myEmacsWithPackages basePackage;
+  emacsPackage =
+    let
+      basePackage =
+        if cfg.package != null then
+          cfg.package
+        else if pkgs.stdenv.isDarwin then
+          pkgs.emacs
+        else if cfg.desktopType == "none" then
+          pkgs.emacs-nox
+        else if cfg.desktopType == "wayland" then
+          pkgs.emacs-pgtk
+        else
+          pkgs.emacs-gtk;
+    in
+    myEmacsWithPackages basePackage;
 
-in {
+in
+{
   options.programs.doom-emacs = with types; {
     enable = mkEnableOption "Doom Emacs configuration";
 
     package = mkOption {
       type = nullOr package;
       default = null;
-      description =
-        "The Emacs package to use. If null, automatically determined based on platform and desktop type.";
+      description = "The Emacs package to use. If null, automatically determined based on platform and desktop type.";
     };
 
     desktopType = mkOption {
-      type = enum [ "x" "wayland" "darwin" "none" ];
+      type = enum [
+        "x"
+        "wayland"
+        "darwin"
+        "none"
+      ];
       default = "none";
-      description =
-        "The desktop type (x, wayland, darwin, or none). Affects which Emacs package is used.";
+      description = "The desktop type (x, wayland, darwin, or none). Affects which Emacs package is used.";
     };
 
     doomSource = mkOption {
@@ -261,8 +285,7 @@ in {
     emacsPackages = mkOption {
       type = functionTo (listOf package);
       default = defaultEmacsPkgs;
-      description =
-        "Function that takes emacs packages and returns list of packages to install.";
+      description = "Function that takes emacs packages and returns list of packages to install.";
     };
 
     enableDaemon = mkOption {
@@ -327,44 +350,49 @@ in {
       };
 
       home = {
-        activation.installDoomEmacs =
-          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            if [ ! -d ${config.xdg.configHome}/emacs ]; then
-              mkdir -p ${config.xdg.configHome}/emacs
-            fi
-            # --delete: the Doom tree must exactly mirror doomSource. Without
-            #   it, files dropped by an upstream reorganization linger forever
-            #   and shadow the new layout (e.g. the pre-2026-06 bundled
-            #   modules/ tree, which lacks the .doommodules marker newer Doom
-            #   needs to scan a module's autodefs).
-            # --checksum: every file in the Nix store has mtime 1970-01-01, so
-            #   rsync's default size+mtime quick check never notices a changed
-            #   file that kept its size.
-            ${pkgs.rsync}/bin/rsync -avz --delete --checksum \
-              --exclude='/.local/' --exclude='/eln-cache/' \
-              --chmod=D2755,F744 ${cfg.doomSource}/ ${config.xdg.configHome}/emacs/
+        activation.installDoomEmacs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          if [ ! -d ${config.xdg.configHome}/emacs ]; then
+            mkdir -p ${config.xdg.configHome}/emacs
+          fi
+          # --delete: the Doom tree must exactly mirror doomSource. Without
+          #   it, files dropped by an upstream reorganization linger forever
+          #   and shadow the new layout (e.g. the pre-2026-06 bundled
+          #   modules/ tree, which lacks the .doommodules marker newer Doom
+          #   needs to scan a module's autodefs).
+          # --checksum: every file in the Nix store has mtime 1970-01-01, so
+          #   rsync's default size+mtime quick check never notices a changed
+          #   file that kept its size.
+          ${pkgs.rsync}/bin/rsync -avz --delete --checksum \
+            --exclude='/.local/' --exclude='/eln-cache/' \
+            --chmod=D2755,F744 ${cfg.doomSource}/ ${config.xdg.configHome}/emacs/
 
-            # Create state directory if it doesn't exist
-            if [ ! -d ${stateDir} ]; then
-              mkdir -p ${stateDir}
-            fi
-          '';
+          # Create state directory if it doesn't exist
+          if [ ! -d ${stateDir} ]; then
+            mkdir -p ${stateDir}
+          fi
+        '';
 
-        packages = [ emacsPackage ] ++ defaultEmacsDeps ++ cfg.extraDependencies
-          ++ cfg.extraPackages
-          ++ (optionals pkgs.stdenv.isLinux defaultLinuxDeps);
+        packages = [
+          emacsPackage
+        ]
+        ++ defaultEmacsDeps
+        ++ cfg.extraDependencies
+        ++ cfg.extraPackages
+        ++ (optionals pkgs.stdenv.isLinux defaultLinuxDeps);
 
         sessionVariables = {
           DOOMLOCALDIR = stateDir;
           DOOM_EMACS_SITE_PATH = "${config.xdg.configHome}/doom/site.d";
           DOOM_EMACS_LOCAL_PATH = "${config.xdg.configHome}/emacs-local";
-        } // cfg.extraEnv;
+        }
+        // cfg.extraEnv;
 
         shellAliases = {
           emacs = "emacs --init-directory=${config.xdg.configHome}/emacs";
           e = "emacsclient --create-frame --tty";
           ew = "emacsclient --create-frame";
-        } // cfg.extraAliases;
+        }
+        // cfg.extraAliases;
       };
     }
 
@@ -372,9 +400,14 @@ in {
     (mkIf pkgs.stdenv.isLinux {
       systemd.user.services.emacs = mkIf cfg.enableDaemon {
         Service = {
-          Environment = let
-            binPath = makeBinPath ([ emacsPackage ] ++ config.home.packages);
-          in [ "PATH=$PATH:${binPath}" "DOOMLOCALDIR=${stateDir}" ];
+          Environment =
+            let
+              binPath = makeBinPath ([ emacsPackage ] ++ config.home.packages);
+            in
+            [
+              "PATH=$PATH:${binPath}"
+              "DOOMLOCALDIR=${stateDir}"
+            ];
           ExecStartPre = pkgs.writeShellScript "run-doom-sync" ''
             # Ensure state directory exists
             if [ ! -d ${stateDir} ]; then
@@ -420,11 +453,11 @@ in {
               "-c"
               "export DOOMLOCALDIR='${stateDir}' && ${emacsPackage}/bin/emacs --fg-daemon"
             ];
-            EnvironmentVariables = { DOOMLOCALDIR = stateDir; };
-            StandardErrorPath =
-              "${config.home.homeDirectory}/Library/Logs/emacs-daemon.stderr.log";
-            StandardOutPath =
-              "${config.home.homeDirectory}/Library/Logs/emacs-daemon.stdout.log";
+            EnvironmentVariables = {
+              DOOMLOCALDIR = stateDir;
+            };
+            StandardErrorPath = "${config.home.homeDirectory}/Library/Logs/emacs-daemon.stderr.log";
+            StandardOutPath = "${config.home.homeDirectory}/Library/Logs/emacs-daemon.stdout.log";
             RunAtLoad = true;
             KeepAlive = true;
           };

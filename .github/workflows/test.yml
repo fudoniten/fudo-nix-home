@@ -30,8 +30,8 @@ jobs:
       - name: Check for dead code with deadnix
         run: nix run nixpkgs#deadnix -- --fail --no-lambda-arg --no-lambda-pattern-names .
 
-      - name: Check formatting with nixfmt-classic
-        run: nix fmt -- --check .
+      - name: Check formatting with nixfmt
+        run: nix fmt -- --ci
 
   module-validation:
     runs-on: ubuntu-latest

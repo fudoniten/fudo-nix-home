@@ -32,7 +32,10 @@ with lib;
     profiles = mkOption {
       type = types.listOf types.str;
       default = [ ];
-      example = [ "default" "desktop" ];
+      example = [
+        "default"
+        "desktop"
+      ];
       description = ''
         List of profiles this host can decrypt secrets for.
         The host must have the corresponding private key for each profile.
@@ -60,7 +63,10 @@ with lib;
     };
 
     defaultMethod = mkOption {
-      type = types.enum [ "symlink" "copy" ];
+      type = types.enum [
+        "symlink"
+        "copy"
+      ];
       default = "symlink";
       description = ''
         Default method for placing secrets at target paths.
@@ -71,44 +77,53 @@ with lib;
     };
 
     secrets = mkOption {
-      type = types.attrsOf (types.submodule ({ name, ... }: {
-        options = {
-          source = mkOption {
-            type = types.path;
-            description = "Path to the encrypted .age file";
-          };
+      type = types.attrsOf (
+        types.submodule (
+          { name, ... }: {
+            options = {
+              source = mkOption {
+                type = types.path;
+                description = "Path to the encrypted .age file";
+              };
 
-          target = mkOption {
-            type = types.str;
-            description = "Target path relative to home directory";
-          };
+              target = mkOption {
+                type = types.str;
+                description = "Target path relative to home directory";
+              };
 
-          profiles = mkOption {
-            type = types.listOf types.str;
-            description = "Profiles that can decrypt this secret";
-          };
+              profiles = mkOption {
+                type = types.listOf types.str;
+                description = "Profiles that can decrypt this secret";
+              };
 
-          mode = mkOption {
-            type = types.str;
-            default = "0600";
-            description = "File permissions for the decrypted secret";
-          };
+              mode = mkOption {
+                type = types.str;
+                default = "0600";
+                description = "File permissions for the decrypted secret";
+              };
 
-          method = mkOption {
-            type = types.nullOr (types.enum [ "symlink" "copy" ]);
-            default = null;
-            description = ''
-              Method for placing this secret. If null, uses defaultMethod.
-            '';
-          };
+              method = mkOption {
+                type = types.nullOr (
+                  types.enum [
+                    "symlink"
+                    "copy"
+                  ]
+                );
+                default = null;
+                description = ''
+                  Method for placing this secret. If null, uses defaultMethod.
+                '';
+              };
 
-          description = mkOption {
-            type = types.str;
-            default = "";
-            description = "Human-readable description of this secret";
-          };
-        };
-      }));
+              description = mkOption {
+                type = types.str;
+                default = "";
+                description = "Human-readable description of this secret";
+              };
+            };
+          }
+        )
+      );
       default = { };
       description = ''
         Secrets to manage. Usually populated automatically from secrets/<user>/ directory.
@@ -116,33 +131,40 @@ with lib;
     };
 
     overrides = mkOption {
-      type = types.attrsOf (types.submodule {
-        options = {
-          enable = mkOption {
-            type = types.bool;
-            default = true;
-            description = "Whether to enable this secret on this host";
-          };
+      type = types.attrsOf (
+        types.submodule {
+          options = {
+            enable = mkOption {
+              type = types.bool;
+              default = true;
+              description = "Whether to enable this secret on this host";
+            };
 
-          target = mkOption {
-            type = types.nullOr types.str;
-            default = null;
-            description = "Override target path for this secret";
-          };
+            target = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "Override target path for this secret";
+            };
 
-          method = mkOption {
-            type = types.nullOr (types.enum [ "symlink" "copy" ]);
-            default = null;
-            description = "Override method for this secret";
-          };
+            method = mkOption {
+              type = types.nullOr (
+                types.enum [
+                  "symlink"
+                  "copy"
+                ]
+              );
+              default = null;
+              description = "Override method for this secret";
+            };
 
-          mode = mkOption {
-            type = types.nullOr types.str;
-            default = null;
-            description = "Override file permissions for this secret";
+            mode = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = "Override file permissions for this secret";
+            };
           };
-        };
-      });
+        }
+      );
       default = { };
       description = ''
         Per-secret overrides for this host. Allows disabling secrets

@@ -1,26 +1,35 @@
 { inputs, ... }:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
 let
   cfg = config.fudo.vr;
 
-  wivrn-config = pkgs.writeText "wivrn-config.json" (builtins.toJSON {
-    encoders = [{
-      encoder = cfg.wivrn.encoder;
-      codec = cfg.wivrn.codec;
-      width = 1.0;
-      height = 1.0;
-      offset_x = 0.0;
-      offset_y = 0.0;
-    }];
-    bitrate = cfg.wivrn.bitrate;
-    # WayVR provides the Wayland compositor inside VR; without this, launched
-    # apps connect to the desktop compositor and never appear in the headset.
-    application = lib.getExe pkgs.wayvr;
-  });
+  wivrn-config = pkgs.writeText "wivrn-config.json" (
+    builtins.toJSON {
+      encoders = [
+        {
+          encoder = cfg.wivrn.encoder;
+          codec = cfg.wivrn.codec;
+          width = 1.0;
+          height = 1.0;
+          offset_x = 0.0;
+          offset_y = 0.0;
+        }
+      ];
+      bitrate = cfg.wivrn.bitrate;
+      # WayVR provides the Wayland compositor inside VR; without this, launched
+      # apps connect to the desktop compositor and never appear in the headset.
+      application = lib.getExe pkgs.wayvr;
+    }
+  );
 
   # Helper script to launch apps via wayvrctl
   # Usage: wayvrctl-launcher <app> [resolution] [pos] [icon] [args...]
@@ -36,11 +45,11 @@ let
     exec ${pkgs.wayvr}/bin/wayvrctl process-launch "$APP_PATH" "$resolution" "$pos" "$@"
   '';
 
-in {
+in
+{
   options = {
     fudo.vr = {
-      enable =
-        mkEnableOption "VR configuration for user (OpenXR and OpenComposite)";
+      enable = mkEnableOption "VR configuration for user (OpenXR and OpenComposite)";
 
       wivrn = {
         encoder = mkOption {
@@ -123,7 +132,9 @@ in {
     };
 
     systemd.user.services.wivrn = {
-      Unit = { Description = "WiVRn XR runtime service"; };
+      Unit = {
+        Description = "WiVRn XR runtime service";
+      };
 
       Service = {
         ExecStart = "${lib.getExe pkgs.wivrn} -f ${wivrn-config}";
@@ -161,7 +172,9 @@ in {
         RestrictSUIDSGID = true;
       };
 
-      Install = { WantedBy = [ "graphical-session.target" ]; };
+      Install = {
+        WantedBy = [ "graphical-session.target" ];
+      };
     };
 
     # WiVRn discovers apps via .desktop files with X-WiVRn-VR in Categories.

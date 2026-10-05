@@ -1,6 +1,16 @@
-{ inputs, userOpts, systemOpts, ... }@settings:
+{
+  inputs,
+  userOpts,
+  systemOpts,
+  ...
+}@settings:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   imports = [

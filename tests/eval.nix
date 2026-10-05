@@ -14,12 +14,26 @@ let
 
   stateVersion = "26.05";
 
-  users =
-    [ "hermes" "jasper" "ken" "niten" "openclaw" "reaper" "root" "xiaoxuan" ];
+  users = [
+    "hermes"
+    "jasper"
+    "ken"
+    "niten"
+    "openclaw"
+    "reaper"
+    "root"
+    "xiaoxuan"
+  ];
 
   homeOf = user: if user == "root" then "/root" else "/home/${user}";
 
-  standalone = { system, desktopType, hostname ? "", home-directory }:
+  standalone =
+    {
+      system,
+      desktopType,
+      hostname ? "",
+      home-directory,
+    }:
     (home-manager.lib.homeManagerConfiguration {
       pkgs = import nixpkgs {
         inherit system;
@@ -29,12 +43,21 @@ let
         (flake.mkModule.niten {
           username = "test";
           email = "test@example.com";
-          inherit home-directory stateVersion desktopType hostname;
+          inherit
+            home-directory
+            stateVersion
+            desktopType
+            hostname
+            ;
         })
       ];
     }).activationPackage.drvPath;
 
-  nixos = { desktopType, hostname ? "" }:
+  nixos =
+    {
+      desktopType,
+      hostname ? "",
+    }:
     let
       system = lib.nixosSystem {
         modules = [
@@ -50,8 +73,9 @@ let
               device = "/dev/sda1";
               fsType = "ext4";
             };
-            users.users = lib.genAttrs (lib.remove "root" users)
-              (_: { isNormalUser = true; });
+            users.users = lib.genAttrs (lib.remove "root" users) (_: {
+              isNormalUser = true;
+            });
             fudo.home-manager = {
               enable = true;
               users = map (user: {
@@ -67,10 +91,11 @@ let
           }
         ];
       };
-    in lib.genAttrs users (user:
-      system.config.home-manager.users.${user}.home.activationPackage.drvPath);
+    in
+    lib.genAttrs users (user: system.config.home-manager.users.${user}.home.activationPackage.drvPath);
 
-in {
+in
+{
   standalone = {
     linux-headless = standalone {
       system = "x86_64-linux";

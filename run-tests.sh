@@ -47,8 +47,8 @@ run_test "Dead code detection (deadnix)" \
     nix run nixpkgs#deadnix -- --fail --no-lambda-arg --no-lambda-pattern-names . || true
 
 # Test 4: Format checking
-run_test "Format check (nixfmt-classic; 'nix fmt' to fix)" \
-    nix fmt -- --check . || true
+run_test "Format check (nixfmt; 'nix fmt' to fix)" \
+    nix fmt -- --ci || true
 
 # Test 5: Module validation
 run_test "NixOS module structure (default)" \

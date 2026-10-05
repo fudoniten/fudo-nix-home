@@ -23,7 +23,12 @@
 
 _:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -76,36 +81,42 @@ let
     cp ${themeQml} $out/Theme.qml
   '';
 
-  qmlImportPath =
-    concatMapStringsSep ":" (p: "${p}/${pkgs.qt6.qtbase.qtQmlPrefix}")
-    cfg.extraQmlPackages;
+  qmlImportPath = concatMapStringsSep ":" (
+    p: "${p}/${pkgs.qt6.qtbase.qtQmlPrefix}"
+  ) cfg.extraQmlPackages;
 
   # nixpkgs' quickshell only carries the QML modules it was built against.
   # Anything extra (Qt5Compat.GraphicalEffects for blur/shadow being the usual
   # one) has to be put on QML2_IMPORT_PATH, and the `qs` alias needs the same
   # treatment or it quietly bypasses the wrapper.
-  wrappedPackage = if cfg.extraQmlPackages == [ ] then
-    pkgs.quickshell
-  else
-    pkgs.symlinkJoin {
-      name = "quickshell-with-qml-modules";
-      paths = [ pkgs.quickshell ];
-      nativeBuildInputs = [ pkgs.makeWrapper ];
-      postBuild = ''
-        for bin in quickshell qs; do
-          if [ -e "$out/bin/$bin" ]; then
-            rm -f "$out/bin/$bin"
-            makeWrapper ${getExe pkgs.quickshell} "$out/bin/$bin" \
-              --prefix QML2_IMPORT_PATH : "${qmlImportPath}"
-          fi
-        done
-      '';
-      meta = pkgs.quickshell.meta // { mainProgram = "quickshell"; };
-    };
+  wrappedPackage =
+    if cfg.extraQmlPackages == [ ] then
+      pkgs.quickshell
+    else
+      pkgs.symlinkJoin {
+        name = "quickshell-with-qml-modules";
+        paths = [ pkgs.quickshell ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          for bin in quickshell qs; do
+            if [ -e "$out/bin/$bin" ]; then
+              rm -f "$out/bin/$bin"
+              makeWrapper ${getExe pkgs.quickshell} "$out/bin/$bin" \
+                --prefix QML2_IMPORT_PATH : "${qmlImportPath}"
+            fi
+          done
+        '';
+        meta = pkgs.quickshell.meta // {
+          mainProgram = "quickshell";
+        };
+      };
 
   devTool = pkgs.writeShellApplication {
     name = "fudo-quickshell";
-    runtimeInputs = [ pkgs.diffutils pkgs.systemd ];
+    runtimeInputs = [
+      pkgs.diffutils
+      pkgs.systemd
+    ];
     text = ''
       set -euo pipefail
 
@@ -175,7 +186,8 @@ let
     '';
   };
 
-in {
+in
+{
   options.fudo.quickshell = {
     enable = mkEnableOption "the Fudo Quickshell bar";
 
@@ -245,8 +257,7 @@ in {
       path = mkOption {
         type = types.str;
         default = "${config.home.homeDirectory}/src/quickshell-config";
-        defaultText = literalExpression
-          ''"''${config.home.homeDirectory}/src/quickshell-config"'';
+        defaultText = literalExpression ''"''${config.home.homeDirectory}/src/quickshell-config"'';
         description = "Directory holding the live-editable Quickshell config.";
       };
     };
@@ -290,23 +301,22 @@ in {
     # Upstream's `configs` option takes a plain path, which cannot express an
     # out-of-store symlink, so the config directory is written here instead --
     # `configs` is left empty and the two do not overlap.
-    xdg.configFile."quickshell/${configName}".source = if cfg.dev.enable then
-      config.lib.file.mkOutOfStoreSymlink cfg.dev.path
-    else
-      defaultConfig;
+    xdg.configFile."quickshell/${configName}".source =
+      if cfg.dev.enable then config.lib.file.mkOutOfStoreSymlink cfg.dev.path else defaultConfig;
 
     # Seed once, never clobber: this is someone's working tree after the first
     # switch, and silently overwriting the component QML would lose real
     # work. Theme.qml is the one exception -- see quickshellDevTheme below,
     # which supersedes whatever gets seeded here for that one file.
-    home.activation.quickshellDevSeed = mkIf cfg.dev.enable
-      (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    home.activation.quickshellDevSeed = mkIf cfg.dev.enable (
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         if [ ! -e "${cfg.dev.path}/shell.qml" ]; then
           run mkdir -p "${cfg.dev.path}"
           run cp ${defaultConfig}/*.qml "${cfg.dev.path}/"
           run chmod -R u+w "${cfg.dev.path}"
         fi
-      '');
+      ''
+    );
 
     # Unlike the rest of the dev directory, Theme.qml is never meant to be
     # hand-edited -- its own header says so -- it exists only to mirror
@@ -317,16 +327,16 @@ in {
     # crashing quickshell after the fix had already landed and been rebuilt
     # -- the dev copy was seeded before the fix and activation never
     # touched it again. So this one runs unconditionally, every activation.
-    home.activation.quickshellDevTheme = mkIf cfg.dev.enable
-      (lib.hm.dag.entryAfter [ "quickshellDevSeed" ] ''
+    home.activation.quickshellDevTheme = mkIf cfg.dev.enable (
+      lib.hm.dag.entryAfter [ "quickshellDevSeed" ] ''
         run mkdir -p "${cfg.dev.path}"
         run cp ${themeQml} "${cfg.dev.path}/Theme.qml"
         run chmod u+w "${cfg.dev.path}/Theme.qml"
-      '');
+      ''
+    );
 
     # Two bars is never what anyone wants; mkDefault so you can still force
     # Waybar back on if you want to compare them side by side.
-    programs.hyprland =
-      mkIf config.programs.hyprland.enable { statusBar = mkDefault "none"; };
+    programs.hyprland = mkIf config.programs.hyprland.enable { statusBar = mkDefault "none"; };
   };
 }

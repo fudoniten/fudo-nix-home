@@ -154,7 +154,7 @@ Individual checks:
 nix flake check
 nix run nixpkgs#statix -- check .
 nix run nixpkgs#deadnix -- --fail --no-lambda-arg --no-lambda-pattern-names .
-nix fmt -- --check .                          # nixfmt-classic; `nix fmt .` to fix
+nix fmt -- --ci                               # nixfmt; `nix fmt` to fix
 nix eval .#nixosModules.default
 nix eval .#mkModule.<user> --apply 'x: builtins.isFunction x'
 nix eval --impure --json --expr \

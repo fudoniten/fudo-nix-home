@@ -505,7 +505,7 @@ GitHub Actions automatically runs tests on every push and pull request:
 - **Flake validation**: Ensures the flake structure is correct
 - **Static analysis**: Checks for Nix code quality issues with [statix](https://github.com/nerdypepper/statix)
 - **Dead code detection**: Finds unused code with [deadnix](https://github.com/astro/deadnix)
-- **Format checking**: Validates code formatting with nixfmt-classic (`nix fmt`)
+- **Format checking**: Validates code formatting with [nixfmt](https://github.com/NixOS/nixfmt) (`nix fmt`)
 - **Module validation**: Verifies NixOS modules and mkModule function exports are correct
 - **Configuration tests**: Evaluates every user config through the NixOS module, and `mkModule.niten` standalone on Linux and aarch64-darwin (`tests/eval.nix`)
 - **Locket validation**: Checks secrets structure, prevents private key commits
@@ -535,10 +535,10 @@ nix run nixpkgs#statix -- check .
 nix run nixpkgs#deadnix -- --fail --no-lambda-arg --no-lambda-pattern-names .
 
 # Check code formatting
-nix fmt -- --check .
+nix fmt -- --ci
 
 # Auto-fix formatting issues
-nix fmt .
+nix fmt
 
 # Validate module exports
 nix eval .#nixosModules.default

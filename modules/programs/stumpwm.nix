@@ -15,7 +15,12 @@
 
 { inputs, ... }:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -248,8 +253,7 @@ let
       (0 t t :title "Picture-in-Picture"))
 
     ;;;; Startup Applications
-    ${concatMapStringsSep "\n" (cmd: ''(run-shell-command "${cmd}")'')
-    cfg.extraAutostart}
+    ${concatMapStringsSep "\n" (cmd: ''(run-shell-command "${cmd}")'') cfg.extraAutostart}
 
     ;; Start compositor for transparency and effects
     (run-shell-command "picom &")
@@ -263,7 +267,8 @@ let
     (message "StumpWM configuration loaded!")
   '';
 
-in {
+in
+{
   options.programs.stumpwm = {
     enable = mkEnableOption "StumpWM window manager";
 
@@ -271,7 +276,10 @@ in {
       type = types.listOf types.str;
       default = [ ];
       description = "Additional commands to run on StumpWM startup";
-      example = [ "discord" "element-desktop" ];
+      example = [
+        "discord"
+        "element-desktop"
+      ];
     };
   };
 

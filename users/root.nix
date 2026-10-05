@@ -1,19 +1,28 @@
 inputs:
 
-{ username, email, home-directory, ... }:
+{
+  username,
+  email,
+  home-directory,
+  ...
+}:
 
 systemCfg:
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
   # Validate required arguments
-  checkArgs = assert assertMsg (username != null && username != "")
-    "username is required";
+  checkArgs =
+    assert assertMsg (username != null && username != "") "username is required";
     assert assertMsg (email != null && email != "") "email is required";
-    assert assertMsg (home-directory != null && home-directory != "")
-      "home-directory is required";
+    assert assertMsg (home-directory != null && home-directory != "") "home-directory is required";
     null;
 
   # Common system administration packages
@@ -68,7 +77,8 @@ let
     unzip # ZIP extraction
   ];
 
-in builtins.seq checkArgs {
+in
+builtins.seq checkArgs {
   imports = [ ];
 
   config = {
@@ -114,7 +124,6 @@ in builtins.seq checkArgs {
       };
     };
 
-    systemd.user.tmpfiles.rules =
-      [ "d ${home-directory}/.emacs.d/.local/etc/eshell 700 root - - -" ];
+    systemd.user.tmpfiles.rules = [ "d ${home-directory}/.emacs.d/.local/etc/eshell 700 root - - -" ];
   };
 }

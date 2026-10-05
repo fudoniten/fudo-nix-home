@@ -11,7 +11,12 @@
 #
 # See LOCKET.md for full documentation and usage instructions.
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -27,9 +32,7 @@ let
     RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/${cfg.runtimeDirectory}"
     DEFAULT_METHOD="${cfg.defaultMethod}"
     PROFILES=(${concatStringsSep " " (map (p: ''"${p}"'') cfg.profiles)})
-    IDENTITY_KEY_PATH="${
-      optionalString (cfg.identityKeyPath != null) cfg.identityKeyPath
-    }"
+    IDENTITY_KEY_PATH="${optionalString (cfg.identityKeyPath != null) cfg.identityKeyPath}"
 
     # Ensure runtime directory exists
     mkdir -p "$RUNTIME_DIR"
@@ -120,38 +123,42 @@ let
     fi
 
     # Process each secret
-    ${concatStringsSep "\n" (mapAttrsToList (name: secret:
-      let
-        override = cfg.overrides.${name} or { enable = true; };
-        enabled = override.enable or true;
-        target =
-          if override.target != null then override.target else secret.target;
-        method = if override.method != null then
-          override.method
-        else if secret.method != null then
-          secret.method
-        else
-          cfg.defaultMethod;
-        mode = if override.mode != null then override.mode else secret.mode;
-        profilesStr =
-          concatStringsSep " " (map (p: ''"${p}"'') secret.profiles);
-      in optionalString enabled ''
-        # Secret: ${name}
-        SECRET_PROFILES=(${profilesStr})
-        if can_decrypt_profiles "''${SECRET_PROFILES[@]}"; then
-          echo "Locket: Decrypting ${name}..."
-          RUNTIME_PATH="$RUNTIME_DIR/${name}"
-          if ${pkgs.age}/bin/age -d $IDENTITY_ARGS -o "$RUNTIME_PATH" "${secret.source}" 2>/dev/null; then
-            chmod ${mode} "$RUNTIME_PATH"
-            place_secret "$RUNTIME_PATH" "${target}" "${method}" "${mode}"
-            echo "Locket: ${name} -> ~/${target}"
+    ${concatStringsSep "\n" (
+      mapAttrsToList (
+        name: secret:
+        let
+          override = cfg.overrides.${name} or { enable = true; };
+          enabled = override.enable or true;
+          target = if override.target != null then override.target else secret.target;
+          method =
+            if override.method != null then
+              override.method
+            else if secret.method != null then
+              secret.method
+            else
+              cfg.defaultMethod;
+          mode = if override.mode != null then override.mode else secret.mode;
+          profilesStr = concatStringsSep " " (map (p: ''"${p}"'') secret.profiles);
+        in
+        optionalString enabled ''
+          # Secret: ${name}
+          SECRET_PROFILES=(${profilesStr})
+          if can_decrypt_profiles "''${SECRET_PROFILES[@]}"; then
+            echo "Locket: Decrypting ${name}..."
+            RUNTIME_PATH="$RUNTIME_DIR/${name}"
+            if ${pkgs.age}/bin/age -d $IDENTITY_ARGS -o "$RUNTIME_PATH" "${secret.source}" 2>/dev/null; then
+              chmod ${mode} "$RUNTIME_PATH"
+              place_secret "$RUNTIME_PATH" "${target}" "${method}" "${mode}"
+              echo "Locket: ${name} -> ~/${target}"
+            else
+              echo "Locket: Failed to decrypt ${name} (missing key or corrupt file)"
+            fi
           else
-            echo "Locket: Failed to decrypt ${name} (missing key or corrupt file)"
+            echo "Locket: Skipping ${name} (no matching profile key)"
           fi
-        else
-          echo "Locket: Skipping ${name} (no matching profile key)"
-        fi
-      '') cfg.secrets)}
+        ''
+      ) cfg.secrets
+    )}
 
     echo "Locket: Decryption complete"
   '';
@@ -165,32 +172,37 @@ let
     echo "Locket: Cleaning up secrets..."
 
     # Remove symlinks pointing to our runtime directory
-    ${concatStringsSep "\n" (mapAttrsToList (name: secret:
-      let
-        override = cfg.overrides.${name} or { enable = true; };
-        enabled = override.enable or true;
-        target =
-          if override.target != null then override.target else secret.target;
-        method = if override.method != null then
-          override.method
-        else if secret.method != null then
-          secret.method
-        else
-          cfg.defaultMethod;
-      in optionalString enabled ''
-        # Cleanup: ${name}
-        TARGET="$HOME/${target}"
-        if [[ "${method}" == "symlink" ]] && [[ -L "$TARGET" ]]; then
-          LINK_TARGET=$(readlink "$TARGET" || true)
-          if [[ "$LINK_TARGET" == "$RUNTIME_DIR/"* ]]; then
+    ${concatStringsSep "\n" (
+      mapAttrsToList (
+        name: secret:
+        let
+          override = cfg.overrides.${name} or { enable = true; };
+          enabled = override.enable or true;
+          target = if override.target != null then override.target else secret.target;
+          method =
+            if override.method != null then
+              override.method
+            else if secret.method != null then
+              secret.method
+            else
+              cfg.defaultMethod;
+        in
+        optionalString enabled ''
+          # Cleanup: ${name}
+          TARGET="$HOME/${target}"
+          if [[ "${method}" == "symlink" ]] && [[ -L "$TARGET" ]]; then
+            LINK_TARGET=$(readlink "$TARGET" || true)
+            if [[ "$LINK_TARGET" == "$RUNTIME_DIR/"* ]]; then
+              rm -f "$TARGET"
+              echo "Locket: Removed symlink ${target}"
+            fi
+          elif [[ "${method}" == "copy" ]] && [[ -f "$TARGET" ]]; then
             rm -f "$TARGET"
-            echo "Locket: Removed symlink ${target}"
+            echo "Locket: Removed copy ${target}"
           fi
-        elif [[ "${method}" == "copy" ]] && [[ -f "$TARGET" ]]; then
-          rm -f "$TARGET"
-          echo "Locket: Removed copy ${target}"
-        fi
-      '') cfg.secrets)}
+        ''
+      ) cfg.secrets
+    )}
 
     # Remove runtime directory
     if [[ -d "$RUNTIME_DIR" ]]; then
@@ -201,7 +213,8 @@ let
     echo "Locket: Cleanup complete"
   '';
 
-in {
+in
+{
   imports = [ ./options.nix ];
 
   config = mkIf cfg.enable {
@@ -230,7 +243,9 @@ in {
     };
 
     systemd.user.services.locket-decrypt = {
-      Unit = { Description = "Decrypt Locket user secrets"; };
+      Unit = {
+        Description = "Decrypt Locket user secrets";
+      };
       Service = {
         Type = "oneshot";
         ExecStart = "${decryptScript}";
