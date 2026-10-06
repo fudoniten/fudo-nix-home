@@ -246,6 +246,48 @@ let
     in
     myEmacsWithPackages basePackage;
 
+  # macOS app that opens a frame on the running Emacs daemon, so Emacs can be
+  # started from Spotlight, Launchpad or the Dock instead of a terminal. Home
+  # Manager copies apps in home.packages to ~/Applications/Home Manager Apps.
+  # If no daemon is running, --alternate-editor="" starts one.
+  emacsClientApp = pkgs.runCommand "emacs-client-app" { } ''
+    contents="$out/Applications/Emacs Client.app/Contents"
+    mkdir -p "$contents/MacOS" "$contents/Resources"
+
+    icon=${emacsPackage}/Applications/Emacs.app/Contents/Resources/Emacs.icns
+    if [ -f "$icon" ]; then
+      cp "$icon" "$contents/Resources/Emacs.icns"
+    fi
+
+    cat > "$contents/Info.plist" <<EOF
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>CFBundleName</key><string>Emacs Client</string>
+      <key>CFBundleDisplayName</key><string>Emacs Client</string>
+      <key>CFBundleIdentifier</key><string>org.fudo.emacs-client</string>
+      <key>CFBundleExecutable</key><string>emacs-client</string>
+      <key>CFBundleIconFile</key><string>Emacs</string>
+      <key>CFBundlePackageType</key><string>APPL</string>
+      <key>CFBundleShortVersionString</key><string>${emacsPackage.version or "1.0"}</string>
+      <!-- Only a launcher: the frame belongs to the daemon, so keep this
+           out of the Dock's running apps. -->
+      <key>LSUIElement</key><true/>
+    </dict>
+    </plist>
+    EOF
+
+    cat > "$contents/MacOS/emacs-client" <<EOF
+    #!/bin/sh
+    # Focus the new frame; otherwise it can open behind the current app.
+    exec ${emacsPackage}/bin/emacsclient --create-frame --no-wait \\
+      --alternate-editor="" \\
+      --eval '(select-frame-set-input-focus (selected-frame))'
+    EOF
+    chmod +x "$contents/MacOS/emacs-client"
+  '';
+
 in
 {
   options.programs.doom-emacs = with types; {
@@ -452,6 +494,8 @@ in
 
     # macOS-specific configuration
     (mkIf pkgs.stdenv.isDarwin {
+      home.packages = [ emacsClientApp ];
+
       launchd = mkIf cfg.enableDaemon {
         enable = true;
         agents.emacs = {
@@ -461,7 +505,7 @@ in
               "${pkgs.bash}/bin/bash"
               "-l"
               "-c"
-              "export DOOMLOCALDIR='${stateDir}' && ${emacsPackage}/bin/emacs --fg-daemon"
+              "export DOOMLOCALDIR='${stateDir}' && ${emacsPackage}/bin/emacs --fg-daemon --init-directory=${config.xdg.configHome}/emacs"
             ];
             EnvironmentVariables = {
               DOOMLOCALDIR = stateDir;
