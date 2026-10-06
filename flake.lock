@@ -507,11 +507,11 @@
     "niten-doom-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1789018124,
-        "narHash": "sha256-kNAzpxQcDmn/n725bSoBFm+jDXkQrmHNFM1/z+JhDEg=",
+        "lastModified": 1791306484,
+        "narHash": "sha256-qIkCzrvfIRLeNGxhvArlgWp+TZWiD04vGANyJm/yeFw=",
         "owner": "fudoniten",
         "repo": "doom-emacs-config",
-        "rev": "fc4b03214b60477168d277a0ae9176ce1902d873",
+        "rev": "9d48d90b1a7219071c81ccfdf8f7e23f16fd897b",
         "type": "github"
       },
       "original": {
@@ -592,11 +592,11 @@
     },
     "nixpkgsUnstable": {
       "locked": {
-        "lastModified": 1791179034,
-        "narHash": "sha256-C9upu7DiyqMGzdnVbapqVYx2QvBXubxyrhSKV3C+Ngo=",
-        "rev": "494ce7fd23ff6a5dff39e1fb11e9b6f2ac74bf25",
+        "lastModified": 1791260994,
+        "narHash": "sha256-MFBjw66d4h06MvpW6lIl7RwarLteD0sk859CncGwb1Q=",
+        "rev": "151fa4e8ddfdd8dd25d945ad94ed54a13de9f6e4",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1085777.494ce7fd23ff/nixexprs.tar.zst"
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1086391.151fa4e8ddfd/nixexprs.tar.zst"
       },
       "original": {
         "id": "nixpkgs",
@@ -666,11 +666,11 @@
     },
     "nixpkgs_6": {
       "locked": {
-        "lastModified": 1791143449,
-        "narHash": "sha256-XvTu5S/TUsH4Jn9WRXSJfSxD7kHN4OzM/y+sKEzN8rU=",
-        "rev": "0d9e9b832d03ac387417e16ce1febf73b2e631e1",
+        "lastModified": 1791254437,
+        "narHash": "sha256-MtUTNbeLCAWGgY7Bt9adNUEkiY5Uv7POO1gP8ClVhQY=",
+        "rev": "b25309931cfda5f0b8805f462a29897eeae50168",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/26.05/nixos-26.05.11216.0d9e9b832d03/nixexprs.tar.zst"
+        "url": "https://releases.nixos.org/nixos/26.05/nixos-26.05.11275.b25309931cfd/nixexprs.tar.zst"
       },
       "original": {
         "id": "nixpkgs",
@@ -1087,11 +1087,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791223205,
-        "narHash": "sha256-BdeX7c1Jp521cfi/XStSnMR3GcEcOWrSaQ8hUW2dnWc=",
+        "lastModified": 1791266850,
+        "narHash": "sha256-F/scdmE9Y03TfSQWrBHaJWTRTr3rRQBqvJSDgF48g1c=",
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
-        "rev": "ed4d581eb1ed4b2c71f393269ccc3226a7a1fc7b",
+        "rev": "d9e4e25d6ade5d541074045d332d887c044e11f5",
         "type": "github"
       },
       "original": {
