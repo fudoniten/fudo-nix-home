@@ -676,11 +676,12 @@ builtins.seq checkArgs {
         };
       };
 
-      # NB: containers, workspaces, pins, and keyboard shortcuts below are
-      # written into zen-sessions.jsonlz4 by the activation script (decompress
-      # -> edit with jq -> recompress), so close Zen before `home-manager
-      # switch` whenever one of those changes--otherwise the running browser
-      # can overwrite the freshly-written state on exit.
+      # The zen-browser Home Manager module creates symlinks for certain
+      # configuration files (profiles.ini, containers.json, search.json.mozlz4)
+      # that point to Nix store paths. These get regenerated on rebuilds.
+      # We create profiles.ini as a real file above to prevent symlink issues.
+      # Note: close Zen before `home-manager switch` whenever you change the
+      # zenContainers, zenSearchEngines, or zenExtensions above.
       zen-browser = mkIf (isLinux && isGui) {
         enable = true;
 
@@ -924,6 +925,21 @@ builtins.seq checkArgs {
         text = ''
           SSH_AUTH_SOCK=''${XDG_RUNTIME_DIR}/ssh-agent
           GSM_SKIP_SSH_AGENT_WORKAROUND=1
+        '';
+      };
+
+      "zen/profiles.ini" = {
+        enable = true;
+        text = ''
+          [General]
+          StartWithLastProfile=1
+          Version=2
+
+          [Profile0]
+          Default=1
+          IsRelative=1
+          Name=default
+          Path=default
         '';
       };
     };
