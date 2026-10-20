@@ -948,5 +948,8 @@ builtins.seq checkArgs {
     # Enable VR configuration (OpenXR and OpenComposite)
     # Configured via the fudo.vr module for Meta Quest 3 support
     fudo.vr.enable = isLinux && isGui;
+
+    # Oxanium and Nordwand Mono, from fudo-fonts
+    fudo.fonts.enable = isGui;
   };
 }
