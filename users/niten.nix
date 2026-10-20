@@ -285,6 +285,7 @@ let
     # AI development tools
     claude-code # Claude Code CLI
     pkgsUnstable.opencode # OpenCode CLI
+    pkgsUnstable.pi-coding-agent # Pi CLI
 
     # Document processing
     texlive.combined.scheme-full # Complete LaTeX distribution
