@@ -335,6 +335,29 @@
         "type": "github"
       }
     },
+    "fudo-fonts": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nordwand-mono": "nordwand-mono",
+        "oxanium": "oxanium",
+        "utils": "utils_5"
+      },
+      "locked": {
+        "lastModified": 1792517860,
+        "narHash": "sha256-/mmt+2mFVzw3vGWYvJfojpbTX9wZkfEQmHqpyG4ED00=",
+        "owner": "fudoniten",
+        "repo": "fudo-fonts",
+        "rev": "511f4d1f1a5bb5c65caae4251d41ac8ecd48bdb7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "fudoniten",
+        "repo": "fudo-fonts",
+        "type": "github"
+      }
+    },
     "fudo-pkgs": {
       "inputs": {
         "google-photo-uploader-flake": "google-photo-uploader-flake",
@@ -678,6 +701,23 @@
         "type": "indirect"
       }
     },
+    "nordwand-mono": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790710085,
+        "narHash": "sha256-OYgQAKwPU6DuRYGGc/iYjK0LQBOPQi314cT+pJl85YY=",
+        "owner": "tywr",
+        "repo": "Nordwand-Mono",
+        "rev": "b4cc05881a0ebfcd3a801660251dfe2a71f518db",
+        "type": "github"
+      },
+      "original": {
+        "owner": "tywr",
+        "ref": "1.3.1",
+        "repo": "Nordwand-Mono",
+        "type": "github"
+      }
+    },
     "nur": {
       "inputs": {
         "flake-parts": [
@@ -719,6 +759,23 @@
         "type": "github"
       }
     },
+    "oxanium": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1601452957,
+        "narHash": "sha256-1PJJiOulhpqZFrMS4W971T2IamVfoyCoTxstvnOVMyA=",
+        "owner": "sevmeyer",
+        "repo": "oxanium",
+        "rev": "a8f39e0c71186190027a093e9001459410192d1e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sevmeyer",
+        "ref": "2.000",
+        "repo": "oxanium",
+        "type": "github"
+      }
+    },
     "polymuse": {
       "inputs": {
         "flake-utils": "flake-utils_3",
@@ -745,6 +802,7 @@
       "inputs": {
         "canon": "canon",
         "doom-emacs": "doom-emacs",
+        "fudo-fonts": "fudo-fonts",
         "fudo-pkgs": "fudo-pkgs",
         "home-manager": "home-manager",
         "niten-doom-config": "niten-doom-config",
@@ -902,6 +960,21 @@
         "owner": "nix-systems",
         "repo": "default",
         "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_9": {
+      "locked": {
+        "lastModified": 1791244623,
+        "narHash": "sha256-uuanbkFk8a313Zfrxdcz8Us/yQtaxNnKJtX8v0ZPpd8=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "d36eeed142f88b5a636f2e3856a53c61654cf29b",
         "type": "github"
       },
       "original": {
@@ -1071,6 +1144,24 @@
         "owner": "numtide",
         "repo": "flake-utils",
         "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "utils_5": {
+      "inputs": {
+        "systems": "systems_9"
+      },
+      "locked": {
+        "lastModified": 1791914995,
+        "narHash": "sha256-Zf/xfQEAasnwnmEfHqW/4hjDE/s44yn2hD4RuVIZRjA=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "b7a79d3fea1e214f6d668d521cecec0c01e26544",
         "type": "github"
       },
       "original": {

@@ -41,6 +41,10 @@
       url = "github:fudoniten/fudo-nix-pkgs/26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    fudo-fonts = {
+      url = "github:fudoniten/fudo-fonts";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     stylix = {
       url = "github:danth/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
