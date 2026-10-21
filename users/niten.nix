@@ -757,8 +757,9 @@ builtins.seq checkArgs {
       "Xft.antialias" = 1;
       "Xft.autohint" = 0;
       "Xft.hinting" = 1;
-      "Xft.hintstyle" = "hintfull";
-      "Xft.lcdfilter" = "lcddefault";
+      "Xft.hintstyle" = "hintslight";
+      "Xft.rgba" = "none";
+      "Xft.lcdfilter" = "lcdnone";
     };
 
     stylix = mkIf (isLinux && isGui) {

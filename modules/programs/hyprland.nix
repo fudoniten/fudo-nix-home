@@ -232,6 +232,17 @@ in
       '';
     };
 
+    monitorScale = mkOption {
+      type = types.either types.int types.float;
+      default = 2;
+      description = ''
+        Scale factor applied to every monitor. 2 renders text and UI at
+        double density, the way macOS does on Retina displays -- much
+        crisper on high-DPI panels, but everything is twice as large, so
+        drop to 1.5 or 1.25 (or 1 on low-DPI screens) if it's too big.
+      '';
+    };
+
     lockCommand = mkOption {
       type = types.str;
       default = "swaylock";
@@ -352,7 +363,7 @@ in
 
       settings = {
         # Monitor configuration - auto-detect
-        monitor = [ ",preferred,auto,1" ];
+        monitor = [ ",preferred,auto,${toString cfg.monitorScale}" ];
 
         # Environment variables
         env = [
