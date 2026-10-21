@@ -234,13 +234,9 @@ in
 
     monitorScale = mkOption {
       type = types.either types.int types.float;
-      default = 2;
-      description = ''
-        Scale factor applied to every monitor. 2 renders text and UI at
-        double density, the way macOS does on Retina displays -- much
-        crisper on high-DPI panels, but everything is twice as large, so
-        drop to 1.5 or 1.25 (or 1 on low-DPI screens) if it's too big.
-      '';
+      default = config.fudo.displayScale;
+      defaultText = literalExpression "config.fudo.displayScale";
+      description = "Scale factor applied to every monitor.";
     };
 
     lockCommand = mkOption {
