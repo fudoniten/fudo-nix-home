@@ -24,6 +24,7 @@ Internal repository for managing [Home Manager](https://github.com/nix-community
 │   │   ├── default.nix
 │   │   └── options.nix
 │   ├── programs/
+│   │   ├── chromapper.nix # ChroMapper (Beat Saber map editor)
 │   │   ├── doom-emacs.nix # Doom Emacs configuration module
 │   │   ├── hyprland.nix   # Hyprland (Wayland) compositor setup
 │   │   ├── hyprland/      # Hyprland assets (hypridle, wofi configs)
@@ -239,6 +240,24 @@ locket = {
 ```
 
 ### Programs
+
+#### ChroMapper (`fudo.chromapper`)
+
+[ChroMapper](https://github.com/Caeden117/ChroMapper), the Beat Saber map
+editor, from the `chromapper` package in `fudo-nix-pkgs` (x86_64-linux only).
+
+```nix
+fudo.chromapper = {
+  enable = true;
+  # Optional: plugin DLLs, linked into ~/.local/share/ChroMapper/Plugins.
+  plugins."ErrorChecker.dll" = pkgs.fetchurl { url = "..."; hash = "..."; };
+};
+```
+
+ChroMapper runs from `~/.local/share/ChroMapper` (its `Plugins/` folder lives
+there; plugins dropped in by hand still load) and keeps settings and logs in
+`~/.config/unity3d/BinaryElement/ChroMapper`. Point it at your Beat Saber
+`CustomWIPLevels` folder on first launch.
 
 #### Doom Emacs (`programs.doom-emacs`)
 

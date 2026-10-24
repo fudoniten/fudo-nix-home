@@ -9,6 +9,7 @@
 
 {
   imports = [
+    (import ./chromapper.nix { inherit inputs; })
     (import ./doom-emacs.nix { inherit inputs; })
     (import ./hyprland.nix { inherit inputs; })
     (import ./quickshell.nix { inherit inputs; })
