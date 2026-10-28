@@ -88,24 +88,35 @@ builtins.seq checkArgs {
             if [ -f $HOME/.xinitrc ]; then
               bash --login -i $HOME/.xinitrc
             fi
-
-            export XMODIFIERS="@im=fcitx5"
-            export XMODIFIER="@im=fcitx5"
-            export GTK_IM_MODULE="fcitx5"
-            export QT_IM_MODULE="fcitx5"
           '';
         };
       };
     };
 
-    # Chinese input method configuration
-    i18n.inputMethod = {
-      enable = true;
-      type = "fcitx5";
-      fcitx5.addons = with pkgs; [
-        fcitx5-gtk # GTK application support
-        fcitx5-rime # Rime input engine with Pinyin support
-      ];
+    # Chinese (Simplified, Pinyin) input.
+    #
+    # GNOME runs IBus itself and only offers the engines the system installs
+    # -- nixos-config adds ibus-libpinyin on GNOME hosts. This just puts it
+    # in the input sources so it is there on first login: Super+Space
+    # switches between English and 中文 (the indicator in the top bar shows
+    # which is active), and Shift toggles English inside Pinyin mode.
+    #
+    # This used to run fcitx5 here, which cannot work under GNOME: GNOME
+    # Shell only talks to IBus, and fcitx5's session variables pointed GTK
+    # apps away from it, so neither one ended up usable.
+    dconf.settings = mkIf isLinux {
+      "org/gnome/desktop/input-sources" = {
+        sources = [
+          (hm.gvariant.mkTuple [
+            "xkb"
+            "us"
+          ])
+          (hm.gvariant.mkTuple [
+            "ibus"
+            "libpinyin"
+          ])
+        ];
+      };
     };
 
     programs.firefox.enable = true;
