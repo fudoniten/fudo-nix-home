@@ -288,7 +288,6 @@ let
     pkgsUnstable.pi-coding-agent # Pi CLI
 
     # Document processing
-    texlive.combined.scheme-full # Complete LaTeX distribution
     graphviz # Graph visualization (dot)
 
     # Data processing
@@ -319,6 +318,9 @@ let
 
   # GUI packages for all desktop environments
   commonGuiPackages = with pkgs; [
+    # Several GB, much of it fonts; LaTeX/PDF export only happens on desktops.
+    texlive.combined.scheme-full # Complete LaTeX distribution
+
     spotify # Music streaming service
   ];
 
