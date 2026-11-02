@@ -75,7 +75,9 @@ builtins.seq checkArgs {
     programs = {
       bash = {
         enable = true;
-        enableVteIntegration = true;
+        # vte.sh comes from the GTK3 `vte` package; only worth its closure
+        # (GTK, X11 libs, fonts) where a VTE terminal can actually run.
+        enableVteIntegration = systemCfg.desktop.type != "none";
       };
 
       git = {

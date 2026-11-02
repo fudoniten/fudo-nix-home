@@ -82,7 +82,6 @@ let
       gopls # Go language server
       gore
       gotests
-      imagemagick # Image processing (for inline image display)
       isort
       multimarkdown
       nix # Nix for nix-mode
@@ -103,7 +102,10 @@ let
     ++ (with pkgsUnstable; [
       opencode
       aider-chat
-    ]);
+    ])
+    # Only for inline image display, which a terminal (-nox) Emacs can't do;
+    # it also brings fontconfig, fonts and X11 libs along with it.
+    ++ optional (cfg.desktopType != "none") imagemagick;
 
   defaultEmacsPkgs =
     epkgs: with epkgs; [
@@ -157,12 +159,19 @@ let
     ];
 
   # Linux-specific dependencies
-  defaultLinuxDeps = with pkgs; [
-    sbcl # Steel Bank Common Lisp (for some Emacs packages)
-    doas # Sudo alternative
-    supercollider # Audio synthesis for music composition
-    xclip # X11 clipboard integration
-  ];
+  defaultLinuxDeps =
+    with pkgs;
+    [
+      sbcl # Steel Bank Common Lisp (for some Emacs packages)
+      doas # Sudo alternative
+    ]
+    # Desktop-only: SuperCollider ships its Qt5 IDE (~450 MiB closure) and
+    # makes sound, and xclip needs an X display. Neither does anything on a
+    # headless host.
+    ++ optionals (cfg.desktopType != "none") [
+      supercollider # Audio synthesis for music composition
+      xclip # X11 clipboard integration
+    ];
 
   # Build emacs with packages using custom overlay
   myEmacsWithPackages =
