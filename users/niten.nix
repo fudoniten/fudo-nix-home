@@ -324,14 +324,25 @@ let
 
   # Linux-specific packages (no GUI required)
   linuxPackages = with pkgs; [
-    pipewire # Audio/video routing
-    pipewire.jack # JACK compatibility
     pciutils # PCI utilities (lspci)
-    tor-browser # Anonymous web browser
   ];
 
   # Linux GUI applications
   linuxGuiPackages = with pkgs; [
+    # Audio. Only useful where there's a desktop session to route audio for;
+    # on a headless host these dragged in ffmpeg, gstreamer and X11 libs.
+    pipewire # Audio/video routing
+    pipewire.jack # JACK compatibility
+
+    # Web browsers (also: google-chrome, below)
+    tor-browser # Anonymous web browser
+
+    # Themes. graphite-gtk-theme pulls in GTK3, and papirus-icon-theme
+    # propagates the Qt/X11 dev outputs: together ~1 GiB on a server.
+    graphite-cursors
+    graphite-gtk-theme
+    papirus-icon-theme
+
     # GNOME Extensions
     gnomeExtensions.forge # Tiling window manager
     gnomeExtensions.vitals # System monitoring
@@ -565,7 +576,10 @@ builtins.seq checkArgs {
     programs = {
       bash = {
         enable = true;
-        enableVteIntegration = true;
+        # Sources vte.sh from the GTK3 `vte` package, so it would put GTK,
+        # X11 libs and fonts in every host's closure. Only VTE terminals
+        # (GNOME Terminal, Tilix, ...) use it, and those only run locally.
+        enableVteIntegration = isGui;
         enableCompletion = true;
         profileExtra = ''
           [[ -f $HOME/.profile_local ]] && . $HOME/.profile_local
@@ -838,14 +852,7 @@ builtins.seq checkArgs {
             symbols-only
           ]
         ))
-        ++ (optionals isLinux (
-          linuxPackages
-          ++ (with pkgs; [
-            graphite-cursors
-            graphite-gtk-theme
-            papirus-icon-theme
-          ])
-        ));
+        ++ (optionals isLinux linuxPackages);
 
       file = {
         ".xprofile" = mkIf isX {
@@ -865,9 +872,9 @@ builtins.seq checkArgs {
 
       sessionVariables =
         sessionEnvVariables
-        // {
+        // (optionalAttrs isGui {
           GTK_THEME = "Graphite-Dark-Rimless";
-        }
+        })
         // (optionalAttrs isLinux {
           # Override GNOME Keyring's SSH_AUTH_SOCK to use our SSH agent
           SSH_AUTH_SOCK = "$XDG_RUNTIME_DIR/ssh-agent";
