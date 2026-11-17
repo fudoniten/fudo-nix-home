@@ -284,7 +284,7 @@ let
 
     # AI development tools
     claude-code # Claude Code CLI
-    pkgsUnstable.opencode # OpenCode CLI
+    config.fudo.opencode.finalPackage # OpenCode CLI (wrapped where configured)
     pkgsUnstable.pi-coding-agent # Pi CLI
 
     # Document processing
@@ -961,10 +961,5 @@ builtins.seq checkArgs {
 
     # Oxanium and Nordwand Mono, from fudo-fonts
     fudo.fonts.enable = isGui;
-
-    # OpenCode on OpenRouter (GLM) with Hindsight memory. Only installs its
-    # config on NixOS hosts where Aegis exports OPENROUTER_API_KEY and
-    # HINDSIGHT_API_KEY and that are on Nebula; inert elsewhere (work-home).
-    fudo.opencode.enable = true;
   };
 }
