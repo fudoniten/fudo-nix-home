@@ -99,9 +99,6 @@ let
       sqlite # Database (used by org-roam and other packages)
       zstd # Compression (for package caching)
     ]
-    ++ (with pkgsUnstable; [
-      aider-chat
-    ])
     # The same opencode and kubectl the user gets, so agent-shell and
     # kubernetes-el under an Emacs daemon (which has no login-shell
     # environment) see the configured, key-loading wrapper and kubeconfig.
@@ -116,7 +113,6 @@ let
   defaultEmacsPkgs =
     epkgs: with epkgs; [
       agent-shell
-      aidermacs
       babashka
       bash-completion
       canon
