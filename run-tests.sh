@@ -70,6 +70,10 @@ run_test "User configurations evaluate" \
     nix eval --impure --json --expr \
     'import ./tests/eval.nix { flake = builtins.getFlake (toString ./.); }' || true
 
+run_test "OpenCode config gate" \
+    nix eval --impure --json --expr \
+    'import ./tests/opencode.nix { flake = builtins.getFlake (toString ./.); }' || true
+
 # Test 8: User configuration syntax check
 # Just verify the Nix files are syntactically valid
 echo -e "${YELLOW}▶${NC} Running: User configuration syntax checks"
