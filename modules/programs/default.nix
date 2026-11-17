@@ -9,6 +9,7 @@
 
 {
   imports = [
+    (import ./agent-context.nix { inherit inputs; })
     (import ./doom-emacs.nix { inherit inputs; })
     (import ./hyprland.nix { inherit inputs; })
     (import ./opencode.nix { inherit inputs; })

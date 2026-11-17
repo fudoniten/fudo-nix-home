@@ -78,7 +78,7 @@ module.nix         # NixOS module: the fudo.home-manager.* option namespace
 modules/           # custom Home Manager modules (imported by every user)
 ├── default.nix / modules.nix   # aggregators
 ├── locket/        # profile-based secrets (default.nix + options.nix)
-├── programs/      # doom-emacs, hyprland, quickshell, stumpwm, vr
+├── programs/      # agent-context, doom-emacs, hyprland, opencode, quickshell, stumpwm, vr
 ├── services/      # supercollider
 └── styling.nix    # stylix theming glue
 users/             # one file per user (curried-function convention above)
