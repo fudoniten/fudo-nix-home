@@ -79,3 +79,8 @@ jobs:
         run: |
           nix eval --impure --json --show-trace --expr \
             'import ./tests/eval.nix { flake = builtins.getFlake (toString ./.); }'
+
+      - name: OpenCode config gate
+        run: |
+          nix eval --impure --json --show-trace --expr \
+            'import ./tests/opencode.nix { flake = builtins.getFlake (toString ./.); }'
