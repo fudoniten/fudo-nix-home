@@ -721,12 +721,14 @@ builtins.seq checkArgs {
                 Status = "locked";
               })
               {
-                "browser.urlbar.suggest.quicksuggest.sponsored" = false;
-                "browser.urlbar.suggest.quicksuggest.nonsponsored" = false;
-                "browser.urlbar.suggest.trending" = false;
-                "browser.urlbar.suggest.yelp" = false;
-                "browser.urlbar.quicksuggest.enabled" = false;
-                "browser.ml.chat.enabled" = false;
+                # Hardware acceleration - essential for AMD GPUs
+                "layers.acceleration.force-enabled" = true;
+                "gfx.direct2d.disabled" = false;
+                "webgl.disabled" = false;
+                "webgl.webgl2.enabled" = true;
+                # Additional GPU settings
+                "media.ffmpeg.vaapi.enabled" = true;
+                "media.force-wavrend" = false;
                 # Firefox Containers--Zen's native container UI depends on this.
                 "privacy.userContext.enabled" = true;
                 "privacy.userContext.ui.enabled" = true;
