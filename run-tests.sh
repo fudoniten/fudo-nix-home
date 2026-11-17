@@ -70,7 +70,7 @@ run_test "User configurations evaluate" \
     nix eval --impure --json --expr \
     'import ./tests/eval.nix { flake = builtins.getFlake (toString ./.); }' || true
 
-run_test "OpenCode config gate" \
+run_test "OpenCode and kube modules" \
     nix eval --impure --json --expr \
     'import ./tests/opencode.nix { flake = builtins.getFlake (toString ./.); }' || true
 

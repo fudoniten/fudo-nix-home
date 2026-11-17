@@ -100,9 +100,15 @@ let
       zstd # Compression (for package caching)
     ]
     ++ (with pkgsUnstable; [
-      opencode
       aider-chat
     ])
+    # The same opencode and kubectl the user gets, so agent-shell and
+    # kubernetes-el under an Emacs daemon (which has no login-shell
+    # environment) see the configured, key-loading wrapper and kubeconfig.
+    ++ [
+      config.fudo.opencode.finalPackage
+      config.fudo.kube.package
+    ]
     # Only for inline image display, which a terminal (-nox) Emacs can't do;
     # it also brings fontconfig, fonts and X11 libs along with it.
     ++ optional (cfg.desktopType != "none") imagemagick;
