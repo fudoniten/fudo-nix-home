@@ -74,6 +74,10 @@ run_test "OpenCode and kube modules" \
     nix eval --impure --json --expr \
     'import ./tests/opencode.nix { flake = builtins.getFlake (toString ./.); }' || true
 
+run_test "Agent context module" \
+    nix eval --impure --json --expr \
+    'import ./tests/agent-context.nix { flake = builtins.getFlake (toString ./.); }' || true
+
 # Test 8: User configuration syntax check
 # Just verify the Nix files are syntactically valid
 echo -e "${YELLOW}▶${NC} Running: User configuration syntax checks"

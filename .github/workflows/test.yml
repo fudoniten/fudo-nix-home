@@ -84,3 +84,8 @@ jobs:
         run: |
           nix eval --impure --json --show-trace --expr \
             'import ./tests/opencode.nix { flake = builtins.getFlake (toString ./.); }'
+
+      - name: Agent context module
+        run: |
+          nix eval --impure --json --show-trace --expr \
+            'import ./tests/agent-context.nix { flake = builtins.getFlake (toString ./.); }'
