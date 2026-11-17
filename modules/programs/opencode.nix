@@ -14,7 +14,7 @@
 # path (e.g. the work machine via work-home) there is no `osConfig`, so the
 # gate is closed and nothing is written: the opencode binary stays a plain,
 # unconfigured install.
-{ ... }:
+_:
 
 {
   config,
